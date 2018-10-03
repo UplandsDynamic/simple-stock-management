@@ -1,6 +1,6 @@
 # Simple Stock Management
 
-This a simple stock management and inventory application. 
+This a simple stock management and inventory application.
 
 The app is designed to allow "stores" to request transfers of stock (or "order" it) from a central stock database (the "warehouse"). Warehouse stock is adjusted as stock transfers are ordered.
 
@@ -8,7 +8,8 @@ It has web frontend that connects to a RESTful API backend. Data is stored in ei
 
 ## Key features
 
-- Administrator may add, edit and delete stock from database.
+- Administrator may add, edit and delete stock from database through a simple web page.
+- For each stock line in the database, the following is recorded: SKU, description, unit price, unit quantity, time of latest record update.
 - Store managers may request transfers ("order") stock from the "warehouse".
 - Warehouse stock levels are adjusted in accordance with incoming transfers ("orders").
 - Email notifications are dispatched to the administrator(s) and store manager(s).
@@ -38,7 +39,7 @@ Password: jduejHje(89K
 
 ## Development Roadmap
 
-- Addition of independent databases for each "store". 
+- Addition of independent databases for each "store". Stock levels are synchronised across databases in accordance with "transfers" (or "orders") of stock. 
 
 ## Authors
 - Dan Bright (Aninstance Consultancy), productions@aninstance.com
