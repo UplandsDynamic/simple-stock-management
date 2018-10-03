@@ -12,6 +12,8 @@ It has web frontend that connects to a RESTful API backend. Data is stored in ei
 - Store managers may request transfers ("order") stock from the "warehouse".
 - Warehouse stock levels are adjusted in accordance with incoming transfers ("orders").
 - Email notifications are dispatched to the administrator(s) and store manager(s).
+- Dynamic search of stock lines (SKU and description).
+- Configurable pagination of results table.
 
 ## Key technologies
 
