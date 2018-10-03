@@ -1,11 +1,7 @@
-coreapi
-django_q
 Django
+coreapi
 python_dateutil
 djangorestframework
 django-webpack-loader
 django-cors-headers
-django-redis
-psycopg2-binary
-mod_wsgi
 django-anymail[sparkpost]
