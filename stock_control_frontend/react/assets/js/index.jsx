@@ -278,7 +278,9 @@ class App extends React.Component {
                             />
                             {dataTable}
                             <Footer footer={App.APP_DETAILS.footerText}
-                                    copyright={App.APP_DETAILS.copyright}/>
+                                    copyright={App.APP_DETAILS.copyright}
+                                    version={App.APP_DETAILS.version}
+                            />
                             <StockUpdateModal
                                 stockUpdateData={this.state.stockUpdateData}
                                 stockUpdateMeta={this.state.stockUpdateMeta}
