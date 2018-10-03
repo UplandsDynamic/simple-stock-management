@@ -19,6 +19,8 @@ It has web frontend that connects to a RESTful API backend. Data is stored in ei
 - Django
 - Django-rest-framework
 - Javascript (ReactJS)
+- HTML5
+- CSS3
 
 ## Live Demo
 
