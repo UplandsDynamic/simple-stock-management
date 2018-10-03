@@ -10,11 +10,11 @@ const Env = () => {
             shortOrgName: 'Simple Stock Management',
             copyright:
                 (<div><p>Application developed by Aninstance Consultancy. <a
-                    href="https://www.aninstance.com" target="_blank">Tap here for support enquiries</a>.
-                    <br/>Version: 1.0.6</p>
+                    href="https://www.aninstance.com" target="_blank">Tap here for support enquiries</a>.</p>
                 </div>),
             footerText: `My custom footer text ...`,
             greeting: (<span>My custom greeting ...</span>)
+	    version: (<div>Github master (head).</div>)
         }
     };
 };
