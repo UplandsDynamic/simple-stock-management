@@ -1,0 +1,14 @@
+html {
+    background-color: #001e00;
+}
+
+div.app-main {
+    padding: 1em;
+    color: #fcfcfc;
+    background-color: #001a00;
+    margin: auto;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: yellow;
+}

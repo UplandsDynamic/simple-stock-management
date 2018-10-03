@@ -1,0 +1,26 @@
+button.close-button {
+    margin-left:auto;
+}
+
+.close-modal-button-cell {
+    text-align: right;
+}
+
+label {
+    margin: 0.5em;
+    font-weight: bold;
+}
+
+form.transfer-form {
+    background-color: yellow;
+    color: #001e00;
+}
+
+form.transfer-form-danger {
+    background-color: #530000;
+    color: yellow;
+}
+
+button.delete-btn, button.cancel-btn {
+    margin: 0.25em;
+}
