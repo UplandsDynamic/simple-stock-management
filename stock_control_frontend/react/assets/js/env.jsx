@@ -13,7 +13,7 @@ const Env = () => {
                     href="https://www.aninstance.com" target="_blank">Tap here for support enquiries</a>.</p>
                 </div>),
             footerText: `My custom footer text ...`,
-            greeting: (<span>My custom greeting ...</span>)
+            greeting: (<span>My custom greeting ...</span>),
 	    version: (<div>Github master (head).</div>)
         }
     };
