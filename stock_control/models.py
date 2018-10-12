@@ -1,6 +1,6 @@
-from django.core.exceptions import ValidationError
 from django.db import models
 from rest_framework.authtoken.models import Token
+from rest_framework import serializers
 from django.conf import settings
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
@@ -63,9 +63,9 @@ class StockData(models.Model):
 
         """ Validate stock does not go negative """
         if self.units_total < 0:
-            raise ValidationError(
-                f'{-int(self.units_total)} exceeds the total number of units of {self.desc} '
-                f'currently in the warehouse. Therefore, your transfer request is denied.'
+            raise serializers.ValidationError(
+                f'Your request is to transfer {-int(self.units_total)} too many of {self.desc}, '
+                f'as that would exceed the number we currently have in the warehouse. Sorry!'
             )
 
         """ Call clean """
@@ -82,4 +82,4 @@ class StockData(models.Model):
 @receiver(post_save, sender=StockData)
 def email(sender, instance, **kwargs):
     if hasattr(instance, 'update'):  # only send email if an update (not following new model creation)
-        SendEmail.compose(instance=instance, notification_type=SendEmail.EmailType.STOCK_TRANSFER)
+        SendEmail().compose(instance=instance, notification_type=SendEmail.EmailType.STOCK_TRANSFER)
