@@ -5,6 +5,7 @@ from datetime import datetime
 from .models import StockData
 from django.contrib.auth.password_validation import validate_password
 from . import custom_validators
+from django.db import IntegrityError
 from django.utils.translation import gettext_lazy as _
 
 
@@ -155,8 +156,8 @@ class StockDataSerializer(serializers.HyperlinkedModelSerializer):
         try:
             super().create(validated_data)  # now call parent method to do the save
             return self.validated_data
-        except ValidationError as v:
-            raise serializers.ValidationError(detail=f'{v.message}')
+        except IntegrityError as i:
+            raise serializers.ValidationError(detail=f'{i}')
 
     def update(self, instance, validated_data):
         """
@@ -164,7 +165,8 @@ class StockDataSerializer(serializers.HyperlinkedModelSerializer):
         """
         """
         Control what superusers and staff are allowed to update.
-        By default, superusers allowed to update everything, staff only what's in staff_allowed_to_update list
+        By default, administrators (e.g. warehouse admins) allowed to update everything, staff (e.g.
+        store managers) only what's in staff_allowed_to_update list
         """
         for k in list(validated_data.keys()):
             if k not in StockData.STAFF_ALLOWED_TO_UPDATE and not self.administrators_check(self):
@@ -174,16 +176,16 @@ class StockDataSerializer(serializers.HyperlinkedModelSerializer):
             if 'units_total' in validated_data and not self.administrators_check(self) and \
                     int(validated_data['units_total']) > instance.units_total:
                 raise serializers.ValidationError(detail=f'Only administrators may increase stock!')
-        try:
-            # identify as update (not new record) for purpose of email generation in post_save signal
-            instance.update = True
-            # add request user to instance, to pass to post_save callback for email
-            instance.user = self.user
-            # pass transferred total for email
-            instance.transferred = instance.units_total - int(validated_data['units_total'])
+        # identify as update (not new record) for purpose of email generation in post_save signal
+        instance.update = True
+        # add request user to instance, to pass to post_save callback for email
+        instance.user = self.user
+        # pass transferred total for email
+        instance.transferred = instance.units_total - int(validated_data['units_total'])
+        if instance.transferred < instance.units_total:  # if not trying to transfer more than the remaining stock
             # call parent method to do the update
             super().update(instance, validated_data)
             # return the updated instance
             return instance
-        except ValidationError as v:
-            raise serializers.ValidationError(detail=f'{v.message}')
+        else:
+            raise serializers.ValidationError(detail=f'Stock levels must not fall below 0!')
