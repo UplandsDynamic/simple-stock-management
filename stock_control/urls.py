@@ -1,11 +1,11 @@
 from django.conf.urls import url, include
-from rest_framework import routers, renderers, permissions
+from rest_framework import routers, permissions
 from rest_framework.urlpatterns import format_suffix_patterns
 from . import views
 from rest_framework.schemas import get_schema_view
 from rest_framework.authtoken import views as authviews
 
-# from rest_framework.renderers import CoreJSONRenderer
+app_name = 'stock-control'
 
 """
 set up the routers for the viewset class based views
@@ -13,16 +13,27 @@ set up the routers for the viewset class based views
 router = routers.DefaultRouter()
 router.register(r'users', views.UserViewSet)
 router.register(r'groups', views.GroupViewSet)
-router.register(r'stock', views.StockDataViewSet)
+# router.register(r'stock', views.StockDataViewSet)  # define manually to allow DRF unit testing (router testing buggy)
 # router.register(r'change-password', views.PasswordUpdateViewSet)  # define manually below to allow dots in usernames
 
 """
 set up the url patterns for the functional views and simple class based views
+Note: Mapping for actions (used in as_view), are:
+    {
+    'get': 'retrieve'  # to retrieve one object, as spec by pk passed in url param, e.g. /stock/1
+    'get': 'list' # to list all objects, e.g. /stock/
+    'put': 'update',
+    'patch': 'partial_update',
+    'delete': 'destroy'
+    }
 """
 functional_view_urlpatterns = [
-    # url(r'^api/some_action/', views.SomeActionClass.as_view(), name='someactionclassview'),
     url('^v1/change-password/(?P<username>[a-zA-Z0-9.].+)/$', views.PasswordUpdateViewSet.as_view(
         {'patch': 'partial_update'})),
+    url('^v1/stock/$', views.StockDataViewSet.as_view(
+        {'get': 'list'})),
+    url('^v1/stock/(?P<pk>[0-9].+)/$', views.StockDataViewSet.as_view(
+        {'get': 'retrieve'})),
 ]
 
 """
@@ -43,7 +54,7 @@ schema_view = get_schema_view(
 urlpatterns += [
     url(r'^(/?)$', schema_view),
     url(r'^api-token-auth/', authviews.obtain_auth_token),
-    url(r'^v1/', include(router.urls)),
+    url(r'^v1/', include(router.urls), 'v1'),
     url(r'^schema(/?)$', schema_view),
     url(r'^api-auth/',
         include('rest_framework.urls', namespace='rest_framework'))
