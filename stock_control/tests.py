@@ -1,19 +1,25 @@
 import copy
-from django.test import TestCase, TransactionTestCase
+from django.test import TestCase, TransactionTestCase, Client
+from django.urls import reverse
+from rest_framework.utils import json
 from .models import StockData
 from django.contrib.auth.models import User, Group
 from .custom_validators import RequestQueryValidator
-from .serializers import ChangePasswordSerializer, StockDataSerializer
 from .email import SendEmail
 from django.core.exceptions import ValidationError
-from rest_framework import serializers
+from rest_framework import serializers, status
 from contextlib import contextmanager
 from datetime import datetime
 from django.conf import settings
+from .views import PasswordUpdateViewSet, StockDataViewSet
+from .serializers import ChangePasswordSerializer, StockDataSerializer
+from rest_framework.test import APIClient, APITransactionTestCase, RequestsClient, APIRequestFactory, \
+    force_authenticate, APITestCase
+from rest_framework.authtoken.models import Token
 
 
 @contextmanager
-def as_admin(class_reference=None):
+def as_admin(class_reference=None, user=None, group=None):
     """
     class_reference: 'self' of calling class method.
     create context manager to set/unset user as an administrator, using context manager ('with' statement).
@@ -32,6 +38,23 @@ def as_admin(class_reference=None):
         class_reference.group.user_set.add(class_reference.class_instance.user)
         yield
         class_reference.group.user_set.remove(class_reference.class_instance.user)
+    elif user and group:
+        group.user_set.add(user)
+        yield
+        group.user_set.remove(user)
+
+
+@contextmanager
+def as_staff(user=None):
+    """
+    context manager to set user as staff
+    """
+    if user:
+        user.is_staff = True
+        user.save()
+        yield
+        user.is_staff = False
+        user.save()
 
 
 """
@@ -310,3 +333,137 @@ class SendEmailTestCase(TestCase):
             self.stock_data.desc = 77
             self.assertFalse(self.class_instance.compose(instance=self.stock_data,
                                                          notification_type=self.notification_type))
+
+
+"""
+tests for views.py
+"""
+
+
+class PasswordUpdateViewSetTestCase(APITransactionTestCase):
+    """
+    tests password reset functionality
+    """
+
+    def setUp(self):
+        self.group = Group.objects.create(name='administrators')  # create 'administrators' group
+        self.user = User.objects.create_user('tester', settings.DEFAULT_FROM_EMAIL, 'myPwd8ntGr8', is_staff=True)
+        self.token = Token.objects.get(user__username='tester')
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token.key)
+
+    def test_perform_update(self):
+        # test password change for non-admin user
+        response = self.client.patch(f'/api/v1/change-password/{self.user.username}/',
+                                     json.dumps({"old_password": "myPwd8ntGr8", "new_password": "ser*kenem"}
+                                                ), content_type='application/json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # test password change for admin user
+        with as_admin(user=self.user, group=self.group):
+            response = self.client.patch(f'/api/v1/change-password/{self.user.username}/',
+                                         json.dumps({"old_password": "ser*kenem", "new_password": "myPwd8ntGr8"}
+                                                    ), content_type='application/json')
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+
+class StockDataViewSetTestCase(APITestCase):
+    """
+    tests the views in StockDataViewSet
+    """
+
+    @staticmethod
+    def create_stock(number, user):
+        units = []
+        for c, unit in enumerate(range(number)):
+            units.append(StockData.objects.create(
+                owner=User.objects.get(username=user),
+                sku=f'001-0{c}',
+                desc=f'Test description {c}',
+                units_total=45 + c,
+                unit_price=14.22 + c
+            ))
+        return units
+
+    def setUp(self):
+        # common to all tests
+        self.group = Group.objects.create(name='administrators')  # create 'administrators' group
+
+    # """
+    # Note 1: Mapping for actions (used in as_view), are:
+    # {
+    # 'get': 'retrieve'  # to retrieve one object, as spec by pk passed in url param, e.g. /stock/1
+    # 'get': 'list' # to list all objects, e.g. /stock/
+    # 'put': 'update',
+    # 'patch': 'partial_update',
+    # 'delete': 'destroy'
+    # }
+    #
+    # Note 2: Permissions testing doesn't work with APIRequestFactory (used below) - need to use APIClient for that.
+    # But, APIClient doesn't work with DRF router URLs.
+    # """
+    #
+    # def test_get_queryset_apirequestfactory(self):
+    #     """
+    #     APIRequestFactory: tests (tests view, but not necessarily permissions, middleware, routing, etc)
+    #     """
+    #     # setup
+    #     user = User.objects.create_user('tester', settings.DEFAULT_FROM_EMAIL, 'myPwd8ntGr8', is_staff=True)
+    #     factory = APIRequestFactory()
+    #     request = factory.get('/api/v1/stock/', {}, format='json')
+    #     force_authenticate(request, user=user, token=user.auth_token)
+    #     stock = StockDataViewSetTestCase.create_stock(number=25, user=user)  # list of 25 stock objects
+    #     # test get list
+    #     view = StockDataViewSet.as_view({'get': 'list'})
+    #     response = view(request)
+    #     # test returns http status 200
+    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
+    #     # test results list contains at least one result
+    #     self.assertGreater(len(response.data['results']), 0)
+    #     """
+    #     APIRequestFactory: test query string
+    #     """
+    #     request = factory.get('/api/v1/stock/?desc=test', {}, format='json')
+    #     force_authenticate(request, user=user, token=user.auth_token)
+    #     view = StockDataViewSet.as_view({'get': 'list'})
+    #     response = view(request)
+    #     # test returns http status 200
+    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
+    #     # test results list contains at least one result
+    #     self.assertGreater(len(response.data['results']), 0)
+    #     """
+    #     APIRequestFactory: test retrieve a specific record
+    #     """
+    #     request = factory.get('/api/v1/stock/11/', {}, format='json')
+    #     force_authenticate(request, user=user, token=user.auth_token)
+    #     view = StockDataViewSet.as_view({'get': 'retrieve'})
+    #     response = view(request, pk=stock[10].pk)
+    #     # test returns http status 200
+    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_get_queryset(self):
+        """
+        APIClient: tests entire gambit, including routing, middleware & permissions).
+        Run in preference to APIRequestFactory tests, as that only tests view alone.
+        """
+        # setup
+        user = User.objects.create_user('tester', settings.DEFAULT_FROM_EMAIL, 'myPwd8ntGr8', is_staff=False)
+        token = Token.objects.get(user__username='tester')
+        client = APIClient()
+        client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+        stock = StockDataViewSetTestCase.create_stock(number=25, user=user)  # list of 25 stock objects
+        # test returns 403 if user not staff
+        response = client.get(f'/api/v1/stock/')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        # test returns 200 if user is staff
+        with as_staff(user):
+            response = client.get(f'/api/v1/stock/')
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            self.assertGreater(len(response.data['results']), 0)
+        # test list
+        response = client.get(f'/api/v1/stock/{stock[10].pk}/')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        with as_staff(user):
+            response = client.get(f'/api/v1/stock/{stock[10].pk}/')
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_perform_create(self):
+        pass
