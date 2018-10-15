@@ -22,6 +22,7 @@ Note: Mapping for actions (used in as_view), are:
     {
     'get': 'retrieve'  # to retrieve one object, as spec by pk passed in url param, e.g. /stock/1
     'get': 'list' # to list all objects, e.g. /stock/
+    'post': 'create'
     'put': 'update',
     'patch': 'partial_update',
     'delete': 'destroy'
@@ -31,7 +32,7 @@ functional_view_urlpatterns = [
     url('^v1/change-password/(?P<username>[a-zA-Z0-9.].+)/$', views.PasswordUpdateViewSet.as_view(
         {'patch': 'partial_update'})),
     url('^v1/stock/$', views.StockDataViewSet.as_view(
-        {'get': 'list'})),
+        {'get': 'list', 'post': 'create'})),
     url('^v1/stock/(?P<pk>[0-9].+)/$', views.StockDataViewSet.as_view(
         {'get': 'retrieve'})),
 ]

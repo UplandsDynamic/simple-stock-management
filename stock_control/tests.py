@@ -1,6 +1,5 @@
 import copy
-from django.test import TestCase, TransactionTestCase, Client
-from django.urls import reverse
+from django.test import TestCase, TransactionTestCase
 from rest_framework.utils import json
 from .models import StockData
 from django.contrib.auth.models import User, Group
@@ -11,15 +10,13 @@ from rest_framework import serializers, status
 from contextlib import contextmanager
 from datetime import datetime
 from django.conf import settings
-from .views import PasswordUpdateViewSet, StockDataViewSet
 from .serializers import ChangePasswordSerializer, StockDataSerializer
-from rest_framework.test import APIClient, APITransactionTestCase, RequestsClient, APIRequestFactory, \
-    force_authenticate, APITestCase
+from rest_framework.test import APIClient, APITransactionTestCase, APIRequestFactory, APITestCase
 from rest_framework.authtoken.models import Token
 
 
 @contextmanager
-def as_admin(class_reference=None, user=None, group=None):
+def as_admin(user=None, group=None):
     """
     class_reference: 'self' of calling class method.
     create context manager to set/unset user as an administrator, using context manager ('with' statement).
@@ -34,11 +31,7 @@ def as_admin(class_reference=None, user=None, group=None):
         else:
             print('This should be rendered, as user has been removed to the administrator group!')
     """
-    if class_reference:
-        class_reference.group.user_set.add(class_reference.class_instance.user)
-        yield
-        class_reference.group.user_set.remove(class_reference.class_instance.user)
-    elif user and group:
+    if user and group:
         group.user_set.add(user)
         yield
         group.user_set.remove(user)
@@ -178,95 +171,97 @@ class StockDataSerializerTestCase(TransactionTestCase):
     dummy_orig_stock_creation = {'sku': '001-001', 'desc': 'test description',
                                  'units_total': 100, 'unit_price': 17.27}
     dummy_new_stock_creation = {'sku': '001-002', 'desc': 'test new description',
-                                'units_total': 111, 'unit_price': 127.26}
+                                'units_total': 100, 'unit_price': 127.26}
 
     def setUp(self):
-        self.class_instance = StockDataSerializer(
-            data=self.dummy_new_stock_creation)  # create instance of class to test
-        self.class_instance.is_valid(raise_exception=True)  # run test data through validation
         self.group = Group.objects.create(name='administrators')  # create 'administrators' group
-        self.class_instance.user = User.objects.create_user('dan', 'dan@aninstanceofme.com', 'myPassword1')  # set user
-        self.stockObject = StockData.objects.create(**self.dummy_orig_stock_creation)  # create dummy stock object
-
-    def set_stock_object(self):
-        """
-        set/reset stock obj to original values
-        """
-        StockData.objects.update_or_create({'id': self.stockObject.id, 'sku': '001-001', 'desc': 'test description',
-                                            'units_total': 100, 'unit_price': 17.27})
+        self.user = User.objects.create_user('dan', 'dan@aninstanceofme.com', 'myPassword1')  # set user
 
     def test_administrators_check(self):
         """
         test function that determines whether user is an administrator
         """
-        with as_admin(self):  # check true if user in administrators
-            self.assertTrue(self.class_instance.administrators_check(None))
-        self.assertFalse(self.class_instance.administrators_check(None))  # false if user not in administrators
+        request = APIRequestFactory().get('/api/v1/stock/')
+        request.user = self.user
+        serializer = StockDataSerializer(context={'request': request})
+        with as_admin(user=self.user, group=self.group):  # check true if user in administrators
+            self.assertTrue(serializer.administrators_check(None))
+        self.assertFalse(serializer.administrators_check(None))  # false if user not in administrators
 
     def test_create_request_time(self):
         """
         test function that creates a datetime object to return as the time of request
         """
-        self.assertIsInstance(self.class_instance.create_request_time(None), datetime)
+        request = APIRequestFactory().get('/api/v1/stock/')
+        request.user = self.user
+        serializer = StockDataSerializer(context={'request': request})
+        self.assertIsInstance(serializer.create_request_time(None), datetime)
 
     def test_create(self):
         """
         test new object is created
         """
+        stock_object = StockData.objects.create(**self.dummy_orig_stock_creation)  # create dummy stock object
+        request = APIRequestFactory().get('/api/v1/stock/')
+        request.user = self.user
+        serializer = StockDataSerializer(context={'request': request}, data=stock_object)
+        serializer.is_valid()
         # test non-admin user
-        self.assertRaises(serializers.ValidationError, self.class_instance.create, self.dummy_new_stock_creation)
-        with as_admin(self):  # test admin user
+        self.assertRaises(serializers.ValidationError, serializer.create, serializer.validated_data)
+        with as_admin(user=self.user, group=self.group):  # test admin user
+            # creation with admin must succeed
+            self.assertEqual(serializer.create(serializer.validated_data), serializer.validated_data)
             # duplicate SKU must fail
-            self.assertRaises(serializers.ValidationError, self.class_instance.create, self.dummy_orig_stock_creation)
-            # updating by admin must succeed
-            created = self.class_instance.create(self.dummy_new_stock_creation)
-            self.assertIsInstance(StockData.objects.get(sku=created['sku']), StockData)
+            self.assertRaises(serializers.ValidationError, serializer.create, serializer.validated_data)
 
     def test_update(self):
         """
         test update of object for non-admin user
         """
+        stock_object = StockData.objects.create(**self.dummy_orig_stock_creation)  # create dummy stock object
+        request = APIRequestFactory().patch('/api/v1/stock/1/')
+        request.user = self.user
+        serializer = StockDataSerializer(context={'request': request}, data=stock_object)
+        serializer.is_valid()
         # update of description, SKU, and price must fail for non-admin user
-        pre_update_stock_object = copy.deepcopy(self.stockObject)  # create separate copy of obj to compare against
-        updated = self.class_instance.update(self.stockObject, {'sku': '001-002', 'desc': 'new description',
-                                                                'units_total': 23, 'unit_price': 253.23})
-        self.assertEqual(updated.desc, pre_update_stock_object.desc)  # desc should be the same, no change
-        self.assertEqual(updated.sku, pre_update_stock_object.sku)  # sku should be the same, no change
-        self.assertEqual(updated.unit_price, pre_update_stock_object.unit_price)  # unit_price should be the same
+        updated = serializer.update(instance=stock_object, validated_data=self.dummy_new_stock_creation)
+        self.assertEqual(updated.desc, stock_object.desc)  # desc should be the same, no change
+        self.assertEqual(updated.sku, stock_object.sku)  # sku should be the same, no change
+        self.assertEqual(updated.unit_price, stock_object.unit_price)  # unit_price should be the same
         # reducing stock unit level below 0 must fail
-        self.assertRaises(serializers.ValidationError, self.class_instance.update, self.stockObject,
+        self.assertRaises(serializers.ValidationError, serializer.update, stock_object,
                           {'units_total': -150})
         # increase of stock units for non-admin user must fail
-        self.assertRaises(serializers.ValidationError, self.class_instance.update, self.stockObject,
-                          {'units_total': 25})
+        self.assertRaises(serializers.ValidationError, serializer.update, stock_object,
+                          {'units_total': 150})
         # decreasing stock if level stays 0 or above must succeed
-        units_before_update = self.stockObject.units_total
-        updated = self.class_instance.update(self.stockObject, {'units_total': 10})
+        units_before_update = stock_object.units_total
+        updated = serializer.update(instance=stock_object, validated_data={'units_total': 10})
         self.assertNotEqual(updated.units_total, units_before_update)
         """
         test update of object for admin user
         """
         # update of description, SKU, and price must pass for admin user
-        with as_admin(self):
-            self.set_stock_object()  # reset stockObject to original values
-            pre_update_stock_object = copy.deepcopy(self.stockObject)  # create separate copy of obj to compare against
-            updated = self.class_instance.update(self.stockObject, {'sku': '001-002', 'desc': 'new description',
-                                                                    'units_total': 200, 'unit_price': 253.23})
+        with as_admin(user=self.user, group=self.group):
+            pre_update_stock_object = copy.deepcopy(stock_object)
+            updated = serializer.update(instance=stock_object,
+                                        validated_data={'sku': '001-003', 'desc': 'new description',
+                                                        'units_total': 200, 'unit_price': 253.23})
             self.assertNotEqual(updated.desc, pre_update_stock_object.desc)  # desc should change
             self.assertNotEqual(updated.sku, pre_update_stock_object.sku)  # sku should change
             self.assertNotEqual(updated.unit_price, pre_update_stock_object.unit_price)  # unit_price should change
             self.assertNotEqual(updated.units_total, pre_update_stock_object.units_total)  # units_total should increase
             # changing SKU to value that already exists must be ignored
-            sku_before_update = updated.sku
-            updated = self.class_instance.update(self.stockObject, {'sku': '001-002', 'desc': 'new description',
-                                                                    'units_total': 210, 'unit_price': 253.23})
-            self.assertEqual(sku_before_update, updated.sku)  # must remain equal
+            updated = serializer.update(instance=stock_object,
+                                        validated_data={'sku': '001-001', 'desc': 'new description',
+                                                        'units_total': 210, 'unit_price': 253.23})
+            self.assertEqual(pre_update_stock_object.sku, updated.sku)  # must remain equal
             # reducing stock unit level below 0 must fail
-            self.assertRaises(serializers.ValidationError, self.class_instance.update, self.stockObject,
-                              {'units_total': -150})
+            self.assertRaises(serializers.ValidationError, serializer.update, stock_object,
+                              {'units_total': -500})
             # decreasing stock if level stays 0 or above must succeed
-            units_before_update = self.stockObject.units_total
-            updated = self.class_instance.update(self.stockObject, {'units_total': 10})
+            units_before_update = stock_object.units_total
+            updated = serializer.update(instance=stock_object, validated_data={'units_total': 10})
             self.assertNotEqual(updated.units_total, units_before_update)
 
 
@@ -281,16 +276,15 @@ class SendEmailTestCase(TestCase):
     """
 
     def setUp(self):
-        self.class_instance = SendEmail()
         self.body_plaintext = 'This is a test!'
         self.body_html = '<h1>This is a test!</h1>'
         self.subject = 'Test email'
         self.email_to = [settings.DEFAULT_FROM_EMAIL]
         self.email_from = settings.DEFAULT_FROM_EMAIL
-        self.notification_type = self.class_instance.EmailType.STOCK_TRANSFER
+        self.notification_type = SendEmail.EmailType.STOCK_TRANSFER
         self.group = Group.objects.create(name='administrators')  # create 'administrators' group
-        self.class_instance.user = User.objects.create_user('warehouse admin', settings.DEFAULT_FROM_EMAIL, 'myPwd8*e')
-        self.class_instance.user2 = User.objects.create_user('shop manager', 's.m.test@aninstance.com', 'eekeJ839)lx*')
+        self.user = User.objects.create_user('warehouse admin', settings.DEFAULT_FROM_EMAIL, 'myPwd8*e')
+        self.user2 = User.objects.create_user('shop manager', 's.m.test@aninstance.com', 'eekeJ839)lx*')
         self.stock_data = StockData.objects.create(
             owner=User.objects.get(username='warehouse admin'),
             sku='001-001',
@@ -298,41 +292,42 @@ class SendEmailTestCase(TestCase):
             units_total=11,
             unit_price=11.23
         )
-        self.stock_data.user = self.class_instance.user2
+        self.stock_data.user = self.user2
         self.stock_data.transferred = 77
+        self.send_email = SendEmail()
 
     def test_send(self):
         # test False (no email sent) if body, email_to or email_from are absent
         test_params = {'email_to': self.email_to, 'email_from': self.email_from, 'body_plaintext': self.body_plaintext,
                        'body_html': self.body_html, 'subject': self.subject}
         for k, v in test_params.items():
-            self.assertFalse(self.class_instance.send(f'{k}={v}'))
+            self.assertFalse(self.send_email.send(f'{k}={v}'))
         # test True (email sent) if params are present
         settings.STOCK_MANAGEMENT_OPTIONS['email']['notifications_on'] = True
-        self.assertTrue(self.class_instance.send(**test_params))
+        self.assertTrue(self.send_email.send(**test_params))
         # test False if invalid email
         test_params['email_to'] = 'blah'
-        self.assertFalse(self.class_instance.send(**test_params))
+        self.assertFalse(self.send_email.send(**test_params))
         # test false if params are in incorrect type
         test_params_corrupt = {'email_to': 77, 'email_from': 77, 'body_plaintext': 77, 'body_html': 77, 'subject': 77}
-        self.assertFalse(self.class_instance.send(**test_params_corrupt))
+        self.assertFalse(self.send_email.send(**test_params_corrupt))
 
     def test_compose(self):
         # test False if no stock instance or notification type
-        self.assertFalse(self.class_instance.compose())
-        with as_admin(self):
+        self.assertFalse(self.send_email.compose())
+        with as_admin(user=self.user, group=self.group):
             # test True to confirm sending
-            self.assertTrue(self.class_instance.compose(instance=self.stock_data,
-                                                        notification_type=self.notification_type))
+            self.assertTrue(self.send_email.compose(instance=self.stock_data,
+                                                    notification_type=self.notification_type))
             # test invalid email return False
             self.stock_data.user.email = 'blah'
-            self.assertFalse(self.class_instance.compose(instance=self.stock_data,
-                                                         notification_type=self.notification_type))
+            self.assertFalse(self.send_email.compose(instance=self.stock_data,
+                                                     notification_type=self.notification_type))
             # test Attribute error returns False
             self.stock_data.user.email = 'valid_test@anistance.com'
             self.stock_data.desc = 77
-            self.assertFalse(self.class_instance.compose(instance=self.stock_data,
-                                                         notification_type=self.notification_type))
+            self.assertFalse(self.send_email.compose(instance=self.stock_data,
+                                                     notification_type=self.notification_type))
 
 
 """
@@ -385,13 +380,14 @@ class StockDataViewSetTestCase(APITestCase):
 
     def setUp(self):
         # common to all tests
-        self.group = Group.objects.create(name='administrators')  # create 'administrators' group
+        pass
 
     # """
     # Note 1: Mapping for actions (used in as_view), are:
     # {
     # 'get': 'retrieve'  # to retrieve one object, as spec by pk passed in url param, e.g. /stock/1
     # 'get': 'list' # to list all objects, e.g. /stock/
+    # 'post': 'create'
     # 'put': 'update',
     # 'patch': 'partial_update',
     # 'delete': 'destroy'
@@ -443,6 +439,8 @@ class StockDataViewSetTestCase(APITestCase):
         """
         APIClient: tests entire gambit, including routing, middleware & permissions).
         Run in preference to APIRequestFactory tests, as that only tests view alone.
+
+        Test GET stock items
         """
         # setup
         user = User.objects.create_user('tester', settings.DEFAULT_FROM_EMAIL, 'myPwd8ntGr8', is_staff=False)
@@ -466,4 +464,35 @@ class StockDataViewSetTestCase(APITestCase):
             self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_perform_create(self):
-        pass
+        """
+        Test POST new stock item
+        """
+        # setup
+        user = User.objects.create_user('tester', settings.DEFAULT_FROM_EMAIL, 'myPwd8ntGr8', is_staff=False)
+        group = Group.objects.create(name='administrators')  # create 'administrators' group
+        token = Token.objects.get(user__username='tester')
+        client = APIClient()
+        client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+        # test returns 403 if user not staff
+        response = client.post(f'/api/v1/stock/', {"units_total": "1", "unit_price": "5.36", "desc": "tester",
+                                                   "sku": "008-952"}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        # test returns 400 if staff but not admin
+        with as_staff(user):
+            response = client.post(f'/api/v1/stock/', {
+                "units_total": "1", "unit_price": "5.36", "desc": "tester",
+                "sku": "008-952"}, format='json')
+            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        # test returns 200 if staff and admin
+        with as_staff(user):
+            with as_admin(user=user, group=group):
+                response = client.post(f'/api/v1/stock/', {"units_total": "1", "unit_price": "5.36", "desc": "tester",
+                                                           "sku": "008-952"}, format='json')
+                self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+                # test response is correct
+                self.assertEqual(response.data['units_total'], 1)
+                self.assertEqual(response.data['sku'], '008-952')
+                self.assertEqual(response.data['desc'], 'tester')
+                self.assertEqual(response.data['unit_price'], '5.36')
+                self.assertEqual(response.data['user_is_admin'], True)
+                self.assertIsInstance(response.data['datetime_of_request'], datetime)
