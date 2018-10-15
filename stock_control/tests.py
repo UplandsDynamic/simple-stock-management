@@ -465,8 +465,8 @@ class StockDataViewSetTestCase(APITestCase):
         """
         if staff
         """
-        # test returns 200
         with as_staff(user):
+            # test returns records
             response = client.get(f'/api/v1/stock/')
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             self.assertGreater(len(response.data['results']), 0)
@@ -500,9 +500,13 @@ class StockDataViewSetTestCase(APITestCase):
             # test order by record_updated
             updated_list = [r['record_updated'] for r in response.json()['results']]
             self.assertEqual(updated_list, sorted(updated_list))
-            # test order_by id negative
+            # test order by id negative
             response = client.get(f'/api/v1/stock/?order_by=-id')
             self.assertLess(response.json()['results'][1]['id'], response.json()['results'][0]['id'])
+            # test limit
+            response = client.get(f'/api/v1/stock/?order_by=id&limit=5')
+            self.assertGreater(response.data['count'], 5)
+
 
     def test_perform_create(self):
         """
