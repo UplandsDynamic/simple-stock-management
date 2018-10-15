@@ -34,7 +34,7 @@ functional_view_urlpatterns = [
     url('^v1/stock/$', views.StockDataViewSet.as_view(
         {'get': 'list', 'post': 'create'})),
     url('^v1/stock/(?P<pk>[0-9].+)/$', views.StockDataViewSet.as_view(
-        {'get': 'retrieve'})),
+        {'get': 'retrieve', 'patch': 'partial_update', 'delete': 'destroy', 'put': 'update'})),
 ]
 
 """
