@@ -104,11 +104,10 @@ class StockDataSerializer(serializers.HyperlinkedModelSerializer):
     """
 
     # return staff status of requester
-    user = User  # user attr (User obj) set on request in views.py, get_queryset() method
     user_is_admin = serializers.SerializerMethodField(method_name='administrators_check')
 
     def administrators_check(self, obj):
-        return self.user.groups.filter(name='administrators').exists()
+        return self.context['request'].user.groups.filter(name='administrators').exists()
 
     # def superuser_check(self, obj):
     #     return self.user.is_superuser
@@ -179,7 +178,7 @@ class StockDataSerializer(serializers.HyperlinkedModelSerializer):
         # identify as update (not new record) for purpose of email generation in post_save signal
         instance.update = True
         # add request user to instance, to pass to post_save callback for email
-        instance.user = self.user
+        instance.user = self.context['request'].user
         # pass transferred total for email
         instance.transferred = instance.units_total - int(validated_data['units_total'])
         if instance.transferred < instance.units_total:  # if not trying to transfer more than the remaining stock
