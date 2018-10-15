@@ -448,20 +448,61 @@ class StockDataViewSetTestCase(APITestCase):
         client = APIClient()
         client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
         stock = StockDataViewSetTestCase.create_stock(number=25, user=user)  # list of 25 stock objects
-        # test returns 403 if user not staff
+        """
+        if not staff
+        """
+        # test returns 403
         response = client.get(f'/api/v1/stock/')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-        # test returns 200 if user is staff
+        # test returns requested specific record
+        response = client.get(f'/api/v1/stock/{stock[10].pk}/')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        # test returns records in response to query on desc
+        response = client.get(f'/api/v1/stock/?desc=tes')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        response = client.get(f'/api/v1/stock/?desc=tes_i_do_not_exist')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        """
+        if staff
+        """
+        # test returns 200
         with as_staff(user):
             response = client.get(f'/api/v1/stock/')
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             self.assertGreater(len(response.data['results']), 0)
-        # test list
-        response = client.get(f'/api/v1/stock/{stock[10].pk}/')
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-        with as_staff(user):
+            # test returns requested specific record
             response = client.get(f'/api/v1/stock/{stock[10].pk}/')
             self.assertEqual(response.status_code, status.HTTP_200_OK)
+            self.assertEqual(response.data['id'], stock[10].id)
+            # test returns records in response to query on desc
+            response = client.get(f'/api/v1/stock/?desc=Test%20description%2011')
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            self.assertIn('Test description 11', response.json()['results'][0]['desc'])
+            # test returns empty if query does not exist
+            response = client.get(f'/api/v1/stock/?desc=Test%20description%2011_i_do_not_exist')
+            self.assertEqual(response.json()['count'], 0)
+            # test order by id
+            response = client.get(f'/api/v1/stock/?order_by=id')
+            self.assertGreater(response.json()['results'][1]['id'], response.json()['results'][0]['id'])
+            # test order by SKU
+            response = client.get(f'/api/v1/stock/?order_by=sku')
+            sku_list = [r['sku'] for r in response.json()['results']]
+            self.assertEqual(sku_list, sorted(sku_list))
+            # test order by desc
+            desc_list = [r['desc'] for r in response.json()['results']]
+            self.assertEqual(desc_list, sorted(desc_list))
+            # test order by units_total
+            units_total_list = [r['units_total'] for r in response.json()['results']]
+            self.assertEqual(units_total_list, sorted(units_total_list))
+            # test order by unit_price
+            unit_price_list = [r['unit_price'] for r in response.json()['results']]
+            self.assertEqual(unit_price_list, sorted(unit_price_list))
+            # test order by record_updated
+            updated_list = [r['record_updated'] for r in response.json()['results']]
+            self.assertEqual(updated_list, sorted(updated_list))
+            # test order_by id negative
+            response = client.get(f'/api/v1/stock/?order_by=-id')
+            self.assertLess(response.json()['results'][1]['id'], response.json()['results'][0]['id'])
 
     def test_perform_create(self):
         """
