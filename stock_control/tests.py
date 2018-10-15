@@ -504,8 +504,11 @@ class StockDataViewSetTestCase(APITestCase):
             response = client.get(f'/api/v1/stock/?order_by=-id')
             self.assertLess(response.json()['results'][1]['id'], response.json()['results'][0]['id'])
             # test limit
-            response = client.get(f'/api/v1/stock/?order_by=id&limit=5')
-            self.assertGreater(response.data['count'], 5)
+            response = client.get(f'/api/v1/stock/?limit=5')
+            self.assertEqual(len(response.json()['results']), 5)
+            # test offset
+            response = client.get(f'/api/v1/stock/?limit=5&offset=1')
+            self.assertEqual(response.json()['results'][4]['id'], 6)
 
 
     def test_perform_create(self):
