@@ -510,7 +510,6 @@ class StockDataViewSetTestCase(APITestCase):
             response = client.get(f'/api/v1/stock/?limit=5&offset=1')
             self.assertEqual(response.json()['results'][4]['id'], 6)
 
-
     def test_perform_create(self):
         """
         Test POST new stock item
@@ -544,3 +543,15 @@ class StockDataViewSetTestCase(APITestCase):
                 self.assertEqual(response.data['unit_price'], '5.36')
                 self.assertEqual(response.data['user_is_admin'], True)
                 self.assertIsInstance(response.data['datetime_of_request'], datetime)
+
+    def test_perform_update(self):
+        # setup
+        user = User.objects.create_user('tester', settings.DEFAULT_FROM_EMAIL, 'myPwd8ntGr8', is_staff=False)
+        group = Group.objects.create(name='administrators')  # create 'administrators' group
+        token = Token.objects.get(user__username='tester')
+        client = APIClient()
+        client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+        #stock = StockDataViewSetTestCase.create_stock(number=25, user=user)  # list of 25 stock objects
+        # test returns 403 if user not staff
+        response = client.patch(f'/api/v1/stock/1/', {"units_total": "77"}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
