@@ -551,7 +551,11 @@ class StockDataViewSetTestCase(APITestCase):
         token = Token.objects.get(user__username='tester')
         client = APIClient()
         client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
-        #stock = StockDataViewSetTestCase.create_stock(number=25, user=user)  # list of 25 stock objects
+        stock = StockDataViewSetTestCase.create_stock(number=25, user=user)  # list of 25 stock objects
         # test returns 403 if user not staff
-        response = client.patch(f'/api/v1/stock/1/', {"units_total": "77"}, format='json')
+        response = client.patch(f'/api/v1/stock/{stock[0].pk}/', data={"units_total": 77}, format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        with as_staff(user):
+            # test increase stock as staff but not as administrator fails
+            response = client.patch(f'/api/v1/stock/{stock[0].pk}/', data={"units_total": 77}, format='json')
+            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
