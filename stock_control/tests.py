@@ -559,3 +559,7 @@ class StockDataViewSetTestCase(APITestCase):
             # test increase stock as staff but not as administrator fails
             response = client.patch(f'/api/v1/stock/{stock[0].pk}/', data={"units_total": 77}, format='json')
             self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+            with as_admin(user=user, group=group):
+                # test increase stock as staff and as administrator succeeds
+                response = client.patch(f'/api/v1/stock/{stock[0].pk}/', data={"units_total": 77}, format='json')
+                self.assertEqual(response.status_code, status.HTTP_200_OK)
