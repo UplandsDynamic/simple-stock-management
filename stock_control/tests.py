@@ -3,7 +3,7 @@ from django.test import TestCase, TransactionTestCase
 from rest_framework.utils import json
 from .models import StockData
 from django.contrib.auth.models import User, Group
-from .custom_validators import RequestQueryValidator
+from .custom_validators import *
 from .email import SendEmail
 from django.core.exceptions import ValidationError
 from rest_framework import serializers, status
@@ -123,6 +123,33 @@ class RequestQueryValidatorTestCase(TestCase):
                     self.assertIn(RequestQueryValidator.validate(
                         RequestQueryValidator.results, result), [result, self.results_arg_default])
 
+    def test_validate_alphanumplus(self):
+        self.assertEqual(validate_alphanumplus(value='This is a test'), None)
+        self.assertRaises(ValidationError, validate_alphanumplus, 'This is a test!!!')
+
+    def test_validate_search(self):
+        self.assertEqual(validate_search(value='This is a test'), 'This is a test')
+        self.assertRaises(ValidationError, validate_search, 'This is a test!!!')
+
+    def test_validate_unit_price(self):
+        self.assertEqual(validate_unit_price('10.23'), None)
+        self.assertEqual(validate_unit_price('10523.23'), None)
+        self.assertEqual(validate_unit_price('10523'), None)
+        self.assertRaises(ValidationError, validate_unit_price, '12.362')
+        self.assertRaises(ValidationError, validate_unit_price, 'test')
+
+    def test_validate_passwords_different(self):
+        self.assertEqual(validate_passwords_different(value=['mYpa$sW0rD', 'mYpa$sW0rD2']),
+                         ['mYpa$sW0rD', 'mYpa$sW0rD2']),
+        self.assertRaises(ValidationError, validate_passwords_different, ['mYpa$sW0rD', 'mYpa$sW0rD'])
+        self.assertRaises(ValidationError, validate_passwords_different, ['', 'mYpa$sW0rD'])
+        self.assertRaises(ValidationError, validate_passwords_different, ['mYpa$sW0rD'])
+
+    def test_validate_password_correct(self):
+        user = User.objects.create_user('dan', 'test@aninstance.com', 'myPassword1')
+        self.assertEqual(validate_password_correct(user=user, value='myPassword1'), None)
+        self.assertRaises(ValidationError, validate_password_correct, user=user, value='InC0rREctPWd!')
+
     """
     tests for serializers.py
     """
@@ -135,7 +162,7 @@ class ChangePasswordSerializerTestCase(TestCase):
 
     def setUp(self):
         self.class_instance = ChangePasswordSerializer()  # create instance of class to test
-        self.user_instance = User.objects.create_user('dan', 'dan@aninstanceofme.com', 'myPassword1')
+        self.user_instance = User.objects.create_user('dan', 'test@aninstance.com', 'myPassword1')
         self.invalid_password = '123'
         self.validated_data = {'old_password': 'myPassword1', 'new_password': 'myNewPassword'}
         self.invalid_validated_data = {'old_password': 'myPassword1', 'new_password': 'myPassword1'}
@@ -175,7 +202,7 @@ class StockDataSerializerTestCase(TransactionTestCase):
 
     def setUp(self):
         self.group = Group.objects.create(name='administrators')  # create 'administrators' group
-        self.user = User.objects.create_user('dan', 'dan@aninstanceofme.com', 'myPassword1')  # set user
+        self.user = User.objects.create_user('dan', 'test@aninstance.com', 'myPassword1')  # set user
 
     def test_administrators_check(self):
         """
@@ -478,6 +505,10 @@ class StockDataViewSetTestCase(APITestCase):
             response = client.get(f'/api/v1/stock/?desc=Test%20description%2011', format='json')
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             self.assertIn('Test description 11', response.data['results'][0]['desc'])
+            # test returns empty results if invalid characters
+            response = client.get(f'/api/v1/stock/?desc=Test%20description%20*(', format='json')
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            self.assertEqual(len(response.data['results']), 0)
             # test returns empty if query does not exist
             response = client.get(f'/api/v1/stock/?desc=Test%20description%2011_i_do_not_exist', format='json')
             self.assertEqual(response.data['count'], 0)
@@ -575,5 +606,31 @@ class StockDataViewSetTestCase(APITestCase):
                 response = client.patch(f'/api/v1/stock/{stock[0].pk}/', data={"units_total": 77}, format='json')
                 self.assertEqual(response.status_code, status.HTTP_200_OK)
                 self.assertEqual(response.data['units_total'], 77)
+                # test changing other values succeeds if staff and administrator
+                for key, value in new_values.items():
+                    response = client.patch(f'/api/v1/stock/{stock[0].pk}/', data={key: value}, format='json')
+                    self.assertEqual(response.status_code, status.HTTP_200_OK)
+                    self.assertNotEqual(response.data[key], str(orig_values[key]))
 
-
+    def test_perform_destroy(self):
+        # setup
+        user = User.objects.create_user('tester', settings.DEFAULT_FROM_EMAIL, 'myPwd8ntGr8', is_staff=False)
+        group = Group.objects.create(name='administrators')  # create 'administrators' group
+        token = Token.objects.get(user__username='tester')
+        client = APIClient()
+        client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+        stock = StockDataViewSetTestCase.create_stock(number=25, user=user)  # list of 25 stock objects
+        # test returns 403 if not staff
+        response = client.delete(f'/api/v1/stock/{stock[11].pk}/', format='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        with as_staff(user):
+            # test returns 403 if staff but not administrator
+            response = client.delete(f'/api/v1/stock/{stock[11].pk}/', format='json')
+            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+            self.assertEqual(response.data[0], 'You are not authorized to delete stock lines!')
+            with as_admin(user=user, group=group):
+                # test deletes stock item if staff and administrator
+                response = client.delete(f'/api/v1/stock/{stock[11].pk}/', format='json')
+                self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+                verify_response = client.get(f'/api/v1/stock/{stock[11].pk}/', format='json')
+                self.assertEqual(verify_response.status_code, status.HTTP_404_NOT_FOUND)
