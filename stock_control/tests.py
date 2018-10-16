@@ -467,48 +467,48 @@ class StockDataViewSetTestCase(APITestCase):
         """
         with as_staff(user):
             # test returns records
-            response = client.get(f'/api/v1/stock/')
+            response = client.get(f'/api/v1/stock/', format='json')
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             self.assertGreater(len(response.data['results']), 0)
             # test returns requested specific record
-            response = client.get(f'/api/v1/stock/{stock[10].pk}/')
+            response = client.get(f'/api/v1/stock/{stock[10].pk}/', format='json')
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             self.assertEqual(response.data['id'], stock[10].id)
             # test returns records in response to query on desc
-            response = client.get(f'/api/v1/stock/?desc=Test%20description%2011')
+            response = client.get(f'/api/v1/stock/?desc=Test%20description%2011', format='json')
             self.assertEqual(response.status_code, status.HTTP_200_OK)
-            self.assertIn('Test description 11', response.json()['results'][0]['desc'])
+            self.assertIn('Test description 11', response.data['results'][0]['desc'])
             # test returns empty if query does not exist
-            response = client.get(f'/api/v1/stock/?desc=Test%20description%2011_i_do_not_exist')
-            self.assertEqual(response.json()['count'], 0)
+            response = client.get(f'/api/v1/stock/?desc=Test%20description%2011_i_do_not_exist', format='json')
+            self.assertEqual(response.data['count'], 0)
             # test order by id
-            response = client.get(f'/api/v1/stock/?order_by=id')
-            self.assertGreater(response.json()['results'][1]['id'], response.json()['results'][0]['id'])
+            response = client.get(f'/api/v1/stock/?order_by=id', format='json')
+            self.assertGreater(response.json()['results'][1]['id'], response.data['results'][0]['id'])
             # test order by SKU
-            response = client.get(f'/api/v1/stock/?order_by=sku')
-            sku_list = [r['sku'] for r in response.json()['results']]
+            response = client.get(f'/api/v1/stock/?order_by=sku', format='json')
+            sku_list = [r['sku'] for r in response.data['results']]
             self.assertEqual(sku_list, sorted(sku_list))
             # test order by desc
-            desc_list = [r['desc'] for r in response.json()['results']]
+            desc_list = [r['desc'] for r in response.data['results']]
             self.assertEqual(desc_list, sorted(desc_list))
             # test order by units_total
-            units_total_list = [r['units_total'] for r in response.json()['results']]
+            units_total_list = [r['units_total'] for r in response.data['results']]
             self.assertEqual(units_total_list, sorted(units_total_list))
             # test order by unit_price
-            unit_price_list = [r['unit_price'] for r in response.json()['results']]
+            unit_price_list = [r['unit_price'] for r in response.data['results']]
             self.assertEqual(unit_price_list, sorted(unit_price_list))
             # test order by record_updated
-            updated_list = [r['record_updated'] for r in response.json()['results']]
+            updated_list = [r['record_updated'] for r in response.data['results']]
             self.assertEqual(updated_list, sorted(updated_list))
             # test order by id negative
-            response = client.get(f'/api/v1/stock/?order_by=-id')
-            self.assertLess(response.json()['results'][1]['id'], response.json()['results'][0]['id'])
+            response = client.get(f'/api/v1/stock/?order_by=-id', format='json')
+            self.assertLess(response.data['results'][1]['id'], response.json()['results'][0]['id'])
             # test limit
-            response = client.get(f'/api/v1/stock/?limit=5')
-            self.assertEqual(len(response.json()['results']), 5)
+            response = client.get(f'/api/v1/stock/?limit=5', format='json')
+            self.assertEqual(len(response.data['results']), 5)
             # test offset
-            response = client.get(f'/api/v1/stock/?limit=5&offset=1')
-            self.assertEqual(response.json()['results'][4]['id'], 6)
+            response = client.get(f'/api/v1/stock/?limit=5&offset=1', format='json')
+            self.assertEqual(response.data['results'][4]['id'], 6)
 
     def test_perform_create(self):
         """
@@ -556,10 +556,24 @@ class StockDataViewSetTestCase(APITestCase):
         response = client.patch(f'/api/v1/stock/{stock[0].pk}/', data={"units_total": 77}, format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         with as_staff(user):
-            # test increase stock as staff but not as administrator fails
+            # test increase stock fails if staff but not if administrator
             response = client.patch(f'/api/v1/stock/{stock[0].pk}/', data={"units_total": 77}, format='json')
             self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+            # test decrease stock succeeds if staff but not if administrator
+            response = client.patch(f'/api/v1/stock/{stock[0].pk}/', data={"units_total": 11}, format='json')
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            self.assertEqual(response.data['units_total'], 11)
+            # test changing any other value than units_total is ignored if staff but not administrator
+            orig_values = {"desc": stock[0].desc, "unit_price": stock[0].unit_price, "sku": stock[0].sku}
+            new_values = {"desc": "A new description", "unit_price": "56.32", "sku": "896-528"}
+            for key, value in new_values.items():
+                response = client.patch(f'/api/v1/stock/{stock[0].pk}/', data={key: value}, format='json')
+                self.assertEqual(response.status_code, status.HTTP_200_OK)
+                self.assertEqual(response.data[key], str(orig_values[key]))
             with as_admin(user=user, group=group):
-                # test increase stock as staff and as administrator succeeds
+                # test increase stock succeeds if staff and if administrator
                 response = client.patch(f'/api/v1/stock/{stock[0].pk}/', data={"units_total": 77}, format='json')
                 self.assertEqual(response.status_code, status.HTTP_200_OK)
+                self.assertEqual(response.data['units_total'], 77)
+
+

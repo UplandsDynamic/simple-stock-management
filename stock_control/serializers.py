@@ -180,8 +180,11 @@ class StockDataSerializer(serializers.HyperlinkedModelSerializer):
         # add request user to instance, to pass to post_save callback for email
         instance.user = self.context['request'].user
         # pass transferred total for email
-        instance.transferred = instance.units_total - int(validated_data['units_total'])
-        if instance.transferred < instance.units_total:  # if not trying to transfer more than the remaining stock
+        if 'units_total' in validated_data:
+            instance.transferred = instance.units_total - int(validated_data['units_total'])
+        else:
+            instance.transferred = 0
+        if instance.transferred <= instance.units_total:  # if not trying to transfer more than the remaining stock
             # call parent method to do the update
             super().update(instance, validated_data)
             # return the updated instance
