@@ -30,6 +30,7 @@ class ApiRequest extends React.Component {
         let updateStockMeta = nextProps.stockUpdateMeta;
         let updateStockData = nextProps.stockUpdateData;
         let authMeta = nextProps.authMeta;
+        let csrfToken = nextProps.csrfToken;
         switch (nextProps.apiTrigger) {
             case this.props.API_OPTIONS.GET_STOCK:  // get stock data
                 orderDir = this.generateRecordRequestOrder(getStockMeta);
@@ -42,6 +43,7 @@ class ApiRequest extends React.Component {
                 });// set new order dir state
                 this.sendRequest({
                     url: url,
+                    csrfToken: csrfToken,
                     requestType: this.props.API_OPTIONS.GET_STOCK,
                     requestMeta: getStockMeta
                 });
@@ -52,6 +54,7 @@ class ApiRequest extends React.Component {
                     updateStockMeta.url;
                 this.sendRequest({
                     url: url,
+                    csrfToken: csrfToken,
                     requestData: updateStockData,
                     requestType: this.props.API_OPTIONS.PATCH_STOCK,
                     requestMeta: updateStockMeta
@@ -61,6 +64,7 @@ class ApiRequest extends React.Component {
                 url = updateStockMeta.url;
                 this.sendRequest({
                     url: url,
+                    csrfToken: csrfToken,
                     requestData: updateStockData,
                     requestType: this.props.API_OPTIONS.ADD_STOCK,
                     requestMeta: updateStockMeta
@@ -71,6 +75,7 @@ class ApiRequest extends React.Component {
                     null;
                 this.sendRequest({
                     url: url,
+                    csrfToken: csrfToken,
                     requestData: updateStockData,
                     requestType: this.props.API_OPTIONS.DELETE_STOCK_LINE,
                     requestMeta: updateStockMeta
@@ -80,6 +85,7 @@ class ApiRequest extends React.Component {
                 url = authMeta.url;
                 this.sendRequest({
                     url: url,
+                    csrfToken: csrfToken,
                     requestType: this.props.API_OPTIONS.POST_AUTH,
                     requestData: {
                         username: authMeta.requestData.data.username,
@@ -91,6 +97,7 @@ class ApiRequest extends React.Component {
                 url = `${authMeta.change_pw_url}${authMeta.requestData.data.username}/`;
                 this.sendRequest({
                     url: url,
+                    csrfToken: csrfToken,
                     requestType: this.props.API_OPTIONS.PATCH_CHANGE_PW,
                     requestData: {
                         old_password: authMeta.requestData.data.old_password,
@@ -99,7 +106,7 @@ class ApiRequest extends React.Component {
                 });
                 break;
             default:
-                // console.log('Not calling API, nothing to do ...')
+            // console.log('Not calling API, nothing to do ...')
         }
     }
 
@@ -144,7 +151,7 @@ class ApiRequest extends React.Component {
         }
     }
 
-    sendRequest({url = null, requestData = null, requestMeta = null, requestType = null} = {}) {
+    sendRequest({url = null, requestData = null, requestMeta = null, requestType = null, csrfToken = null} = {}) {
         this.props.disarmAPI(); // disarm the API now the command has been actioned
         if (!this.state.activeRequest && url && requestType) {
             this.setState({
@@ -162,7 +169,8 @@ class ApiRequest extends React.Component {
                     Authorization: this.props.getSessionStorage('apiToken') ?
                         `Token ${this.props.getSessionStorage('apiToken')}` : null,
                     'cache-control': requestMeta ? requestMeta.cacheControl : 'no-cache',
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken,
                 } // additional headers here
             }).then((response) => {
                 this.setState({activeRequest: false});

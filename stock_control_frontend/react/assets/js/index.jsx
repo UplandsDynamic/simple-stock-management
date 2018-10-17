@@ -10,6 +10,8 @@ import StockUpdateModal from './stock-update-modal.jsx';
 import ApiRequest from './api-request.jsx';
 import Message from './message.jsx';
 import Footer from './footer.jsx';
+/* cookies */
+import Cookies from 'js-cookie';
 
 /* css */
 import '../css/index.css';
@@ -84,7 +86,7 @@ class App extends React.Component {
             change_pw_url: `${Env().apiRoot}/v1/change-password/`,
             authenticated: Boolean(sessionStorage.getItem('apiToken')),
             cacheControl: 'no-cache',
-            requestData: null
+            requestData: null,
         }
     };
 
@@ -105,9 +107,14 @@ class App extends React.Component {
             apiTrigger: null,  // will be one of API_OPTIONS when triggered
             message: null,
             messageClass: '',
-            greeting: App.APP_DETAILS.greeting
+            greeting: App.APP_DETAILS.greeting,
+            csrfToken: this.getCSRFToken()
         };
     }
+
+    getCSRFToken = () => {
+        return Cookies.get('csrftoken')
+    };
 
     setSessionStorage = ({key, value}) => {
         sessionStorage.setItem(key, value);
@@ -297,6 +304,7 @@ class App extends React.Component {
                                 stockUpdateData={this.state.stockUpdateData}
                                 authMeta={this.state.authMeta}
                                 apiTrigger={this.state.apiTrigger}
+                                csrfToken={this.state.csrfToken}
                                 setStockRecordState={this.setStockRecordState}
                                 setStockUpdateRecordState={this.setStockUpdateRecordState}
                                 getSessionStorage={this.getSessionStorage}
