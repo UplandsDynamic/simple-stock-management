@@ -55,7 +55,7 @@ schema_view = get_schema_view(
 urlpatterns += [
     url(r'^(/?)$', schema_view),
     url(r'^api-token-auth/', authviews.obtain_auth_token),
-    url(r'^v1/', include(router.urls), 'v1'),
+    url(r'^v1/', include(router.urls)),
     url(r'^schema(/?)$', schema_view),
     url(r'^api-auth/',
         include('rest_framework.urls', namespace='rest_framework'))

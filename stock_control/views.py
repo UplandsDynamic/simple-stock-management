@@ -2,6 +2,9 @@ import logging
 from django.contrib.auth.models import User, Group
 from django.core.exceptions import ValidationError
 from rest_framework import (viewsets, permissions, serializers)
+from rest_framework.decorators import action
+from rest_framework.response import Response
+
 from .custom_validators import RequestQueryValidator, validate_search
 from .serializers import (
     UserSerializer,
@@ -138,3 +141,9 @@ class StockDataViewSet(viewsets.ModelViewSet):
             super().perform_destroy(instance)
         else:
             raise serializers.ValidationError(detail='You are not authorized to delete stock lines!')
+
+    @action(methods=['get'], detail=False)
+    def latest(self, request):
+        latest = self.get_queryset().order_by('record_created').last()
+        serializer = self.get_serializer_class()(latest)
+        return Response(serializer.data)
