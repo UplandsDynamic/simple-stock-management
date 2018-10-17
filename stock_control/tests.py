@@ -631,6 +631,6 @@ class StockDataViewSetTestCase(APITestCase):
             with as_admin(user=user, group=group):
                 # test deletes stock item if staff and administrator
                 response = client.delete(f'/api/v1/stock/{stock[11].pk}/', format='json')
-                self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+                assert response.status_code == status.HTTP_204_NO_CONTENT
                 verify_response = client.get(f'/api/v1/stock/{stock[11].pk}/', format='json')
-                self.assertEqual(verify_response.status_code, status.HTTP_404_NOT_FOUND)
+                assert verify_response.status_code == status.HTTP_404_NOT_FOUND
