@@ -10,9 +10,9 @@ app_name = 'stock-control'
 """
 set up the routers for the viewset class based views
 """
-router = routers.DefaultRouter()
-router.register(r'users', views.UserViewSet)
-router.register(r'groups', views.GroupViewSet)
+# router = routers.DefaultRouter()
+# router.register(r'users', views.UserViewSet)
+# router.register(r'groups', views.GroupViewSet)
 # router.register(r'stock', views.StockDataViewSet)  # define manually to allow DRF unit testing (router testing buggy)
 # router.register(r'change-password', views.PasswordUpdateViewSet)  # define manually below to allow dots in usernames
 
@@ -22,6 +22,7 @@ Note: Mapping for actions (used in as_view), are:
     {
     'get': 'retrieve'  # to retrieve one object, as spec by pk passed in url param, e.g. /stock/1
     'get': 'list' # to list all objects, e.g. /stock/
+    'get': 'latest' # CUSTOM action (defined in views.StockDataViewSet.latest(), routed /api/v1/stock/latest/ (below)).
     'post': 'create'
     'put': 'update',
     'patch': 'partial_update',
@@ -35,6 +36,8 @@ functional_view_urlpatterns = [
         {'get': 'list', 'post': 'create'})),
     url('^v1/stock/(?P<pk>\d+)/$', views.StockDataViewSet.as_view(
         {'get': 'retrieve', 'patch': 'partial_update', 'delete': 'destroy', 'put': 'update'})),
+    url('^v1/stock/latest/$', views.StockDataViewSet.as_view(
+        {'get': 'latest'})),
 ]
 
 """
@@ -55,8 +58,6 @@ schema_view = get_schema_view(
 urlpatterns += [
     url(r'^(/?)$', schema_view),
     url(r'^api-token-auth/', authviews.obtain_auth_token),
-    url(r'^v1/', include(router.urls)),
     url(r'^schema(/?)$', schema_view),
-    url(r'^api-auth/',
-        include('rest_framework.urls', namespace='rest_framework'))
+    # url(r'^v1/', include(router.urls)),
 ]

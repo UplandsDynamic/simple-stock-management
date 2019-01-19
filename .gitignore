@@ -1,0 +1,7 @@
+node_modules/
+.idea
+bundles/
+__pycache__/
+htmlcov/
+.coverage
+secret_key.txt

@@ -1,55 +1,62 @@
 {
-  "name": "stock_control-react-frontend",
-  "side-effects": true,
-  "version": "0.0.1",
-  "description": "React frontend for Django REST Simple Stock Management application",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "watch": "webpack -d --config ./webpack.config.js --watch",
-    "dev": "webpack -d --config ./webpack.config.js --mode development",
-    "build": "webpack --config ./prod.webpack.config.js --mode production --optimize-minimize"
-  },
   "author": "Dan Bright, productions@aninstance.com",
   "license": "GPLv3",
-  "devDependencies": {
-    "@babel/runtime": "^7.1.2",
-    "@fortawesome/fontawesome-svg-core": "^1.2.6",
-    "@fortawesome/free-brands-svg-icons": "^5.4.1",
-    "@fortawesome/free-regular-svg-icons": "^5.4.1",
-    "@fortawesome/free-solid-svg-icons": "^5.4.1",
+  "name": "stock_control-react-frontend",
+  "version": "1.2.1",
+  "private": true,
+  "description": "React frontend for Django REST Simple Stock Management application",
+  "main": "index.js",
+  "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^1.2.12",
+    "@fortawesome/free-brands-svg-icons": "^5.6.3",
+    "@fortawesome/free-regular-svg-icons": "^5.6.3",
+    "@fortawesome/free-solid-svg-icons": "^5.6.3",
     "@fortawesome/react-fontawesome": "^0.1.3",
     "axios": "*",
-    "babel-cli": "*",
-    "babel-core": "^6.26.3",
-    "babel-loader": "^7.0.0",
-    "babel-plugin-transform-imports": "^1.5.1",
-    "babel-preset-env": "^1.7.0",
-    "babel-preset-react": "^6.24.1",
-    "babel-preset-stage-2": "^6.24.1",
-    "css-loader": "*",
-    "enzyme": "^3.7.0",
-    "file-loader": "^2.0.0",
+    "env-cmd": "^8.0.2",
+    "enzyme": "^3.8.0",
+    "enzyme-adapter-react-16": "^1.7.0",
+    "jest-enzyme": "^7.0.1",
     "jquery": "^3.3.1",
     "js-cookie": "^2.2.0",
-    "mini-css-extract-plugin": "^0.4.4",
-    "moment": "^2.22.2",
-    "moment-timezone": "^0.5.21",
-    "popper.js": "*",
-    "react": "^16.5.2",
-    "react-dom": "^16.5.2",
-    "react-image-lightbox": "*",
-    "react-modal": "^3.6.1",
-    "react-router-dom": "*",
-    "react-svg-loader": "*",
-    "style-loader": "^0.23.1",
-    "uglifyjs-webpack-plugin": "^2.0.1",
-    "url-loader": "^1.1.2",
-    "webpack": "^4.20.2",
-    "webpack-bundle-analyzer": "*",
-    "webpack-bundle-tracker": "*",
-    "webpack-cli": "^3.1.2",
-    "webpack-dev-server": "^3.1.9"
+    "moment": "^2.23.0",
+    "moment-timezone": "^0.5.23",
+    "popper.js": "^1.14.6",
+    "react": "^16.6.3",
+    "react-app-polyfill": "^0.2.0",
+    "react-dom": "^16.6.3",
+    "react-markdown": "^4.0.3",
+    "react-modal": "^3.8.1",
+    "react-router-dom": "^4.3.1",
+    "react-scripts": "^2.1.3",
+    "react-test-renderer": "^16.6.3",
+    "reactstrap": "^7.0.2"
   },
-  "dependencies": {}
+  "scripts": {
+    "analyze": "source-map-explorer build/static/js/main.*",
+    "start": "HTTPS=false BROWSER='google chrome' react-scripts start",
+    "build:staging": "env-cmd .env.staging react-scripts build",
+    "build:production": "env-cmd .env.production react-scripts build",
+    "test": "react-scripts test",
+    "test:debug": "react-scripts --inspect-brk test --runInBand",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "jest": {
+    "collectCoverageFrom": [
+      "src/**/*.{js,jsx,ts,tsx}",
+      "!<rootDir>/node_modules/",
+      "!<rootDir>/src/serviceWorker.js",
+      "!<rootDir>/src/index.js"
+    ]
+  },
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
+  ],
+  "devDependencies": {}
 }

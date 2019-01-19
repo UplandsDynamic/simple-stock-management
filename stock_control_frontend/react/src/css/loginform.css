@@ -1,0 +1,34 @@
+div.login {
+    margin: 1em auto 1em auto;
+    padding: 1em;
+    background-color: yellow;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+    font-weight: bold;
+    vertical-align: middle!important;
+    color: #001e00;
+}
+
+div.login div.form-field {
+    display: inline-block;
+    margin: 0 1em 1em 0;
+}
+
+div.login div.logout-button-field {
+    text-align: right;
+}
+
+div.login input.login {
+    display: block;
+}
+
+span.welcome {
+    display: inline-block;
+    color: #001e00;
+    margin: 0 1em 0 1em;
+}
+
+.logout-button-field button {
+    margin: 0.25em;
+}
