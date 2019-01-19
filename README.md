@@ -28,7 +28,7 @@ It has web frontend that connects to a RESTful API backend. Data is stored in ei
 
 There is a live demo available here:
 
-https://stockmanagement.staging.aninstance.com
+https://sm.staging.aninstance.com
 
 There are two test users - one for the warehouse administrator, the other for a 'store manager'. Credentials are:
 

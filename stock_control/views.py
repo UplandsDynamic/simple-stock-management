@@ -10,7 +10,7 @@ from .serializers import (
     UserSerializer,
     GroupSerializer,
     StockDataSerializer,
-    ChangePasswordSerializer,
+    ChangePasswordSerializer
 )
 from .models import StockData
 from .custom_permissions import AccessPermissions
@@ -144,6 +144,10 @@ class StockDataViewSet(viewsets.ModelViewSet):
 
     @action(methods=['get'], detail=False)
     def latest(self, request):
+        """
+        example of a custom defined action, mapped to GET request. Defined in routes as /api/v1/latest/.
+        This method returns the latest record added to the database.
+        """
         latest = self.get_queryset().order_by('record_created').last()
-        serializer = self.get_serializer_class()(latest)
+        serializer = self.get_serializer_class()(latest, context={'request': request})
         return Response(serializer.data)

@@ -1,0 +1,79 @@
+div.data-table {
+    min-height: 768px;
+}
+
+table {
+    background-color: #001e00 !important;
+    font-weight: bold;
+    color: yellow;
+}
+
+table.table-bordered td, table.table-bordered th {
+    border: 1px solid darkorange !important;
+}
+
+thead th {
+    padding: 1em !important;
+}
+
+thead th:hover {
+    color: #001e00 !important;
+    background-color: yellow !important;
+}
+
+td {
+    color: yellow !important;
+    padding: 0.5em !important;
+    vertical-align: middle !important;
+}
+
+td.action-col, th.action-col {
+    color: white !important;
+}
+
+table td.table-small-font {
+    font-size: 0.8em;
+}
+
+caption {
+    font-size: 0.8em;
+    text-align: right;
+    color: orange;
+}
+
+.Modal {
+    position: absolute;
+    top: 40px;
+    left: 40px;
+    right: 40px;
+    bottom: 40px;
+    background-color: papayawhip;
+}
+
+.Overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rebeccapurple;
+}
+
+button.table-btn {
+    margin: 0.25em;
+}
+
+div.message-card {
+    margin: 0 0 1em 0;
+    text-align: center;
+    background-color: #001e00;
+    border: 1px solid yellow;
+    -webkit-border-radius: 7px;
+    -moz-border-radius: 7px;
+    border-radius: 7px;
+}
+
+.alert {
+    font-weight: bold;
+    font-size: 0.8em
+}

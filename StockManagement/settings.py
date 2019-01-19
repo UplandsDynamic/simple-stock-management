@@ -1,23 +1,87 @@
-import os
+"""
+Django settings for StockManagement project.
 
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
+REMEMBER, BEFORE PRODUCTION RUN SECURITY CHECKS:
+
+    python manage.py check --deploy
+
+"""
+
+import os, string, random
+
+# # # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'u%-qma4$u2%%af(84k)a=5x6tw)u#x4tr46+&(8ts!6+vw!t_^'
+# # # SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = True  # this setting will be OVERRIDDEN according tot the RUN_TYPE defined below
+RUN_TYPE = 'DEVEL'  # DEVEL|STAGING|PRODUCTION
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True  # REMEMBER TO CHANGE TO False IN PRODUCTION!
-PRODUCTION = False  # REMEMBER TO CHANGE TO True IN PRODUCTION!
+# # # GENERATE A NEW UNIQUE SECRET KEY (secret_key.txt) IF DOES NOT ALREADY EXIST
+KEY_PATH = os.path.join(BASE_DIR, 'secret_key.txt')
+try:
+    SECRET_KEY = open(KEY_PATH).read().strip()
+except IOError:
+    SECRET_KEY = ''.join([random.SystemRandom().choice(string.ascii_letters + string.digits + string.punctuation)
+                          for _ in range(50)])
+    with open(KEY_PATH, 'w') as f:
+        f.write(SECRET_KEY)
 
-# Network
-SITE_FQDN = 'localhost'
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+# # # Network
+WORKING_URL = ''
 ROOT_URLCONF = 'StockManagement.urls'
 WSGI_APPLICATION = 'StockManagement.wsgi.application'
-SECURE_SSL_REDIRECT = False if not PRODUCTION else True
+X_FRAME_OPTIONS = 'DENY'
+# SECURE_HSTS_SECONDS = 3600
+if RUN_TYPE == 'DEVEL' or not RUN_TYPE:
+    DEBUG = True
+    WORKING_URL = 'localhost'
+    WORKING_PORT = '3000'
+    SECURE_CONTENT_TYPE_NOSNIFF = False
+    SECURE_BROWSER_XSS_FILTER = False
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_SECURE = False
+    ALLOWED_HOSTS = [WORKING_URL]
+    # CORS_ORIGIN_ALLOW_ALL = True
+    CORS_ALLOW_CREDENTIALS = True
+    CORS_ORIGIN_WHITELIST = (WORKING_URL, 'localhost:3001')
+    STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+elif RUN_TYPE == 'STAGING':
+    DEBUG = False
+    WORKING_URL = 'sm.staging.aninstance.com'
+    WORKING_PORT = '443'
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_BROWSER_XSS_FILTER = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    #  SECURE_SSL_REDIRECT = True
+    ALLOWED_HOSTS = [WORKING_URL]
+    # CORS_ORIGIN_ALLOW_ALL = True
+    CORS_ALLOW_CREDENTIALS = True
+    CORS_ORIGIN_WHITELIST = (WORKING_URL,)
+    STATIC_ROOT = os.path.join('/var/www/django/'
+                               'sm.staging.aninstance.com/static')
+    MEDIA_ROOT = os.path.join('/var/www/django/'
+                              'sm.staging.aninstance.com/media')
+elif RUN_TYPE == 'PRODUCTION':
+    DEBUG = False
+    WORKING_URL = 'sm.aninstance.com'
+    WORKING_PORT = '443'
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_BROWSER_XSS_FILTER = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    #  SECURE_SSL_REDIRECT = True
+    ALLOWED_HOSTS = [WORKING_URL]
+    # CORS_ORIGIN_ALLOW_ALL = True
+    CORS_ALLOW_CREDENTIALS = True
+    CORS_ORIGIN_WHITELIST = (WORKING_URL,)
+    STATIC_ROOT = os.path.join('/var/www/django/'
+                               'sm.aninstance.com/static')
+    MEDIA_ROOT = os.path.join('/var/www/django/'
+                              'sm.aninstance.com/media')
 
-# Application definition
+# # # Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -26,21 +90,12 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'stock_control.apps.StockControlConfig',
-    'stock_control_frontend.apps.StockControlFrontendConfig',
     'rest_framework',
     'rest_framework.authtoken',
-    'webpack_loader'
+    'corsheaders',
 ]
 
-# webpack loader config, for REACT frontend
-WEBPACK_LOADER = {
-    'DEFAULT': {
-        'BUNDLE_DIR_NAME': 'bundles/',
-        'STATS_FILE': os.path.join(BASE_DIR, 'stock_control_frontend/react/webpack-stats.json'),
-    }
-}
-
-# Rest framework
+# # # Rest framework
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'stock_control.custom_permissions.AccessPermissions',
@@ -49,14 +104,15 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.BasicAuthentication',
-        # 'rest_framework.authentication.SessionAuthentication',
     )
 }
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -68,8 +124,7 @@ MIDDLEWARE = [
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')]
-        ,
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -82,53 +137,110 @@ TEMPLATES = [
     },
 ]
 
-# Caches
+# # # Caches
+USE_REDIS_CACHE = False
 SITE_WIDE_CACHE = True  # site-wide caching system. Set False for more granular control with view & template caching.
 DEFAULT_CACHES_TTL = 0  # 0 means equates to 'do not cache'. E.g. to cache for 24 hours: ((60 * 60) * 60) * 24
 CACHE_SESSION_SECONDS = 60 * 60
 
 if SITE_WIDE_CACHE:
     CACHE_MIDDLEWARE_ALIAS = 'default'
-    CACHE_MIDDLEWARE_SECONDS = DEFAULT_CACHES_TTL
+    CACHE_MIDDLEWARE_SECONDS = DEFAULT_CACHES_TTL  # cache session data for an hour
     CACHE_MIDDLEWARE_KEY_PREFIX = 'stock_management_production_server'
     MIDDLEWARE.insert(0, 'django.middleware.cache.UpdateCacheMiddleware')  # HAS TO GO FIRST IN MIDDLEWARE LIST
     MIDDLEWARE.append('django.middleware.cache.FetchFromCacheMiddleware')  # HAS TO GO LAST IN MIDDLEWARE LIST
 
-CACHES = {'default':
-              {'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-               'TIMEOUT': DEFAULT_CACHES_TTL,
-               'LOCATION': 'stockmanagement-backend-cache'
-               },
-          'template_fragments':
-              {'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-               'TIMEOUT': DEFAULT_CACHES_TTL,
-               'LOCATION': 'stockmanagement-template-fragments-cache'
-               }
-          }
-
-# Database
-# https://docs.djangoproject.com/en/2.0/ref/settings/#databases
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+if not USE_REDIS_CACHE:
+    CACHES = {'default':
+                  {'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+                   'TIMEOUT': DEFAULT_CACHES_TTL,
+                   'LOCATION': 'stockmanagement-backend-cache'
+                   },
+              'template_fragments':
+                  {'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+                   'TIMEOUT': DEFAULT_CACHES_TTL,
+                   'LOCATION': 'stockmanagement-template-fragments-cache'
+                   }
+              }
+else:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django_redis.cache.RedisCache',
+            'LOCATION': 'redis://redis:6379/1',
+            'TIMEOUT': DEFAULT_CACHES_TTL,  # default TTL for the cache in sects(e.g. 5 mins = 'TIMEOUT': 60 * 5)
+            'OPTIONS': {
+                'CLIENT_CLASS': 'django_redis.client.DefaultClient'
+            },
+            'KEY_PREFIX': 'stock_management_production_server'
+        },
+        'sessions': {  # used by SESSION_CACHE_ALIAS, below
+            'BACKEND': 'django_redis.cache.RedisCache',
+            'LOCATION': 'redis://redis:6379/3',
+            'TIMEOUT': CACHE_SESSION_SECONDS,
+            'OPTIONS': {
+                'CLIENT_CLASS': 'django_redis.client.DefaultClient'
+            },
+            'KEY_PREFIX': 'stock_management_production_server'
+        },
+        'template_fragments': {
+            'BACKEND': 'django_redis.cache.RedisCache',
+            'LOCATION': 'redis://redis:6379/4',
+            'TIMEOUT': DEFAULT_CACHES_TTL,
+            'OPTIONS': {
+                'CLIENT_CLASS': 'django_redis.client.DefaultClient'
+            },
+            'KEY_PREFIX': 'stock_management_production_server'
+        },
+        # 'my_pages': {
+        #     'BACKEND': 'django_redis.cache.RedisCache',
+        #     'LOCATION': 'redis://redis:6379/2',
+        #     'TIMEOUT': DEFAULT_CACHES_TTL,
+        #     'OPTIONS': {
+        #         'CLIENT_CLASS': 'django_redis.client.DefaultClient'
+        #     },
+        #     'KEY_PREFIX': 'stock_management_production_server'
+        # },
     }
-}
 
-# Static files
+# # # Database
+if RUN_TYPE == 'PRODUCTION':
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': 'prod_sm',
+            'USER': 'prod_sm',
+            'PASSWORD': 'my_password',
+            'HOST': 'localhost',
+            'PORT': '5432'
+        }
+    }
+elif RUN_TYPE == 'STAGING':
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': 'staging_sm',
+            'USER': 'staging_sm',
+            'PASSWORD': 'my_password',
+            'HOST': 'localhost',
+            'PORT': '5432'
+        }
+    }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        }
+    }
+
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'stock_control_frontend/static'),
-    os.path.join(
-        BASE_DIR, 'stock_control_frontend/react/assets')
 ]
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
 STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
 
-# Password validation
-# https://docs.djangoproject.com/en/2.0/ref/settings/#auth-password-validators
+# # # Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -144,25 +256,33 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-# Email services
-EMAIL_BACKEND = "anymail.backends.sparkpost.EmailBackend"
-DEFAULT_FROM_EMAIL = 'me@mydomain.com'
-ANYMAIL = {
-    'IGNORE_UNSUPPORTED_FEATURES': True,
-    'SPARKPOST_API_KEY': 'my_sparkpost_api_key',
-    'SPARKPOST_API_URL': 'https://api.eu.sparkpost.com/api/v1',
-}
+# # # Email services
+if RUN_TYPE == 'PRODUCTION':
+    EMAIL_BACKEND = "anymail.backends.sparkpost.EmailBackend"
+    DEFAULT_FROM_EMAIL = 'stockmanagement@sm.aninstance.com'
+    ANYMAIL = {
+        'IGNORE_UNSUPPORTED_FEATURES': True,
+        'SPARKPOST_API_KEY': 'my_sparkpost_key',
+        'SPARKPOST_API_URL': 'https://api.eu.sparkpost.com/api/v1',
+    }
+else:
+    EMAIL_BACKEND = "anymail.backends.sparkpost.EmailBackend"
+    DEFAULT_FROM_EMAIL = 'stockmanagement@sm.staging.aninstance.com'
+    ANYMAIL = {
+        'IGNORE_UNSUPPORTED_FEATURES': True,
+        'SPARKPOST_API_KEY': 'my_sparkpost_key',
+        'SPARKPOST_API_URL': 'https://api.eu.sparkpost.com/api/v1',
+    }
 
-# StockManagement Application
+# # # StockManagement Application
 STOCK_MANAGEMENT_OPTIONS = {
     'email': {
-        'notifications_on': False if DEBUG else True,
+        'notifications_on': not DEBUG,  # don't send notifications if DEBUG is True
         'notifications_to_transfer_requester': True
     }
 }
 
-# Internationalization
-# https://docs.djangoproject.com/en/2.0/topics/i18n/
+# # # Internationalization
 LOCALE_PATHS = (
     os.path.join(BASE_DIR, 'locale'),
 )
@@ -193,17 +313,28 @@ LOGGING = {
             'class': 'logging.StreamHandler',
             'formatter': 'simple'
         },
+        'file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': '/var/log/django/django_main.log',
+            'formatter': 'verbose'
+        },
     },
     'loggers': {
         'main': {
-            'handlers': ['console'],
+            'handlers': ['file'] if RUN_TYPE == 'PRODUCTION' else ['console'],
             'level': 'INFO',
             'propagate': True,
         },
         'django': {
-            'handlers': ['console'],
+            'handlers': ['file'] if RUN_TYPE == 'PRODUCTION' else ['console'],
             'level': 'INFO',
             'propagate': True,
         },
+        # 'django_q': {
+        #     'handlers': ['file'],
+        #     'level': 'INFO',
+        #     'propagate': True,
+        # },
     },
 }
