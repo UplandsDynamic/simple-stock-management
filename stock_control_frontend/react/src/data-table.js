@@ -1,8 +1,8 @@
 import React from 'react';
 import Paginate from './paginate.js';
 import './css/data-table.css';
-import './css/vendor/bootstrap-4.0.0/bootstrap.min.css';
-import './vendor/bootstrap-4.0.0/bootstrap.min.js'
+import 'bootstrap/dist/css/bootstrap.css';
+import 'bootstrap/dist/js/bootstrap.js'
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
 import moment from 'moment'
 import 'moment/locale/en-gb.js'
