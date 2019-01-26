@@ -5,3 +5,4 @@ __pycache__/
 htmlcov/
 .coverage
 secret_key.txt
+build/
