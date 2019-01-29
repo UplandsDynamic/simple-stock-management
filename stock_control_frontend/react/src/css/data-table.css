@@ -16,11 +16,6 @@ thead th {
     padding: 1em !important;
 }
 
-thead th:hover {
-    color: #001e00 !important;
-    background-color: yellow !important;
-}
-
 td {
     color: yellow !important;
     padding: 0.5em !important;
@@ -33,6 +28,29 @@ td.action-col, th.action-col {
 
 table td.table-small-font {
     font-size: 0.8em;
+}
+
+table.stockTable thead th:hover {
+    color: #001e00 !important;
+    background-color: yellow !important;
+}
+
+table.stockTable-disabled, table.stockTable-disabled input {
+    font-size: 0.8em;
+}
+
+table.stockTable-disabled input {
+    background-color: lightslategrey!important;
+    border: none;
+}
+
+table.transferTable td, table.transferTable {
+    background-color: slateblue;
+    font-size: 1.1em;
+}
+
+table.transferTable input {
+    font-size: 1.1em;
 }
 
 caption {

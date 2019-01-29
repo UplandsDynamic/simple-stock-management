@@ -7,7 +7,7 @@ class Message extends React.Component {
         super(props);
         // keep real-time props changes in component state
         this.state = {
-            message: null,
+            message: '',
         };
     }
 

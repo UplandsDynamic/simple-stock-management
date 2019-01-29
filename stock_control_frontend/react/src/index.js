@@ -16,9 +16,10 @@ import axios from 'axios/index';
 import './css/index.css';
 /* font awesome icons */
 import {library} from '@fortawesome/fontawesome-svg-core'
-import {faSyncAlt, faEllipsisH, faPlus, faTrashAlt, faEdit} from '@fortawesome/free-solid-svg-icons'
+import {faSyncAlt, faEllipsisH, faPlus, faPlusSquare, faMinus, faMinusSquare,
+    faTrashAlt, faEdit} from '@fortawesome/free-solid-svg-icons'
 
-library.add(faSyncAlt, faEllipsisH, faPlus, faTrashAlt, faEdit);
+library.add(faSyncAlt, faEllipsisH, faPlus, faTrashAlt, faEdit, faPlusSquare, faMinus, faMinusSquare);
 
 
 axios.defaults.withCredentials = true;
