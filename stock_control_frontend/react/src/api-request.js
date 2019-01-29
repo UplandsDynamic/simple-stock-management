@@ -190,7 +190,7 @@ class ApiRequest extends React.Component {
             switch (requestType) {
                 case this.props.API_OPTIONS.GET_STOCK:
                     this.props.setMessage({
-                        message: error.response ? error.response.data[0] : error,
+                        message: error.response ? String(error.response.data[0]) : String(error),
                         messageClass: 'alert alert-danger'
                     });
                     break;

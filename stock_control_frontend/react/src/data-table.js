@@ -12,7 +12,6 @@ class DataTable extends React.Component {
 
     constructor(props) {
         super(props);
-        // keep real-time props changes in component state
         this.state = {
             modalIsOpen: false,
             dataTable: null,
@@ -130,10 +129,10 @@ class DataTable extends React.Component {
         };
         let noData = () => {
             return (
-                <div>
+                <React.Fragment>
                     {navBar()}
                     <div className={'alert alert-warning'}> Loading data ...</div>
-                </div>
+                </React.Fragment>
             );
         };
         let resultData = ({stockData = null} = {}) => {
@@ -142,9 +141,9 @@ class DataTable extends React.Component {
                     return (<tr key={item.id} data-toggle="modal" className={'d-flex'}>
                         {/*<th scope="row">{item.id}</th>*/}
                         <td className={'col-2'}>{item.sku}</td>
-                        <td className={'col-4'}>{item.desc}</td>
+                        <td className={'col-3'}>{item.desc}</td>
                         <td className={'col-1'}>{item.units_total}</td>
-                        <td className={'col-1'}>{item.unit_price}</td>
+                        <td className={'col-2'}>{item.unit_price}</td>
                         <td className={'table-small-font col-2'}>
                             {DataTable.formatUTCDateTime({dateTime: item.record_updated})}</td>
                         <td className={'action-col col-2 '}>
@@ -162,7 +161,7 @@ class DataTable extends React.Component {
         let table = () => {
             let data = resultData({stockData: stockRecordData});
             return data ? (
-                <div>
+                <React.Fragment>
                     {navBar()}
                     <div className={'container'}>
                         <div className={'row'}>
@@ -179,7 +178,7 @@ class DataTable extends React.Component {
                                         })}>
                                             SKU
                                         </th>
-                                        <th className={'col-4'} scope={'col'} onClick={() => this.handleGetRecords({
+                                        <th className={'col-3'} scope={'col'} onClick={() => this.handleGetRecords({
                                             stockRecord: {meta: {orderBy: 'desc', page: 1}}
                                         })}>
                                             Description
@@ -189,7 +188,7 @@ class DataTable extends React.Component {
                                         })}>
                                             Units
                                         </th>
-                                        <th className={'col-1'} scope={'col'} onClick={() => this.handleGetRecords({
+                                        <th className={'col-2'} scope={'col'} onClick={() => this.handleGetRecords({
                                             stockRecord: {meta: {orderBy: 'unit_price', page: 1}}
                                         })}>
                                             Unit Price
@@ -211,7 +210,7 @@ class DataTable extends React.Component {
                             </div>
                         </div>
                     </div>
-                </div>
+                </React.Fragment>
             ) : null;
         };
         return table() ? table() : noData();
