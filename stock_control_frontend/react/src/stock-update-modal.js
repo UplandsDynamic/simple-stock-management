@@ -195,7 +195,7 @@ class StockUpdateModal extends React.Component {
                                            onChange={e => this.setState({
                                                units_total: e.target.value ? parseInt(e.target.value) : 0
                                            })}
-                                           className={'form-control'} type={'number'}
+                                           className={'form-control'} type={!disabled ? 'number' : 'text'}
                                            disabled={disabled}/>
                                 </td>
                             </tr>
