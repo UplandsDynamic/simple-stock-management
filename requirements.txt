@@ -10,3 +10,4 @@ gunicorn
 gevent
 psycopg2
 postgres
+pip-licenses
