@@ -51,4 +51,6 @@ span.splitter {
 
 input.page-input {
     max-width: 3em;
+    background-color: darkorange;
+    color: #001e00;
 }

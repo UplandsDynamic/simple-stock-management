@@ -112,7 +112,8 @@ class StockUpdateModal extends React.Component {
                         units_total: this.state.units_total,
                         unit_price: this.state.unit_price,
                         sku: this.state.sku,
-                        desc: this.state.desc
+                        desc: this.state.desc,
+                        units_to_transfer: this.state.unitsToTransfer
                     },
                     meta: {
                         url: `${process.env.REACT_APP_API_DATA_ROUTE}/stock/`
@@ -297,7 +298,7 @@ class StockUpdateModal extends React.Component {
                                     onClick={(e) => {
                                         this.handleCloseModal({actionCancelled: true});
                                     }}
-                                    className={'cancel-btn btn btn-secondary'}>No, cancel!
+                                    className={'cancel-btn btn btn-secondary'}>No, CANCEL!
                                 </button>
                             </div>
                         </form>

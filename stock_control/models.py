@@ -44,7 +44,7 @@ class StockData(models.Model):
     units_total = models.PositiveIntegerField(blank=False, null=False, default=0)
     unit_price = models.DecimalField(blank=False, null=False, decimal_places=2, max_digits=9, default=0.00)
 
-    STAFF_ALLOWED_TO_UPDATE = ['units_total']
+    STAFF_ALLOWED_TO_UPDATE = ['units_to_transfer']  # fields that store_managers are allowed to update
 
     class Meta:
         ordering = ('id',)
@@ -57,10 +57,10 @@ class StockData(models.Model):
         return self.desc
 
     def clean(self):
+        logger.info('Running clean on model')
         """
         clean method
         """
-
         """ Validate stock does not go negative """
         if self.units_total < 0:
             raise serializers.ValidationError(
