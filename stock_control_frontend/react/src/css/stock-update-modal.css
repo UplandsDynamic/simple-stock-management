@@ -19,6 +19,7 @@ form.transfer-form {
 form.transfer-form-danger {
     background-color: #530000;
     color: yellow;
+    min-height: 250px;
 }
 
 button.delete-btn, button.cancel-btn {

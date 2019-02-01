@@ -151,8 +151,11 @@ class StockUpdateModal extends React.Component {
     }
 
     generateItemTable() {
-        // note: if newRecord, no userIsAdmin state has been set, hence need to test for newRecord separately
-        const disabled = !this.state.stockUpdateMeta.userIsAdmin || this.state.stockUpdateMeta.newRecord;
+        let disabled = true;
+        //note: if newRecord, no userIsAdmin state has been set, hence need to test for newRecord separately
+        if (this.state.stockUpdateMeta.userIsAdmin || this.state.stockUpdateMeta.newRecord) {
+            disabled = false
+        }
         return (
             <div className={'container'}>
                 <div className={'row'}>
@@ -263,15 +266,15 @@ class StockUpdateModal extends React.Component {
                 </div>
                 <div className={'row'}>
                     <div className={'col-sm xfer-button'}>
-                                <button
-                                    onClick={(e) => {
-                                        e.preventDefault();
-                                        this.handleRecordUpdate()
-                                    }}
-                                    className={'btn btn-lg btn-warning pull-right'}>
-                                    {this.state.newRecord ?
-                                        'New Stock Item' : disabled ? 'Transfer Now!' : 'Edit Stock Record'}
-                                </button>
+                        <button
+                            onClick={(e) => {
+                                e.preventDefault();
+                                this.handleRecordUpdate()
+                            }}
+                            className={'btn btn-lg btn-warning pull-right'}>
+                            {this.state.newRecord ?
+                                'New Stock Item' : disabled ? 'Transfer Now!' : 'Edit Stock Record'}
+                        </button>
                     </div>
                 </div>
             </div>

@@ -173,6 +173,8 @@ class StockDataSerializer(serializers.HyperlinkedModelSerializer):
         """
         if not self.administrators_check(self):
             raise serializers.ValidationError(detail=f'Record creation denied for this user level')
+        # remove units_to_transfer write_only (non-model) field for the create() method (only for updates)
+        del validated_data['units_to_transfer']
         try:
             super().create(validated_data)  # now call parent method to do the save
             return self.validated_data
