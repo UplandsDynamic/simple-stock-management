@@ -1,3 +1,4 @@
+import logging
 from django.contrib.auth.models import User, Group
 from django.core.exceptions import ValidationError
 from rest_framework import serializers
@@ -7,6 +8,9 @@ from django.contrib.auth.password_validation import validate_password
 from . import custom_validators
 from django.db import IntegrityError
 from django.utils.translation import gettext_lazy as _
+
+# Get an instance of a logger
+logger = logging.getLogger('django')
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
@@ -101,6 +105,7 @@ class StockDataSerializer(serializers.HyperlinkedModelSerializer):
 
     """
     Any custom fields (non-model)
+    FYI, details of how to process a non-model field in the request, here: https://stackoverflow.com/a/37718821
     """
 
     # return staff status of requester
@@ -108,6 +113,9 @@ class StockDataSerializer(serializers.HyperlinkedModelSerializer):
 
     def administrators_check(self, obj):
         return self.context['request'].user.groups.filter(name='administrators').exists()
+
+    # receive non-model field in request POST/PATCH that represents the number of units to transfer
+    units_to_transfer = serializers.CharField(write_only=True)
 
     # def superuser_check(self, obj):
     #     return self.user.is_superuser
@@ -123,13 +131,14 @@ class StockDataSerializer(serializers.HyperlinkedModelSerializer):
         model = StockData
         fields = ('id', 'record_updated', 'owner', 'sku', 'desc',
                   'units_total', 'unit_price', 'user_is_admin',
-                  'datetime_of_request')
+                  'datetime_of_request', 'units_to_transfer')
 
     """
     Additional validations. 
     Data param is dict of unvalidated fields.
     Note, model validations are passed as validators to serializer validation, so
     most validation here is done on the model.
+    Non-model fields may be validated here.
     """
 
     # def validate(self, data):
@@ -137,6 +146,18 @@ class StockDataSerializer(serializers.HyperlinkedModelSerializer):
     #     if self.instance and data.get('units_total', None) != self.instance.units_total:
     #         raise serializers.ValidationError('You are trying to update with a new value!')
     #     return data
+
+    def validate(self, data):
+        logger.info('Running clean on serializer')
+        """
+        validate units_to_transfer (a non-model field) if it's present
+        """
+        if self.instance and data.get('units_to_transfer', None):
+            try:
+                int(data.get('units_to_transfer'))
+            except ValueError as e:
+                raise serializers.ValidationError(f'Error: units_to_transfer was not a valid number!')
+        return data
 
     """
     create or update
@@ -171,7 +192,7 @@ class StockDataSerializer(serializers.HyperlinkedModelSerializer):
             if k not in StockData.STAFF_ALLOWED_TO_UPDATE and not self.administrators_check(self):
                 # raise serializers.ValidationError(detail=f'Record update denied for this user level')
                 del validated_data[k]  # rather than throw error, simply delete keys from update if unauthorized
-            # only allow superusers to INCREASE units_total
+            # allow only superusers to INCREASE units_total
             if 'units_total' in validated_data and not self.administrators_check(self) and \
                     int(validated_data['units_total']) > instance.units_total:
                 raise serializers.ValidationError(detail=f'Only administrators may increase stock!')
@@ -179,12 +200,14 @@ class StockDataSerializer(serializers.HyperlinkedModelSerializer):
         instance.update = True
         # add request user to instance, to pass to post_save callback for email
         instance.user = self.context['request'].user
-        # pass transferred total for email
-        if 'units_total' in validated_data:
-            instance.transferred = instance.units_total - int(validated_data['units_total'])
+        # pass non-model field units_to_transfer through, for email
+        if 'units_to_transfer' in validated_data:
+            instance.transferred = int(validated_data['units_to_transfer'])
         else:
             instance.transferred = 0
         if instance.transferred <= instance.units_total:  # if not trying to transfer more than the remaining stock
+            # calculate & set the remaining stock (needs to be done manually, as units_to_transfer wasn't a model field)
+            instance.units_total -= instance.transferred
             # call parent method to do the update
             super().update(instance, validated_data)
             # return the updated instance
