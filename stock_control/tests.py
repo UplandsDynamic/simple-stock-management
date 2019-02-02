@@ -257,13 +257,10 @@ class StockDataSerializerTestCase(TransactionTestCase):
         self.assertEqual(updated.unit_price, stock_object.unit_price)  # unit_price should be the same
         # reducing stock unit level below 0 must fail
         self.assertRaises(serializers.ValidationError, serializer.update, stock_object,
-                          {'units_total': -150})
-        # increase of stock units for non-admin user must fail
-        self.assertRaises(serializers.ValidationError, serializer.update, stock_object,
-                          {'units_total': 150})
+                          {'units_to_transfer': 150})
         # decreasing stock if level stays 0 or above must succeed
         units_before_update = stock_object.units_total
-        updated = serializer.update(instance=stock_object, validated_data={'units_total': 10})
+        updated = serializer.update(instance=stock_object, validated_data={'units_to_transfer': 10})
         self.assertNotEqual(updated.units_total, units_before_update)
         """
         test update of object for admin user
@@ -287,8 +284,9 @@ class StockDataSerializerTestCase(TransactionTestCase):
             self.assertRaises(serializers.ValidationError, serializer.update, stock_object,
                               {'units_total': -500})
             # decreasing stock if level stays 0 or above must succeed
+            stock_object = pre_update_stock_object # reset stock obj
             units_before_update = stock_object.units_total
-            updated = serializer.update(instance=stock_object, validated_data={'units_total': 10})
+            updated = serializer.update(instance=stock_object, validated_data={'units_to_transfer': 10})
             self.assertNotEqual(updated.units_total, units_before_update)
 
 
@@ -320,7 +318,7 @@ class SendEmailTestCase(TestCase):
             unit_price=11.23
         )
         self.stock_data.user = self.user2
-        self.stock_data.transferred = 77
+        self.stock_data.units_to_transfer = 77
         self.send_email = SendEmail()
 
     def test_send(self):
@@ -587,26 +585,27 @@ class StockDataViewSetTestCase(APITestCase):
         response = client.patch(f'/api/v1/stock/{stock[0].pk}/', data={"units_total": 77}, format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         with as_staff(user):
-            # test increase stock fails if staff but not if administrator
-            response = client.patch(f'/api/v1/stock/{stock[0].pk}/', data={"units_total": 77}, format='json')
-            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-            # test decrease stock succeeds if staff but not if administrator
-            response = client.patch(f'/api/v1/stock/{stock[0].pk}/', data={"units_total": 11}, format='json')
-            self.assertEqual(response.status_code, status.HTTP_200_OK)
-            self.assertEqual(response.data['units_total'], 11)
-            # test changing any other value than units_total is ignored if staff but not administrator
+            """test changing any other value than units_to_transfer is ignored if staff but not administrator
+            and also that units_to_transfer is accepted"""
             orig_values = {"desc": stock[0].desc, "unit_price": stock[0].unit_price, "sku": stock[0].sku}
-            new_values = {"desc": "A new description", "unit_price": "56.32", "sku": "896-528"}
+            new_values = {"desc": "A new description", "unit_price": "56.32", "sku": "896-528",
+                          "units_to_transfer": "7"}
             for key, value in new_values.items():
                 response = client.patch(f'/api/v1/stock/{stock[0].pk}/', data={key: value}, format='json')
                 self.assertEqual(response.status_code, status.HTTP_200_OK)
-                self.assertEqual(response.data[key], str(orig_values[key]))
+                if key != 'units_to_transfer':
+                    self.assertEqual(response.data[key], str(orig_values[key]))
+                else:
+                    self.assertEqual(response.data[key], "7")
             with as_admin(user=user, group=group):
                 # test increase stock succeeds if staff and if administrator
                 response = client.patch(f'/api/v1/stock/{stock[0].pk}/', data={"units_total": 77}, format='json')
                 self.assertEqual(response.status_code, status.HTTP_200_OK)
                 self.assertEqual(response.data['units_total'], 77)
-                # test changing other values succeeds if staff and administrator
+                """test changing other values succeeds if staff and administrator"""
+                # first delete units_to_transfer from test, as that wouldn't be changed as not part of model
+                del new_values['units_to_transfer']
+                # now run test
                 for key, value in new_values.items():
                     response = client.patch(f'/api/v1/stock/{stock[0].pk}/', data={key: value}, format='json')
                     self.assertEqual(response.status_code, status.HTTP_200_OK)
