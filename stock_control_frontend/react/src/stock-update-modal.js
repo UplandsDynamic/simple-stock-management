@@ -53,7 +53,7 @@ class StockUpdateModal extends React.Component {
             deleteRecord: false,
             modalStyles: {content: REGULAR_STYLES},
         };
-        this.state = {...this.initialState};
+        this.state = {...this.initialState};  // COPY of initialState
         // Remember! This binding is necessary to make `this` work in the callback
         this.handleOpenModal = this.handleOpenModal.bind(this);
         this.handleAfterOpenModal = this.handleAfterOpenModal.bind(this);
@@ -104,26 +104,39 @@ class StockUpdateModal extends React.Component {
         /*
         method to update record data (cancel if desc or sku fields were empty)
          */
-        let allFieldsComplete = !!(this.state.desc && this.state.sku);
-        if (allFieldsComplete) {
+        let {units_total, unitsToTransfer, unit_price, sku, desc, newRecord} = this.state;
+        let reqFieldsComplete = !!(desc && sku);  // these fields required to have a value
+        if (reqFieldsComplete) {
             this.props.setStockUpdateRecordState({
                 record: {
                     data: {
-                        units_total: this.state.units_total,
-                        unit_price: this.state.unit_price,
-                        sku: this.state.sku,
-                        desc: this.state.desc,
-                        units_to_transfer: this.state.unitsToTransfer
+                        units_total: !isNaN(parseInt(units_total)) ? units_total : 0,
+                        unit_price: unit_price,
+                        sku: sku,
+                        desc: desc,
+                        units_to_transfer: !isNaN(parseInt(unitsToTransfer)) ? unitsToTransfer : 0
                     },
                     meta: {
                         url: `${process.env.REACT_APP_API_DATA_ROUTE}/stock/`
                     }
                 },
-                apiTrigger: this.state.newRecord ?
+                apiTrigger: newRecord ?
                     this.props.API_OPTIONS.ADD_STOCK : this.props.API_OPTIONS.PATCH_STOCK
             });
         }
-        this.handleCloseModal({actionCancelled: !allFieldsComplete});
+        this.handleCloseModal({actionCancelled: !reqFieldsComplete});
+    }
+
+    handleEnterKey(e) {
+        if (e.keyCode === 13) {
+            /* e.preventDefault() required to prevent registering "Enter" and
+             and submitting the form twice. Does not register first time if not
+             explicitly testing for keycode, as onChange does not record
+             "Enter" as a keystroke, however testing onKeyDown does.
+             */
+            e.preventDefault();
+            this.handleRecordUpdate();  // submit immediately if Enter pressed
+        }
     }
 
     handleRecordDelete() {
@@ -196,11 +209,17 @@ class StockUpdateModal extends React.Component {
                                 <td>
                                     <input value={!disabled ? this.state.units_total : this.state.startUnitsTotal}
                                            name={'quantity'}
-                                           onChange={e => this.setState({
-                                               units_total: e.target.value ? parseInt(e.target.value) : 0
-                                           })}
-                                           className={'form-control'} type={!disabled ? 'number' : 'text'}
-                                           disabled={disabled}/>
+                                           onKeyDown={(e => this.handleEnterKey(e))}
+                                           onChange={e => {
+                                               if (parseInt(e.target.value) > 0) {
+                                                   return this.setState({
+                                                       units_total: parseInt(e.target.value)
+                                                   });
+                                               }
+                                               return this.setState({units_total: ''})
+                                           }}
+                                           className={'form-control'} type={'text'}
+                                           disabled={disabled} autoFocus={true}/>
                                 </td>
                             </tr>
                             <tr>
@@ -226,6 +245,7 @@ class StockUpdateModal extends React.Component {
                             <div className={'col-sm'}>
                                 <input value={this.state.unitsToTransfer}
                                        name={'quantity'}
+                                       onKeyDown={(e => this.handleEnterKey(e))}
                                        onChange={e => {
                                            if (parseInt(e.target.value) > 0 &&
                                                parseInt(e.target.value) <= this.state.startUnitsTotal) {
@@ -237,7 +257,7 @@ class StockUpdateModal extends React.Component {
                                            return this.setState({unitsToTransfer: ''})
                                        }
                                        }
-                                       className={'form-control'}/>
+                                       className={'form-control'} autoFocus={true}/>
                             </div>
                             <div className={'col-sm'}>
                                 <button className={'btn btn-lg btn-warning qtybtn'} onClick={() => {

@@ -9,22 +9,39 @@ REMEMBER, BEFORE PRODUCTION RUN SECURITY CHECKS:
 
 import os, string, random
 
+""" INITIAL PARAMETERS """
+
 # # # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # # # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True  # this setting will be OVERRIDDEN according tot the RUN_TYPE defined below
-RUN_TYPE = 'DEVEL'  # DEVEL|STAGING|PRODUCTION
+DEBUG = True  # this setting will be OVERRIDDEN according tot the RUN_TYPE defined below.
+
+# # # RUN TYPE: Define run type of the application, as read from run_type.txt file in project root
+RUN_TYPE_PATH = os.path.join(BASE_DIR, 'run_type.txt')
+RUN_TYPE_OPTIONS = ['DEVEL', 'STAGING', 'PRODUCTION']
+RUN_TYPE = RUN_TYPE_OPTIONS[0]
+try:
+    with open(RUN_TYPE_PATH, 'r') as f:
+        RT = f.read().strip()
+        RUN_TYPE = RT if RT in RUN_TYPE_OPTIONS else RUN_TYPE
+except IOError:
+    RUN_TYPE = RUN_TYPE_OPTIONS[0]  # DEVEL as default
+    with open(RUN_TYPE_PATH, 'w') as f:
+        f.write(RUN_TYPE_OPTIONS[0])
 
 # # # GENERATE A NEW UNIQUE SECRET KEY (secret_key.txt) IF DOES NOT ALREADY EXIST
 KEY_PATH = os.path.join(BASE_DIR, 'secret_key.txt')
 try:
-    SECRET_KEY = open(KEY_PATH).read().strip()
+    with open(KEY_PATH, 'r') as f:
+        SECRET_KEY = f.read().strip()
 except IOError:
     SECRET_KEY = ''.join([random.SystemRandom().choice(string.ascii_letters + string.digits + string.punctuation)
                           for _ in range(50)])
     with open(KEY_PATH, 'w') as f:
         f.write(SECRET_KEY)
+
+""" MAIN CONFIGURATION """
 
 # # # Network
 WORKING_URL = ''

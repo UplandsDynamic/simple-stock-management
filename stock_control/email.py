@@ -27,7 +27,7 @@ class SendEmail:
             self.email_invalid = True
 
     def send(self, body_plaintext=None, body_html=None, email_to=None, email_from=None, subject=None):
-        email_to = [] if not email_to or not isinstance(email_to, list) else email_to
+        email_to = [] if not isinstance(email_to, list) else email_to
         if body_plaintext and body_html and email_to:
             # validate email addresses first
             for c, e in enumerate(email_to):
@@ -66,46 +66,45 @@ class SendEmail:
         This method composes notification emails, then sends them through the send() method.
         """
         if notification_type == SendEmail.EmailType.STOCK_TRANSFER:
-            if instance:
+            if hasattr(instance, 'units_to_transfer'):
                 """
                 email notification to administrators + requester
                 """
                 admin_email_addr = User.objects.filter(groups__name='administrators').values_list('email',
                                                                                                   flat=True)
                 # list of all stock administrator's email addresses
-                recipient_list = [a for a in admin_email_addr] if admin_email_addr else []
+                recipient_list = [a for a in admin_email_addr] if \
+                    admin_email_addr and settings.STOCK_MANAGEMENT_OPTIONS['email'][
+                        'notifications_to_administrators'] else []
                 if settings.STOCK_MANAGEMENT_OPTIONS['email']['notifications_to_transfer_requester']:
                     recipient_list.append(instance.user.email)  # add the transfer requester's email address
                 recipient_list = list(set(recipient_list))  # remove any dupes
-                """Remove email address of an admin if that admin is doing the editing
-                """
-                if instance.user.email in recipient_list and instance.user.groups.filter(
-                        name='administrators').exists():
-                    recipient_list.remove(instance.user.email)
                 """
                 Send email notification to admins (and requester if configured to receive in settings.py).
-                Email is not sent to an admin who creates/edits a record themselves.
+                Email is only sent on stock transfer, not editing (determined by a truthy units_to_transfer submission).
                 """
                 if recipient_list:
                     body_plaintext = f"""
-                            The following transfer has taken place on {instance.record_updated.strftime("%d/%m/%Y %H:%M:%S %Z")}:
+                            The following transfer has taken place on {instance.record_updated.strftime(
+                        "%d/%m/%Y %H:%M:%S %Z")}:
                             - Transfer to: {instance.user} [{instance.user.email}]
                             - Stock line details:
                               - SKU: {instance.sku}
                               - Description: {instance.desc}
-                              - Units transferred: {instance.transferred}
+                              - Units transferred: {instance.units_to_transfer}
                               - Unit price: {instance.unit_price}
                             """
                     body_html = f"""<html>
                             <body>
-                            <p>The following transfer has taken place on {instance.record_updated.strftime("%d/%m/%Y %H:%M:%S %Z")}</p>
+                            <p>The following transfer has taken place on {instance.record_updated.strftime(
+                        "%d/%m/%Y %H:%M:%S %Z")}</p>
                             <ul>
                             <li>Transfer to: {instance.user} [<a href="mailto:{instance.user.email}">{instance.user.email}</a>]</li>
                             <li>Stock line details:
                             <ul>
                             <li>SKU: {instance.sku}</li>
                             <li>Description: {instance.desc}</li>
-                            <li>Units transferred: {instance.transferred}</li>
+                            <li>Units transferred: {instance.units_to_transfer}</li>
                             <li>Unit price: {instance.unit_price}</li>
                             </ul>
                             </li>
@@ -117,6 +116,6 @@ class SendEmail:
                                      email_to=recipient_list,
                                      email_from=settings.DEFAULT_FROM_EMAIL,
                                      subject='[STOCK MANAGEMENT] A transfer has taken place!')
-                else:
-                    logger.info('There are no recipients in the notification email list!')
+            else:
+                logger.info('No email to send as this is not a transfer.')
             return False

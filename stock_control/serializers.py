@@ -115,7 +115,8 @@ class StockDataSerializer(serializers.HyperlinkedModelSerializer):
         return self.context['request'].user.groups.filter(name='administrators').exists()
 
     # receive non-model field in request POST/PATCH that represents the number of units to transfer
-    units_to_transfer = serializers.CharField(write_only=True)
+    units_to_transfer = serializers.CharField(required=False)
+
 
     # def superuser_check(self, obj):
     #     return self.user.is_superuser
@@ -150,7 +151,7 @@ class StockDataSerializer(serializers.HyperlinkedModelSerializer):
     def validate(self, data):
         logger.info('Running clean on serializer')
         """
-        validate units_to_transfer (a non-model field) if it's present
+        validate units_to_transfer (a non-model field), on update (hence test for self.instance), if it's present
         """
         if self.instance and data.get('units_to_transfer', None):
             try:
@@ -174,7 +175,8 @@ class StockDataSerializer(serializers.HyperlinkedModelSerializer):
         if not self.administrators_check(self):
             raise serializers.ValidationError(detail=f'Record creation denied for this user level')
         # remove units_to_transfer write_only (non-model) field for the create() method (only for updates)
-        del validated_data['units_to_transfer']
+        if 'units_to_transfer' in validated_data:
+            del validated_data['units_to_transfer']
         try:
             super().create(validated_data)  # now call parent method to do the save
             return self.validated_data
@@ -204,12 +206,13 @@ class StockDataSerializer(serializers.HyperlinkedModelSerializer):
         instance.user = self.context['request'].user
         # pass non-model field units_to_transfer through, for email
         if 'units_to_transfer' in validated_data:
-            instance.transferred = int(validated_data['units_to_transfer'])
+            instance.units_to_transfer = int(validated_data['units_to_transfer'])
         else:
-            instance.transferred = 0
-        if instance.transferred <= instance.units_total:  # if not trying to transfer more than the remaining stock
-            # calculate & set the remaining stock (needs to be done manually, as units_to_transfer wasn't a model field)
-            instance.units_total -= instance.transferred
+            instance.units_to_transfer = 0
+        if instance.units_to_transfer <= instance.units_total:  # if not trying to transfer more than remaining stock
+            """calculate & set the remaining stock on the instance 
+            (needs to be done manually, as units_to_transfer wasn't a model field)"""
+            instance.units_total -= instance.units_to_transfer
             # call parent method to do the update
             super().update(instance, validated_data)
             # return the updated instance
