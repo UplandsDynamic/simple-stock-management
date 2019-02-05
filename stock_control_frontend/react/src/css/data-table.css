@@ -16,6 +16,7 @@ thead th {
     padding: 1em !important;
 }
 
+
 td {
     color: yellow !important;
     padding: 0.5em !important;
@@ -24,6 +25,15 @@ td {
 
 td.action-col, th.action-col {
     color: white !important;
+}
+
+tr.outOfStock td.unitsTotal {
+    color: orangered !important;
+    font-size: 0.7em;
+}
+
+tr.outOfStock td.sku {
+    color: orangered !important;
 }
 
 table td.table-small-font {
@@ -40,7 +50,7 @@ table.stockTable-disabled, table.stockTable-disabled input {
 }
 
 table.stockTable-disabled input {
-    background-color: lightslategrey!important;
+    background-color: lightslategrey !important;
     border: none;
 }
 
@@ -57,6 +67,21 @@ caption {
     font-size: 0.8em;
     text-align: right;
     color: orange;
+}
+
+input.search {
+    background-color: darkorange;
+    color: #001e00 !important;
+    font-weight: bold;
+}
+
+input.search::placeholder {
+    color: #001e00 !important;
+    font-weight: bold;
+}
+
+input.search {
+    border: 2px solid darkgoldenrod !important;
 }
 
 .Modal {

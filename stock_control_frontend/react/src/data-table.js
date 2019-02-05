@@ -112,7 +112,7 @@ class DataTable extends React.Component {
                         <div className={'col-sm'}>
                             <nav className={'search-navigation'}>
                                 <input value={this.state.search} placeholder={'Search'}
-                                       name={'search'} className={'form-control'}
+                                       name={'search'} className={'form-control search'}
                                        onChange={(e) => this.handleSearch(e)}/>
                             </nav>
                         </div>
@@ -138,22 +138,29 @@ class DataTable extends React.Component {
         let resultData = ({stockData = null} = {}) => {
             return stockData.data.results.length ?
                 stockData.data.results.map((item) => {
-                    return (<tr key={item.id} data-toggle="modal" className={'d-flex'}>
+                    let {sku, desc, units_total, unit_price} = item;
+                    let admin = stockRecordMeta.userIsAdmin;
+                    let rowClasses = [units_total <= 0 ? 'outOfStock' : '', 'd-flex'];
+                    let editButtonClasses = [units_total <= 0 && !admin ?
+                        'disabled' : '', 'table-btn', 'btn', 'btn-primary'];
+                    return (<tr key={item.id} data-toggle="modal" className={rowClasses.join(' ')}>
                         {/*<th scope="row">{item.id}</th>*/}
-                        <td className={'col-2'}>{item.sku}</td>
-                        <td className={'col-3'}>{item.desc}</td>
-                        <td className={'col-1'}>{item.units_total}</td>
-                        <td className={'col-2'}>{item.unit_price}</td>
-                        <td className={'table-small-font col-2'}>
+                        <td className={'col-2 sku'}>{sku}</td>
+                        <td className={'col-4 desc'}>{desc}</td>
+                        <td className={'col-1 unitsTotal'}>{units_total > 0 ? units_total : 'Out of Stock'}</td>
+                        <td className={'col-1 unitPrice'}>{unit_price}</td>
+                        <td className={'table-small-font col-2 recordUpdated'}>
                             {DataTable.formatUTCDateTime({dateTime: item.record_updated})}</td>
                         <td className={'action-col col-2 '}>
-                            <button onClick={() => this.handleEditRecord({record: {data: item}})}
-                                    className={'table-btn btn btn-primary'}>
+                            <button onClick={() => {
+                                if (admin || (!admin && units_total > 0)) {
+                                    return this.handleEditRecord({record: {data: item}})
+                                } else return null;
+                            }} className={editButtonClasses.join(' ')}>
                                 <FontAwesomeIcon icon={"edit"}/></button>
-                            {stockRecordMeta.userIsAdmin ?
-                                <button onClick={() => this.handleDeleteLine({record: item})}
-                                        className={'table-btn btn btn-danger'}>
-                                    <FontAwesomeIcon icon={"trash-alt"}/></button> : ''}
+                            {admin ? <button onClick={() => this.handleDeleteLine({record: item})}
+                                             className={'table-btn btn btn-danger'}>
+                                <FontAwesomeIcon icon={"trash-alt"}/></button> : ''}
                         </td>
                     </tr>)
                 }) : null;
@@ -178,7 +185,7 @@ class DataTable extends React.Component {
                                         })}>
                                             SKU
                                         </th>
-                                        <th className={'col-3'} scope={'col'} onClick={() => this.handleGetRecords({
+                                        <th className={'col-4'} scope={'col'} onClick={() => this.handleGetRecords({
                                             stockRecord: {meta: {orderBy: 'desc', page: 1}}
                                         })}>
                                             Description
@@ -188,7 +195,7 @@ class DataTable extends React.Component {
                                         })}>
                                             Units
                                         </th>
-                                        <th className={'col-2'} scope={'col'} onClick={() => this.handleGetRecords({
+                                        <th className={'col-1'} scope={'col'} onClick={() => this.handleGetRecords({
                                             stockRecord: {meta: {orderBy: 'unit_price', page: 1}}
                                         })}>
                                             Unit Price
