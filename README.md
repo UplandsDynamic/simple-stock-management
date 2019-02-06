@@ -24,6 +24,12 @@ It has web frontend that connects to a RESTful API backend. Data is stored in ei
 - HTML5
 - CSS3
 
+## Screenshots
+
+![Screenshot 1](./meta/img/screenshot_1.png?raw=true)
+![Screenshot 1](./meta/img/screenshot_2.png?raw=true)
+![Screenshot 1](./meta/img/screenshot_3.png?raw=true)
+
 ## Live Demo
 
 There is a live demo available here:
