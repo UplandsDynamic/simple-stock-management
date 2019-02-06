@@ -164,16 +164,18 @@ class StockUpdateModal extends React.Component {
     }
 
     generateItemTable() {
-        let disabled = true;
+        let editDisabled = true;
         //note: if newRecord, no userIsAdmin state has been set, hence need to test for newRecord separately
         if (this.state.stockUpdateMeta.userIsAdmin || this.state.stockUpdateMeta.newRecord) {
-            disabled = false
+            editDisabled = false
         }
+        // true|false. Disable submit if input for units was blank
+        let disableButton = this.state.units_total === '' || this.state.unitsToTransfer === '';
         return (
             <div className={'container'}>
                 <div className={'row'}>
                     <div className="col-sm">
-                        <table className={`table stockTable${disabled ? "-disabled" : ''}
+                        <table className={`table stockTable${editDisabled ? "-disabled" : ''}
                         table-bordered table-dark table-hover`}>
                             <caption>Current Record</caption>
                             <thead>
@@ -190,7 +192,7 @@ class StockUpdateModal extends React.Component {
                                            name={'sku'}
                                            onChange={e => this.setState({sku: e.target.value})}
                                            className={'form-control'} type={'text'}
-                                           disabled={disabled}
+                                           disabled={editDisabled}
                                     />
                                 </td>
                             </tr>
@@ -201,17 +203,17 @@ class StockUpdateModal extends React.Component {
                                            name={'description'}
                                            onChange={e => this.setState({desc: this.validateDesc(e.target.value)})}
                                            className={'form-control'} type={'text'}
-                                           disabled={disabled}/>
+                                           disabled={editDisabled}/>
                                 </td>
                             </tr>
                             <tr>
                                 <th scope={'row'}><label>Warehouse quantity</label></th>
                                 <td>
-                                    <input value={!disabled ? this.state.units_total : this.state.startUnitsTotal}
+                                    <input value={!editDisabled ? this.state.units_total : this.state.startUnitsTotal}
                                            name={'quantity'}
                                            onKeyDown={(e => this.handleEnterKey(e))}
                                            onChange={e => {
-                                               if (parseInt(e.target.value) > 0) {
+                                               if (parseInt(e.target.value) >= 0) {
                                                    return this.setState({
                                                        units_total: parseInt(e.target.value)
                                                    });
@@ -219,7 +221,7 @@ class StockUpdateModal extends React.Component {
                                                return this.setState({units_total: ''})
                                            }}
                                            className={'form-control'} type={'text'}
-                                           disabled={disabled} autoFocus={true}/>
+                                           disabled={editDisabled} autoFocus={true}/>
                                 </td>
                             </tr>
                             <tr>
@@ -232,13 +234,13 @@ class StockUpdateModal extends React.Component {
                                                    this.validatePrice(e.target.value)
                                            })}
                                            className={'form-control'} type={'text'}
-                                           disabled={disabled}
+                                           disabled={editDisabled}
                                     />
                                 </td>
                             </tr>
                             </tbody>
                         </table>
-                        <div className={!disabled ? 'd-none' : 'row transfer'}>
+                        <div className={!editDisabled ? 'd-none' : 'row transfer'}>
                             <div className={'col-sm'}>
                                 Units to Transfer
                             </div>
@@ -288,12 +290,16 @@ class StockUpdateModal extends React.Component {
                     <div className={'col-sm xfer-button'}>
                         <button
                             onClick={(e) => {
-                                e.preventDefault();
-                                this.handleRecordUpdate()
+                                if (!disableButton) {
+                                    e.preventDefault();
+                                    this.handleRecordUpdate()
+                                }
                             }}
-                            className={'btn btn-lg btn-warning pull-right'}>
+                            className={'btn btn-lg btn-warning pull-right'}
+                            disabled={disableButton}
+                        >
                             {this.state.newRecord ?
-                                'New Stock Item' : disabled ? 'Transfer Now!' : 'Edit Stock Record'}
+                                'New Stock Item' : editDisabled ? 'Transfer Now!' : 'Edit Stock Record'}
                         </button>
                     </div>
                 </div>
