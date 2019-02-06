@@ -211,7 +211,7 @@ class StockUpdateModal extends React.Component {
                                 <td>
                                     <input value={!editDisabled ? this.state.units_total : this.state.startUnitsTotal}
                                            name={'quantity'}
-                                           onKeyDown={(e => this.handleEnterKey(e))}
+                                           onKeyDown={(e => !disableButton ? this.handleEnterKey(e) : null)}
                                            onChange={e => {
                                                if (parseInt(e.target.value) >= 0) {
                                                    return this.setState({
@@ -247,7 +247,7 @@ class StockUpdateModal extends React.Component {
                             <div className={'col-sm'}>
                                 <input value={this.state.unitsToTransfer}
                                        name={'quantity'}
-                                       onKeyDown={(e => this.handleEnterKey(e))}
+                                       onKeyDown={(e => !disableButton ? this.handleEnterKey(e) : null)}
                                        onChange={e => {
                                            if (parseInt(e.target.value) > 0 &&
                                                parseInt(e.target.value) <= this.state.startUnitsTotal) {
