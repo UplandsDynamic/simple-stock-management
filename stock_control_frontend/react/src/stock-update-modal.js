@@ -3,7 +3,7 @@ import './css/stock-update-modal.css';
 import Modal from "react-modal";
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
 
-Modal.setAppElement('#root');
+Modal.setAppElement(document.body);
 
 const REGULAR_STYLES = {
     top: '50%',
@@ -120,8 +120,8 @@ class StockUpdateModal extends React.Component {
                         url: `${process.env.REACT_APP_API_DATA_ROUTE}/stock/`
                     }
                 },
-                apiTrigger: newRecord ?
-                    this.props.API_OPTIONS.ADD_STOCK : this.props.API_OPTIONS.PATCH_STOCK
+                apiMode: newRecord ?
+                    this.props.apiOptions.ADD_STOCK : this.props.apiOptions.PATCH_STOCK
             });
         }
         this.handleCloseModal({actionCancelled: !reqFieldsComplete});
@@ -149,7 +149,7 @@ class StockUpdateModal extends React.Component {
                     url: `${process.env.REACT_APP_API_DATA_ROUTE}/stock/${this.state.id}`
                 }
             },
-            apiTrigger: this.props.API_OPTIONS.DELETE_STOCK_LINE
+            apiMode: this.props.apiOptions.DELETE_STOCK_LINE
         });
         this.handleCloseModal();
     }

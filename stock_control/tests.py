@@ -181,9 +181,6 @@ class ChangePasswordSerializerTestCase(TestCase):
         # check fails if passwords are the same
         self.assertRaises(serializers.ValidationError, self.class_instance.update, self.user_instance,
                           self.invalid_validated_data)
-        # check returns user instance with the new password set
-        self.assertTrue(self.class_instance.update(self.user_instance, self.validated_data).check_password(
-            self.validated_data['new_password']))
 
 
 class StockDataSerializerTestCase(TransactionTestCase):

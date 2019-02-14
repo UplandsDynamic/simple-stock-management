@@ -57,7 +57,7 @@ class DataTable extends React.Component {
         this.props.setMessage({message: null});  // clear old messages
         this.props.setStockRecordState({
             stockRecord: stockRecord,
-            apiTrigger: this.props.API_OPTIONS.GET_STOCK
+            apiMode: this.props.apiOptions.GET_STOCK
         });  // set record request state
     }
 
@@ -140,7 +140,7 @@ class DataTable extends React.Component {
                 stockData.data.results.map((item) => {
                     let {sku, desc, units_total, unit_price} = item;
                     let admin = stockRecordMeta.userIsAdmin;
-                    let rowClasses = [units_total <= 0 ? 'outOfStock' : '', 'd-flex'];
+                    let rowClasses = [units_total <= 0 ? 'outOfStock' : '', 'd-flex', 'dataTableRows'];
                     let editButtonClasses = [units_total <= 0 && !admin ?
                         'disabled' : '', 'table-btn', 'btn', 'btn-primary'];
                     return (<tr key={item.id} data-toggle="modal" className={rowClasses.join(' ')}>
@@ -152,14 +152,14 @@ class DataTable extends React.Component {
                         <td className={'table-small-font col-2 recordUpdated'}>
                             {DataTable.formatUTCDateTime({dateTime: item.record_updated})}</td>
                         <td className={'action-col col-2 '}>
-                            <button onClick={() => {
+                            <button id={`editButton_${item.id}`} onClick={() => {
                                 if (admin || (!admin && units_total > 0)) {
                                     return this.handleEditRecord({record: {data: item}})
                                 } else return null;
                             }} className={editButtonClasses.join(' ')}>
                                 <FontAwesomeIcon icon={"edit"}/></button>
                             {admin ? <button onClick={() => this.handleDeleteLine({record: item})}
-                                             className={'table-btn btn btn-danger'}>
+                                             className={'table-btn btn btn-danger'} id={`deleteButton_${item.id}`}>
                                 <FontAwesomeIcon icon={"trash-alt"}/></button> : ''}
                         </td>
                     </tr>)
