@@ -88,6 +88,8 @@ class ChangePasswordSerializer(serializers.HyperlinkedModelSerializer):
         instance.set_password(validated_data['new_password'])
         instance.save()
 
+        # remove password from instance, for safe return of other data
+        instance.password = ''
         return instance
 
 

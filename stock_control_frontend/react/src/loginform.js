@@ -56,7 +56,7 @@ class LoginForm extends React.Component {
         let password = this.state.password;
         this.setState({username: '', password: ''});
         this.props.authenticate({
-            apiTrigger: this.props.API_OPTIONS.POST_AUTH,
+            apiMode: this.props.apiOptions.POST_AUTH,
             requestData: {
                 data: {
                     username: username,
@@ -71,7 +71,7 @@ class LoginForm extends React.Component {
         let newPassword = this.state.newPassword;
         this.setState({oldPassword: '', newPassword: ''});
         this.props.authenticate({
-            apiTrigger: this.props.API_OPTIONS.PATCH_CHANGE_PW,
+            apiMode: this.props.apiOptions.PATCH_CHANGE_PW,
             requestData: {
                 data: {
                     old_password: oldPassword,

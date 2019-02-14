@@ -12,14 +12,15 @@
     "@fortawesome/free-regular-svg-icons": "^5.6.3",
     "@fortawesome/free-solid-svg-icons": "^5.6.3",
     "@fortawesome/react-fontawesome": "^0.1.3",
+    "acorn": "^6.0.7",
     "axios": "*",
     "bootstrap": "^4.2.1",
     "env-cmd": "^8.0.2",
-    "enzyme": "^3.8.0",
-    "enzyme-adapter-react-16": "^1.7.0",
+    "enzyme-adapter-react-16": "^1.9.1",
     "jest-enzyme": "^7.0.1",
     "jquery": "^3.3.1",
     "js-cookie": "^2.2.0",
+    "lodash.clonedeep": "^4.5.0",
     "moment": "^2.23.0",
     "moment-timezone": "^0.5.23",
     "popper.js": "^1.14.6",
@@ -29,8 +30,7 @@
     "react-markdown": "^4.0.3",
     "react-modal": "^3.8.1",
     "react-router-dom": "^4.3.1",
-    "react-scripts": "^2.1.3",
-    "react-test-renderer": "^16.6.3"
+    "react-scripts": "^2.1.3"
   },
   "scripts": {
     "analyze": "source-map-explorer build/static/js/main.*",
@@ -38,6 +38,7 @@
     "build:staging": "env-cmd .env.staging react-scripts build",
     "build:production": "env-cmd .env.production react-scripts build",
     "test": "react-scripts test",
+    "test:once": "CI=true react-scripts test",
     "test:debug": "react-scripts --inspect-brk test --runInBand",
     "eject": "react-scripts eject"
   },
@@ -58,5 +59,7 @@
     "not ie <= 11",
     "not op_mini all"
   ],
-  "devDependencies": {}
+  "devDependencies": {
+    "enzyme": "^3.8.0"
+  }
 }

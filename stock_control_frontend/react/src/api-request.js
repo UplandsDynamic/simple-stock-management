@@ -29,8 +29,8 @@ class ApiRequest extends React.Component {
         let updateStockData = nextProps.stockUpdateData;
         let authMeta = nextProps.authMeta;
         let csrfToken = nextProps.csrfToken;
-        switch (nextProps.apiTrigger) {
-            case this.props.API_OPTIONS.GET_STOCK:  // get stock data
+        switch (nextProps.apiMode) {
+            case this.props.apiOptions.GET_STOCK:  // get stock data
                 orderDir = this.generateRecordRequestOrder(getStockMeta);
                 url = getStockMeta.url ? getStockMeta.url :
                     `${process.env.REACT_APP_API_DATA_ROUTE}/stock/?limit=${getStockMeta.limit}` +
@@ -42,11 +42,11 @@ class ApiRequest extends React.Component {
                 this.sendRequest({
                     url: url,
                     csrfToken: csrfToken,
-                    requestType: this.props.API_OPTIONS.GET_STOCK,
+                    requestType: this.props.apiOptions.GET_STOCK,
                     requestMeta: getStockMeta
                 });
                 break;
-            case this.props.API_OPTIONS.PATCH_STOCK:  // update stock data
+            case this.props.apiOptions.PATCH_STOCK:  // update stock data
                 url = updateStockData ?
                     `${process.env.REACT_APP_API_DATA_ROUTE}/stock/${updateStockData.id}/` :
                     updateStockMeta.url;
@@ -54,49 +54,49 @@ class ApiRequest extends React.Component {
                     url: url,
                     csrfToken: csrfToken,
                     requestData: updateStockData,
-                    requestType: this.props.API_OPTIONS.PATCH_STOCK,
+                    requestType: this.props.apiOptions.PATCH_STOCK,
                     requestMeta: updateStockMeta
                 });
                 break;
-            case this.props.API_OPTIONS.ADD_STOCK:  // update stock data
+            case this.props.apiOptions.ADD_STOCK:  // update stock data
                 url = updateStockMeta.url;
                 this.sendRequest({
                     url: url,
                     csrfToken: csrfToken,
                     requestData: updateStockData,
-                    requestType: this.props.API_OPTIONS.ADD_STOCK,
+                    requestType: this.props.apiOptions.ADD_STOCK,
                     requestMeta: updateStockMeta
                 });
                 break;
-            case this.props.API_OPTIONS.DELETE_STOCK_LINE: // delete stock line
+            case this.props.apiOptions.DELETE_STOCK_LINE: // delete stock line
                 url = updateStockData ? `${process.env.REACT_APP_API_DATA_ROUTE}/stock/${updateStockData.id}/` :
                     null;
                 this.sendRequest({
                     url: url,
                     csrfToken: csrfToken,
                     requestData: updateStockData,
-                    requestType: this.props.API_OPTIONS.DELETE_STOCK_LINE,
+                    requestType: this.props.apiOptions.DELETE_STOCK_LINE,
                     requestMeta: updateStockMeta
                 });
                 break;
-            case this.props.API_OPTIONS.POST_AUTH:  // get auth token
+            case this.props.apiOptions.POST_AUTH:  // get auth token
                 url = authMeta.url;
                 this.sendRequest({
                     url: url,
                     csrfToken: csrfToken,
-                    requestType: this.props.API_OPTIONS.POST_AUTH,
+                    requestType: this.props.apiOptions.POST_AUTH,
                     requestData: {
                         username: authMeta.requestData.data.username,
                         password: authMeta.requestData.data.password
                     }
                 });
                 break;
-            case this.props.API_OPTIONS.PATCH_CHANGE_PW:  // change password
+            case this.props.apiOptions.PATCH_CHANGE_PW:  // change password
                 url = `${authMeta.change_pw_url}${authMeta.requestData.data.username}/`;
                 this.sendRequest({
                     url: url,
                     csrfToken: csrfToken,
-                    requestType: this.props.API_OPTIONS.PATCH_CHANGE_PW,
+                    requestType: this.props.apiOptions.PATCH_CHANGE_PW,
                     requestData: {
                         old_password: authMeta.requestData.data.old_password,
                         new_password: authMeta.requestData.data.new_password
@@ -150,7 +150,7 @@ class ApiRequest extends React.Component {
     }
 
     sendRequest({url = null, requestData = null, requestMeta = null, requestType = null, csrfToken = null} = {}) {
-        this.props.disarmAPI(); // disarm the API now the command has been actioned
+        this.props.clearApiMode(); // disarm the API now the command has been actioned
         if (!this.state.activeRequest && url && requestType) {
             this.setState({
                 activeRequest: true,
@@ -188,15 +188,15 @@ class ApiRequest extends React.Component {
     handleAPIResponse({requestData = null, requestType = null, response = null, error = null} = {}) {
         if (error) {
             switch (requestType) {
-                case this.props.API_OPTIONS.GET_STOCK:
+                case this.props.apiOptions.GET_STOCK:
                     this.props.setMessage({
                         message: error.response ? String(error.response.data[0]) : String(error),
                         messageClass: 'alert alert-danger'
                     });
                     break;
-                case this.props.API_OPTIONS.PATCH_STOCK:
-                case this.props.API_OPTIONS.ADD_STOCK:
-                case this.props.API_OPTIONS.DELETE_STOCK_LINE:
+                case this.props.apiOptions.PATCH_STOCK:
+                case this.props.apiOptions.ADD_STOCK:
+                case this.props.apiOptions.DELETE_STOCK_LINE:
                     let msgArray = [];
                     this.props.setStockUpdateRecordState({clearData: true}); // clear data for next time
                     if (error.response && error.response.data) {
@@ -212,8 +212,8 @@ class ApiRequest extends React.Component {
                         });
                     }
                     break;
-                case this.props.API_OPTIONS.POST_AUTH:
-                case this.props.API_OPTIONS.PATCH_CHANGE_PW:
+                case this.props.apiOptions.POST_AUTH:
+                case this.props.apiOptions.PATCH_CHANGE_PW:
                     let message = 'An error occurred! ';
                     if (error.response) {
                         if (error.response.data) {
@@ -244,12 +244,12 @@ class ApiRequest extends React.Component {
             }
         } else {
             switch (requestType) {
-                case this.props.API_OPTIONS.GET_STOCK:
+                case this.props.apiOptions.GET_STOCK:
                     this.props.setStockRecordState({
                         stockRecord: {data: response, meta: {preserveOrder: false}}
                     });
                     break;
-                case this.props.API_OPTIONS.PATCH_STOCK:
+                case this.props.apiOptions.PATCH_STOCK:
                     this.props.setStockRecordState({
                         updatedData: response.data
                     });
@@ -259,19 +259,19 @@ class ApiRequest extends React.Component {
                         messageClass: 'alert alert-success'
                     });
                     break;
-                case this.props.API_OPTIONS.ADD_STOCK:
-                case this.props.API_OPTIONS.DELETE_STOCK_LINE:
+                case this.props.apiOptions.ADD_STOCK:
+                case this.props.apiOptions.DELETE_STOCK_LINE:
                     this.props.setStockUpdateRecordState({clearData: true}); // clear data for next time
                     this.props.setStockRecordState({
                         stockRecord: {meta: {preserveOrder: true}},
-                        apiTrigger: this.props.API_OPTIONS.GET_STOCK
+                        apiMode: this.props.apiOptions.GET_STOCK
                     });  // sets data to be refreshed & rebuild of table
                     this.props.setMessage({
                         message: 'Stock action successful!',
                         messageClass: 'alert alert-success'
                     });
                     break;
-                case this.props.API_OPTIONS.POST_AUTH:
+                case this.props.apiOptions.POST_AUTH:
                     if (response.data) {
                         let token = response.data.token;
                         this.props.setSessionStorage({key: 'apiToken', value: token}); // stick token into local browser storage
@@ -289,7 +289,7 @@ class ApiRequest extends React.Component {
                         })
                     }
                     break;
-                case this.props.API_OPTIONS.PATCH_CHANGE_PW:
+                case this.props.apiOptions.PATCH_CHANGE_PW:
                     if (response.data) {
                         this.props.authenticate({auth: false}); // log out
                         this.props.setMessage({
