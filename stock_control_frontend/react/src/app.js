@@ -135,8 +135,8 @@ class App extends React.Component {
 
     resetUpdateDataState = () => {
         this.setState({
-            stockUpdateData: this.initialState.stockUpdateData,
-            stockUpdateMeta: this.initialState.stockUpdateMeta,
+            stockUpdateData: {...this.initialState.stockUpdateData},
+            stockUpdateMeta: {...this.initialState.stockUpdateMeta},
         })
     };
 
