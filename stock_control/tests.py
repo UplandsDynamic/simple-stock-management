@@ -181,6 +181,8 @@ class ChangePasswordSerializerTestCase(TestCase):
         # check fails if passwords are the same
         self.assertRaises(serializers.ValidationError, self.class_instance.update, self.user_instance,
                           self.invalid_validated_data)
+        # check returns user instance with the password element defined as 'CHANGED'
+        self.assertEqual(self.class_instance.update(self.user_instance, self.validated_data).password, 'CHANGED')
 
 
 class StockDataSerializerTestCase(TransactionTestCase):
@@ -281,7 +283,7 @@ class StockDataSerializerTestCase(TransactionTestCase):
             self.assertRaises(serializers.ValidationError, serializer.update, stock_object,
                               {'units_total': -500})
             # decreasing stock if level stays 0 or above must succeed
-            stock_object = pre_update_stock_object # reset stock obj
+            stock_object = pre_update_stock_object  # reset stock obj
             units_before_update = stock_object.units_total
             updated = serializer.update(instance=stock_object, validated_data={'units_to_transfer': 10})
             self.assertNotEqual(updated.units_total, units_before_update)
