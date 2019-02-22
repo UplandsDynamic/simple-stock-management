@@ -6,61 +6,15 @@ import App from "../app";
 import LoginForm from '../loginform.js';
 import DataTable from '../data-table.js';
 import StockUpdateModal from '../stock-update-modal.js';
-import ApiRequest from '../api-request.js';
 import Message from '../message.js';
 import Footer from '../footer.js';
-
-// mock state
-
-const STATE = {
-    stockRecordData: {
-        results: [
-            {
-                id: 1,
-                record_updated: '2019-02-06T15:25:16.039720Z',
-                owner: 'tester',
-                sku: 'NCC-1701-E',
-                desc: 'USS Enterprise',
-                units_total: 98,
-                unit_price: 98.90,
-                user_is_admin: true,
-                datetime_of_request: '2019-02-08T01:55:10.258338'
-            }
-        ]
-    },
-    stockRecordMeta: {
-        page: 1,
-        limit: 25,
-        pagerMainSize: 5,
-        pagerEndSize: 3,
-        orderBy: 'sku',
-        orderDir: '-',
-        preserveOrder: false,
-        cacheControl: 'no-cache',  // no caching by default, so always returns fresh data
-        url: null,
-        userIsAdmin: false,
-        search: ''
-    },
-    message: 'Test message',
-    messageClass: 'alert-warning',
-};
-
-const APIOPTIONS = {
-    /* used to define available API options in the api-request component */
-    GET_STOCK: {method: 'GET', desc: 'request to get stock data'},
-    PATCH_STOCK: {method: 'PATCH', desc: 'PATCH request to update stock data'},
-    ADD_STOCK: {method: 'POST', desc: 'POST request to add stock data'},
-    DELETE_STOCK_LINE: {method: 'DELETE', desc: 'DELETE request to delete stock line'},
-    POST_AUTH: {method: 'POST', desc: 'POST request to for authorization'},
-    PATCH_CHANGE_PW: {method: 'PATCH', desc: 'PATCH request to for changing password'},
-};
 
 // test component renders
 
 describe('App Component', () => {
     it('renders without crashing', () => {
         const div = document.createElement('div');
-        ReactDOM.render(<App/>, div)
+        ReactDOM.render(<App/>, div);
     })
 });
 
@@ -70,7 +24,7 @@ describe('App Component', () => {
     it('renders the LoginForm wrapper', () => {
         const wrapper = shallow(<App/>);
         expect(wrapper.find(LoginForm)).toHaveLength(1)
-    })
+    });
 });
 
 describe('App Component', () => {
@@ -89,40 +43,35 @@ describe('App Component', () => {
 });
 
 describe('App Component', () => {
-    it('does not render the DataTable wrapper if unauthenticated', () => {
+    it('does render the DataTable wrapper', () => {
         const wrapper = shallow(<App/>);
-        expect(wrapper.find(DataTable)).toHaveLength(0)
-    });
-    it('does render the DataTable wrapper if authenticated', () => {
-        const wrapper = shallow(<App/>);
-        wrapper.instance().authenticate({auth: true});  // need instance of component to access component's methods
+        const instance = wrapper.instance();  // instance of the component
+        // authenticate
+        sessionStorage.setItem('token', 'TEST_TOKEN');
+        instance.setAuthentication();
         expect(wrapper.find(DataTable)).toHaveLength(1)
+        sessionStorage.clear()  // clean up
     });
     it('passes all props to DataTable component', () => {
         const wrapper = shallow(<App/>);
-        wrapper.instance().authenticate({auth: true});  // authenticate.  Note: instance() allows access to component's methods
-        wrapper.setState(STATE);  // set state which is passed as props
+        const instance = wrapper.instance();
+        // authenticate
+        sessionStorage.setItem('token', 'TEST_TOKEN');
+        instance.setAuthentication();
         const dataTableWrapper = wrapper.find(DataTable);
-        expect(dataTableWrapper.props().stockRecordData).toEqual(STATE.stockRecordData);
-        expect(dataTableWrapper.props().stockRecordMeta).toEqual(STATE.stockRecordMeta);
-        expect(dataTableWrapper.props().message).toEqual(STATE.message);
-        expect(dataTableWrapper.props().messageClass).toEqual(STATE.messageClass);
-        expect(dataTableWrapper.props().apiOptions).toEqual(APIOPTIONS);
-        expect(dataTableWrapper.props().setStockRecordState).toBe(wrapper.instance().setStockRecordState);
-    })
+        expect(dataTableWrapper.props().stockRecordData).toEqual(instance.state.stockRecordData);
+        expect(dataTableWrapper.props().stockRecordMeta).toEqual(instance.state.stockRecordMeta);
+        expect(dataTableWrapper.props().apiOptions).toEqual(instance.apiOptions);
+        expect(dataTableWrapper.props().setStockRecordState).toBe(instance.setStockRecordState);
+        expect(dataTableWrapper.props().setMessage).toBe(instance.setMessage);
+    });
+    sessionStorage.clear()  // clean up
 });
 
 describe('App Component', () => {
     it('does render the StockUpdateModal wrapper', () => {
         const wrapper = shallow(<App/>);
         expect(wrapper.find(StockUpdateModal)).toHaveLength(1)
-    })
-});
-
-describe('App Component', () => {
-    it('does render the ApiRequest wrapper', () => {
-        const wrapper = shallow(<App/>);
-        expect(wrapper.find(ApiRequest)).toHaveLength(1)
     })
 });
 
@@ -136,8 +85,42 @@ describe('App Component', () => {
 // test methods
 
 describe('App Component', () => {
-    it('method setStockRecordState successfully returns true', () => {
+    it('method setStockRecordState successfully changes state', () => {
         const wrapper = shallow(<App/>);
-        expect(wrapper.instance().setStockRecordState()).toBe(true)
-    })
+        const instance = wrapper.instance();
+        instance.setStockRecordState({newStockRecord: {meta: {page: 11}, data: {results: [{user_is_admin: true}]}}});
+        expect(instance.state.stockRecord.meta.page).toEqual(11)
+    });
+    it('method setStockRecordState successfully changes userIsAdmin', () => {
+        const wrapper = shallow(<App/>);
+        const instance = wrapper.instance();
+        instance.setStockRecordState({newStockRecord: {meta: {page: 1}, data: {results: [{user_is_admin: true}]}}});
+        expect(instance.state.authMeta.userIsAdmin).toEqual(true);
+        instance.setState({authMeta: {userIsAdmin: false}})  // cleanup
+    });
+    it('method setAuthenticated attempts to retrieve token from session storage', () => {
+        const wrapper = shallow(<App/>);
+        const instance = wrapper.instance();
+        jest.spyOn(Storage.prototype, 'getItem');  // set up spy on storage
+        instance.setAuthentication();
+        expect(sessionStorage.getItem).toBeCalledWith('token');
+        jest.clearAllMocks();
+    });
+    it('method setAuthenticated successfully sets state.authMeta.authenticated to true if session token exists',
+        () => {
+            const wrapper = shallow(<App/>);
+            const instance = wrapper.instance();
+            sessionStorage.setItem('token', 'TEST_TOKEN');
+            instance.setAuthentication();
+            expect(instance.state.authMeta.authenticated).toEqual(true);
+            sessionStorage.clear()  // clean up
+        });
+    it('method setAuthenticated successfully sets state.authMeta.authenticated to false if no "token" in session',
+        () => {
+            const wrapper = shallow(<App/>);
+            const instance = wrapper.instance();
+            instance.setAuthentication();
+            expect(instance.state.authMeta.authenticated).toEqual(false);
+            sessionStorage.clear()  // clean up
+        });
 });

@@ -87,9 +87,8 @@ class ChangePasswordSerializer(serializers.HyperlinkedModelSerializer):
 
         instance.set_password(validated_data['new_password'])
         instance.save()
-
-        # remove password from instance, for safe return of other data
-        instance.password = ''
+        # remove password from instance, replaced with 'CHANGED' str (for client ref) & return the instance as response
+        instance.password = 'CHANGED'
         return instance
 
 
@@ -118,7 +117,6 @@ class StockDataSerializer(serializers.HyperlinkedModelSerializer):
 
     # receive non-model field in request POST/PATCH that represents the number of units to transfer
     units_to_transfer = serializers.CharField(required=False)
-
 
     # def superuser_check(self, obj):
     #     return self.user.is_superuser

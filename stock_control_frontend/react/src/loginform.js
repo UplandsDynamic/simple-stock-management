@@ -2,60 +2,85 @@ import React from 'react';
 import './css/loginform.css';
 import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap/dist/js/bootstrap.js'
-import Greeting from './greeting';
+import Greeting from './greeting'
+import processRequest from "./api";
+/* helpers */
+import cloneDeep from "lodash.clonedeep"
 
 class LoginForm extends React.Component {
+
+    static _MESSAGES = {
+        success: {
+            authenticated: 'Authentication succeeded!',
+            changedPW: `Password successfully changed. Please log back in with your new credentials!`,
+            loggedOut: 'Successfully logged out!'
+        },
+        failure: {
+            authenticated: 'Authentication failed!',
+            changedPW: 'Password change failed!',
+        }
+
+    };
 
     constructor(props) {
         super(props);
         // Remember! This binding is necessary to make `this` work in the callback
-        this.loginHandler = this.loginHandler.bind(this);
-        this.state = {
-            formToDisplay: null,
-            authenticated: false,
+        this.handleLogin = this.handleLogin.bind(this);
+        this.initialState = {
+            formToDisplay: '',
+            authenticated: this.props.authMeta.authenticated,
             password: '',
             username: '',
             oldPassword: '',
-            newPassword: ''
+            newPassword: '',
+            messages: LoginForm._MESSAGES
         };
+        this.state = cloneDeep(this.initialState);
     }
 
+    resetState() {
+        this.setState(this.initialState);
+    }
+
+
     componentWillMount() {
-        this.setState({authenticated: this.props.authMeta.authenticated}, this.setFormToDisplay(
-            {auth: this.props.authMeta.authenticated}
-        ))
+        this.setState({authenticated: this.props.authMeta.authenticated})
+    }
+
+    componentDidMount() {
+        this.setFormToDisplay();
     }
 
     componentWillUnmount() {
+        this.resetState();
+    }
 
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        if (prevState.authenticated !== this.state.authenticated) {
+            this.setFormToDisplay();
+        }
     }
 
     componentWillReceiveProps(nextProps) {
-        if (nextProps.authMeta.authenticated !== this.state.authenticated) {
-            this.setState({authenticated: nextProps.authMeta.authenticated}, this.setFormToDisplay(
-                {auth: nextProps.authMeta.authenticated}
-            ))
-        }
+        this.setState({
+            authenticated: nextProps.authMeta.authenticated,
+            csrfToken: nextProps.csrfToken
+        });
     }
 
-
-    setFormToDisplay({form = null, auth = false} = {}) {
-        if (auth) {
-            this.setState({formToDisplay: form ? form : 'logout'})
+    setFormToDisplay({form = null} = {}) {
+        if (form) {
+            this.setState({formToDisplay: form});
         } else {
-            this.setState({formToDisplay: 'login'})
+            this.setState({formToDisplay: this.state.authenticated ? 'logout' : 'login'});
         }
     }
 
-    changePasswordFormDisplayHandler() {
-        this.setFormToDisplay({form: 'changePassword', auth: this.state.authenticated})
-    }
-
-    loginHandler() {
+    handleLogin() {
         let username = this.state.username;
         let password = this.state.password;
         this.setState({username: '', password: ''});
-        this.props.authenticate({
+        this.authenticate({
             apiMode: this.props.apiOptions.POST_AUTH,
             requestData: {
                 data: {
@@ -64,13 +89,24 @@ class LoginForm extends React.Component {
                 },
             }
         });
+        this.resetState();
     }
 
-    changePasswordHandler() {
+    handleLogout() {
+        this.props.deleteSessionStorage(['token', 'username']);
+        this.props.setMessage({
+            message: this.state.messages.success.loggedOut,
+            messageClass: 'alert alert-success'
+        });
+        this.resetState();
+        this.props.setAuthentication();
+    }
+
+    handleChangePassword() {
         let oldPassword = this.state.oldPassword;
         let newPassword = this.state.newPassword;
         this.setState({oldPassword: '', newPassword: ''});
-        this.props.authenticate({
+        this.authenticate({
             apiMode: this.props.apiOptions.PATCH_CHANGE_PW,
             requestData: {
                 data: {
@@ -78,15 +114,59 @@ class LoginForm extends React.Component {
                     new_password: newPassword,
                     username: this.props.getSessionStorage('username')
                 },
-            },
-            auth: this.state.authenticated
+            }
         });
+        this.resetState();
     }
 
-    handleLogout() {
-        this.props.deleteSessionStorage(['apiToken', 'username']);
-        this.props.authenticate({auth: false})
-    }
+
+    authenticate = ({apiMode = null, requestData = null} = {}) => {
+        // triggers API to get auth token
+        const apiRequest = processRequest({
+            apiMode: apiMode,
+            csrfToken: this.state.csrfToken,
+            requestData: requestData.data
+        });
+        if (apiRequest) {
+            apiRequest.then((response) => {
+                if (response && response.data.hasOwnProperty('token')) {
+                    // logged in
+                    this.props.deleteSessionStorage(['token', 'username']); // ensure any existing token deleted 1st
+                    this.props.setSessionStorage({key: 'token', value: response.data.token});
+                    this.props.setSessionStorage({key: 'username', value: requestData.data.username});
+                    this.props.setMessage({  // display message
+                        message: this.state.messages.success.authenticated,
+                        messageClass: 'alert alert-success'
+                    });
+                     this.props.setAuthentication();
+                }
+                if (response.data.hasOwnProperty('password')) {
+                    // changed password
+                    if (response.data.password === 'CHANGED') {
+                        this.props.deleteSessionStorage(['token', 'username']); // delete existing token to enforce re-login
+                        this.props.setMessage({
+                            message: this.state.messages.success.changedPW,
+                            messageClass: 'alert alert-success'
+                        });
+                        this.props.setAuthentication();
+                    } else {
+                        this.props.setMessage({
+                            message: this.state.messages.failure.changedPW,
+                            messageClass: 'alert alert-success'
+                        });
+                    }
+                }
+            }).catch(error => {
+                let firstError = Object.keys(error.response.data)[0];
+                let displayError = error.response.data[firstError][0];
+                this.resetState();
+                this.props.setMessage({
+                    message: `${displayError ? displayError : this.state.messages.failure.authenticated}`,
+                    messageClass: 'alert alert-danger'
+                });
+            });
+        }
+    };
 
     receivePassword(e) {
         this.setState({password: e.target.value})
@@ -108,6 +188,7 @@ class LoginForm extends React.Component {
         let displayForm;
         switch (this.state.formToDisplay) {
             case 'login':
+            default:
                 displayForm = (
                     <form>
                         <div>
@@ -124,7 +205,7 @@ class LoginForm extends React.Component {
                                 <button className="btn btn-primary"
                                         onClick={(e) => {
                                             e.preventDefault();
-                                            this.loginHandler()
+                                            this.handleLogin()
                                         }}>Submit
                                 </button>
                             </div>
@@ -137,7 +218,7 @@ class LoginForm extends React.Component {
                     <div className="logout-button-field">
                         <span className="welcome">Welcome {this.props.getSessionStorage('username')}!</span>
                         <button className="btn btn-secondary"
-                                onClick={() => this.changePasswordFormDisplayHandler()}>Change Password
+                                onClick={() => this.setFormToDisplay({form: 'changePassword'})}>Change Password
                         </button>
                         <button className="btn btn-warning" onClick={() => this.handleLogout()}>Logout
                         </button>
@@ -162,7 +243,7 @@ class LoginForm extends React.Component {
                                 <button className="btn btn-primary"
                                         onClick={(e) => {
                                             e.preventDefault();
-                                            this.changePasswordHandler()
+                                            this.handleChangePassword()
                                         }}>Submit Change
                                 </button>
                             </div>
@@ -170,10 +251,6 @@ class LoginForm extends React.Component {
                     </form>
                 );
                 break;
-            default:
-                displayForm = (
-                    <div></div>
-                )
         }
         return (
             <div className={'container login'}>

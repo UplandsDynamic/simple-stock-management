@@ -1,13 +1,14 @@
 import React from "react";
 import './css/paginate.css'
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
+import cloneDeep from "lodash.clonedeep"
 
 class Paginate extends React.Component {
 
     constructor(props) {
         super(props);
         this.state = {
-            records: {},
+            stockRecord: {},
             totalPages: 0,
             currentPage: 1
         }
@@ -15,23 +16,29 @@ class Paginate extends React.Component {
 
     componentWillMount() {
         this.setState({
-            records: this.props.records,
-            totalPages: Math.ceil(this.props.records.data.data.count / this.props.records.meta.limit),
-            currentPage: this.props.records.meta.page
+            stockRecord: this.props.stockRecord,
+            totalPages: Math.ceil(this.props.stockRecord.data.count / this.props.stockRecord.meta.limit),
+            currentPage: this.props.stockRecord.meta.page
         });
+    }
+
+    componentDidMount() {
+
     }
 
     componentWillUnmount() {
     }
 
     componentWillReceiveProps(nextProps) {
-        let count = nextProps.records.data.data.count || 0;
+        let count = nextProps.stockRecord.data.count || 0;
+        let {stockRecord} = nextProps;
         this.setState({
-            records: nextProps.records,
-            totalPages: Math.ceil(count / nextProps.records.meta.limit),
-            currentPage: nextProps.records.meta.page
+            stockRecord,
+            totalPages: Math.ceil(count / stockRecord.meta.limit),
+            currentPage: stockRecord.meta.page
         });
     }
+
 
     validatePage(value) {
         // if input is a number or space (allowing for backspace), return value (if 0 change to 1), else current page
@@ -39,25 +46,28 @@ class Paginate extends React.Component {
     }
 
     switchPage = ({linkedPage = 0, dir = 'selected'} = {}) => {
-        let page, url = null;
+        let {url, page, previous, next} = this.state.stockRecord.meta;
         switch (dir) {
             case 'selected':
                 page = linkedPage;
+                url = null;  // to be set in DataTable.handleGetRecords()
                 break;
             case 'previous':
-                page = this.state.records.meta.page >= 1 ? this.state.records.meta.page - 1 : 1;
-                url = this.state.records.data.data.previous;
+                page = page >= 1 ? page - 1 : 1;
+                url = previous ? previous : null;
                 break;
             case 'next':
-                page = this.state.totalPages > this.state.records.meta.page ?
-                    this.state.records.meta.page + 1 : this.state.records.meta.page;
-                url = this.state.records.data.data.next;
+                page = this.state.totalPages > this.state.stockRecord.meta.page ?
+                    this.state.stockRecord.meta.page + 1 : this.state.stockRecord.meta.page;
+                url = next ? next : null;
                 break;
             default:
                 page = linkedPage;
                 break;
         }
-        this.props.handleGetRecords({stockRecord: {meta: {page: page, url: url, preserveOrder: true}}})
+        let newStockRecord = cloneDeep(this.state.stockRecord);
+        Object.assign(newStockRecord.meta, {page: page, limit: this.state.stockRecord.meta.limit});
+        this.props.handleGetRecords({stockRecord: newStockRecord, url: url});
     };
 
     currentPage = () => {
@@ -82,10 +92,12 @@ class Paginate extends React.Component {
     prevSection = () => {
         return (
             <React.Fragment>
-                <li className="page-item"><button aria-label="previous" onClick={
-                    () => this.switchPage({dir: 'previous'})} className="page-link"><span
-                    aria-hidden="true">&laquo;</span>
-                    <span className="sr-only">Previous</span></button></li>
+                <li className="page-item">
+                    <button aria-label="previous" onClick={
+                        () => this.switchPage({dir: 'previous'})} className="page-link"><span
+                        aria-hidden="true">&laquo;</span>
+                        <span className="sr-only">Previous</span></button>
+                </li>
             </React.Fragment>
         )
     };
@@ -93,18 +105,20 @@ class Paginate extends React.Component {
     nextSection = () => {
         return (
             <React.Fragment>
-                <li className="page-item"><button aria-label="next" onClick={
-                    () => this.switchPage({dir: 'next'})} className="page-link"><span
-                    aria-hidden="true">&raquo;</span>
-                    <span className="sr-only">Next</span></button></li>
+                <li className="page-item">
+                    <button aria-label="next" onClick={
+                        () => this.switchPage({dir: 'next'})} className="page-link"><span
+                        aria-hidden="true">&raquo;</span>
+                        <span className="sr-only">Next</span></button>
+                </li>
             </React.Fragment>
         )
     };
 
     mainSection = () => {
         let pageItemClass;
-        let pagerMainSize = this.state.records.meta.pagerMainSize;
-        let linkedPage = this.state.records.meta.page;
+        let pagerMainSize = this.state.stockRecord.meta.pagerMainSize;
+        let linkedPage = this.state.stockRecord.meta.page;
         let totalPages = isNaN(this.state.totalPages) ? 0 : this.state.totalPages;
         return (
             <React.Fragment>
@@ -116,7 +130,7 @@ class Paginate extends React.Component {
                             pageItemClass = 'page-item';
                     return (<li className={pageItemClass} key={pageIndex + 1}>
                         <button onClick={() => this.switchPage({linkedPage: pageIndex + 1, dir: 'selected'})}
-                           className="page-link">
+                                className="page-link">
                             {pageIndex + 1}
                         </button>
                     </li>);
@@ -126,10 +140,10 @@ class Paginate extends React.Component {
     };
 
     endSection = () => {
-        let pagerMainSize = this.state.records.meta.pagerMainSize;
-        let linkedPage = this.state.records.meta.page;
+        let pagerMainSize = this.state.stockRecord.meta.pagerMainSize;
+        let linkedPage = this.state.stockRecord.meta.page;
         let totalPages = this.state.totalPages;
-        let numEndEle = this.state.records.meta.pagerEndSize;
+        let numEndEle = this.state.stockRecord.meta.pagerEndSize;
         let iterArray = Array.apply(null, {length: numEndEle}); // create array as basis for map in frag to iterate
         return (
             <React.Fragment>
@@ -140,7 +154,8 @@ class Paginate extends React.Component {
                         <li key={p}
                             className={page > pagerMainSize ? linkedPage === page ? 'active page-item' : 'page-item' : 'd-none'}>
                             <button onClick={() => this.switchPage({linkedPage: page, dir: 'selected'})} href="#"
-                               className="page-link">{page}</button></li>)
+                                    className="page-link">{page}</button>
+                        </li>)
                 })}
             </React.Fragment>
         );

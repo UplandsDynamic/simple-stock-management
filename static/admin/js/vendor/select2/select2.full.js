@@ -3532,7 +3532,7 @@ S2.define('select2/data/tags',[
 
     this._removeOldTags();
 
-    if (params.term == null || params.page != null) {
+    if (params.term == null || params.newPage != null) {
       decorated.call(this, params, callback);
       return;
     }
@@ -4083,9 +4083,9 @@ S2.define('select2/dropdown/infiniteScroll',[
   InfiniteScroll.prototype.loadMore = function () {
     this.loading = true;
 
-    var params = $.extend({}, {page: 1}, this.lastParams);
+    var params = $.extend({}, {newPage: 1}, this.lastParams);
 
-    params.page++;
+    params.newPage++;
 
     this.trigger('query:append', params);
   };

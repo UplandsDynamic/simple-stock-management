@@ -6,7 +6,7 @@
                 data: function(params) {
                     return {
                         term: params.term,
-                        page: params.page
+                        newPage: params.newPage
                     };
                 }
             }

@@ -1,4 +1,4 @@
-/* global mockProps */
+/*global mockProps*/
 import React from 'react'
 import ReactDOM from 'react-dom'
 import {mount, render, shallow, configure} from 'enzyme';
@@ -8,21 +8,28 @@ import {
     faSyncAlt, faEllipsisH, faPlus, faPlusSquare, faMinus, faMinusSquare,
     faTrashAlt, faEdit
 } from '@fortawesome/free-solid-svg-icons'
+import StockUpdateModal from "../app";
 
 library.add(faSyncAlt, faEllipsisH, faPlus, faTrashAlt, faEdit, faPlusSquare, faMinus, faMinusSquare);
 
-const DataTableWithProps = (<DataTable stockRecord={mockProps.stockRecord}
-                                       apiOptions={mockProps.apiOptions}
-                                       authMeta={mockProps.authMeta}
-                                       setMessage={jest.fn()}
-                                       openStockUpdateModalHandler={jest.fn()}
-                                       getReccordsHandler={jest.fn()}/>);
+const StockUpdateModalWithProps = (
+    <StockUpdateModal
+        stockRecord={mockProps.stockRecord}
+        authMeta={mockProps.authMeta}
+        openStockUpdateModal={mockProps.stockUpdateModalOpen}
+        apiOptions={mockProps.apiOptions}
+        apiMode={mockProps.apiMode}
+        setStockUpdateModalState={jest.fn()}
+        setStockRecordState={jest.fn()}
+        setMessage={jest.fn()}
+    />
+);
 
 // test component renders
 
 describe('DataTable Component', () => {
     it('renders without crashing', () => {
         const div = document.createElement('div');
-        ReactDOM.render(DataTableWithProps, div)
+        ReactDOM.render(StockUpdateModalWithProps, div)
     })
 });
