@@ -5,7 +5,6 @@ djangorestframework
 django-webpack-loader
 django-cors-headers
 django-anymail[sparkpost]
-pyyaml
 gunicorn
 gevent
 psycopg2
