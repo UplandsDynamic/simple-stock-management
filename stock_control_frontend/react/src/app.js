@@ -57,7 +57,7 @@ class App extends React.Component {
             stockRecord: {
                 meta: {
                     page: 1,
-                    limit: 3,
+                    limit: 25,
                     pagerMainSize: 5,
                     pagerEndSize: 3,
                     pageOrderBy: '',
