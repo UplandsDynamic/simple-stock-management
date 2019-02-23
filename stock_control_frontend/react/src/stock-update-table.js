@@ -52,6 +52,7 @@ const StockUpdateTable = ({stockRecord = null, authMeta = null, handleRecordUpda
                                 <td>
                                     <input value={sku}
                                            name={'sku'}
+                                           onKeyDown={(e => !disableButton ? handleEnterKey(e) : null)}
                                            onChange={e => dataUpdate({stockRecord, updated: {sku: e.target.value}})}
                                            className={'form-control'} type={'text'}
                                            disabled={editDisabled}
@@ -63,6 +64,7 @@ const StockUpdateTable = ({stockRecord = null, authMeta = null, handleRecordUpda
                                 <td>
                                     <input value={desc}
                                            name={'description'}
+                                           onKeyDown={(e => !disableButton ? handleEnterKey(e) : null)}
                                            onChange={e => dataUpdate({
                                                stockRecord,
                                                updated: {desc: validateDesc(e.target.value)}
@@ -97,6 +99,7 @@ const StockUpdateTable = ({stockRecord = null, authMeta = null, handleRecordUpda
                                 <td>
                                     <input value={unit_price}
                                            name={'unit-price'}
+                                           onKeyDown={(e => !disableButton ? handleEnterKey(e) : null)}
                                            onChange={e => dataUpdate({
                                                stockRecord, updated: {
                                                    unit_price:
@@ -128,8 +131,12 @@ const StockUpdateTable = ({stockRecord = null, authMeta = null, handleRecordUpda
                                                    }
                                                });
                                            }
-                                           return dataUpdate({stockRecord, updated: {units_to_transfer: '',
-                                               units_total}})
+                                           return dataUpdate({
+                                               stockRecord, updated: {
+                                                   units_to_transfer: '',
+                                                   units_total
+                                               }
+                                           })
                                        }
                                        }
                                        className={'form-control'} autoFocus={true}/>
