@@ -7,8 +7,10 @@ import processRequest from './api.js'
 
 Modal.setAppElement(document.body);
 
+Modal.defaultStyles.overlay.backgroundColor = 'cornflowerblue';
 const REGULAR_STYLES = {
-    top: '50%',
+    content: {
+        top: '50%',
     left: '50%',
     right: 'auto',
     bottom: 'auto',
@@ -20,29 +22,46 @@ const REGULAR_STYLES = {
     borderRadius: '7px 7px 7px 7px',
     boxShadow: '-7px -7px 17px 7px #001e00',
     maxWidth: '800px',
+    },
+    overlay: {
+         backgroundColor: '#2a3517',
+    }
 };
 
 const DANGER_STYLES = {
-    top: '50%',
-    left: '50%',
-    right: 'auto',
-    bottom: 'auto',
-    marginRight: '-50%',
-    transform: 'translate(-50%, -50%)',
-    backgroundColor: 'darkred',
-    color: 'white',
-    border: '1px solid yellow',
-    borderRadius: '7px 7px 7px 7px',
-    boxShadow: '-7px -7px 17px 7px #001e00',
-    maxWidth: '800px'
+    content: {
+        top: '50%',
+        left: '50%',
+        right: 'auto',
+        bottom: 'auto',
+        marginRight: '-50%',
+        transform: 'translate(-50%, -50%)',
+        backgroundColor: 'darkred',
+        color: 'white',
+        border: '1px solid yellow',
+        borderRadius: '7px 7px 7px 7px',
+        boxShadow: '-7px -7px 17px 7px black',
+        maxWidth: '800px',
+    },
+    overlay: {
+        backgroundColor: 'gold',
+    }
 };
+
+/*
+Note: Various ways to style the modal:
+- css stylesheets
+- inline (as above, set in state (modalStyles))
+- default styles (also as above, as used for overlay background color).
+For more info. see: https://reactcommunity.org/react-modal/examples/css_classes.html
+ */
 
 class StockUpdateModal extends React.Component {
 
     constructor(props) {
         super(props);
         this.state = {
-            modalStyles: {content: REGULAR_STYLES},
+            modalStyles: REGULAR_STYLES,
             modalIsOpen: this.props.openStockUpdateModal
         };
         // Remember! This binding is necessary to make `this` work in the callback
@@ -58,8 +77,8 @@ class StockUpdateModal extends React.Component {
     }
 
     componentWillReceiveProps(nextProps, nextContext) {
-        nextProps.stockRecord.meta.deleteRecord ? this.setState({modalStyles: {content: DANGER_STYLES}}) :
-            this.setState({modalStyles: {content: REGULAR_STYLES}});
+        nextProps.stockRecord.meta.deleteRecord ? this.setState({modalStyles: DANGER_STYLES}) :
+            this.setState({modalStyles: REGULAR_STYLES});
         // set modal open/close state (source of truth in parent component - app.js)
         this.setState({modalIsOpen: nextProps.openStockUpdateModal});
     }
@@ -140,6 +159,7 @@ class StockUpdateModal extends React.Component {
                     onAfterOpen={this.handleAfterOpenModal}
                     onRequestClose={this.handleCloseModal}
                     style={this.state.modalStyles}
+                    closeTimeoutMS={500}
                     contentLabel="Stock Action"
                 >
                     <div className="container">

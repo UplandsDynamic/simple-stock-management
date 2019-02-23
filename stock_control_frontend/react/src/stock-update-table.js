@@ -177,7 +177,7 @@ const StockUpdateTable = ({stockRecord = null, authMeta = null, handleRecordUpda
                                     handleRecordUpdate()
                                 }
                             }}
-                            className={'btn btn-lg btn-warning pull-right'}
+                            className={'btn btn-lg btn-warning stockActionButton pull-right'}
                             disabled={disableButton}
                         >
                             {newRecord ?

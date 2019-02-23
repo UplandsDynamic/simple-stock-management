@@ -1,7 +1,7 @@
 /* react */
 import React from 'react';
 /* app components */
-import LoginForm from './loginform.js';
+import Header from './header.js';
 import DataTable from './data-table.js';
 import StockUpdateModal from './stock-update-modal.js';
 import Message from './message.js';
@@ -257,10 +257,9 @@ class App extends React.Component {
                 <div className={'container'}>
                     <div className={'row'}>
                         <div className={'col-12'}>
-                            <LoginForm authMeta={this.state.authMeta}
+                            <Header authMeta={this.state.authMeta}
                                        apiOptions={this.apiOptions}
                                        csrfToken={this.state.csrfToken}
-                                       greeting={process.env.REACT_APP_GREETING}
                                        setMessage={this.setMessage}
                                        getSessionStorage={this.getSessionStorage}
                                        setSessionStorage={this.setSessionStorage}
