@@ -35,6 +35,7 @@ div.linkedPage label {
     border: 2px solid darkorange;
     font-weight: bold;
     padding: 1em !important;
+    z-index: 0!important;
 }
 
 ul.pagination, li.page-item {

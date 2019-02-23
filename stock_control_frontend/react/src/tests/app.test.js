@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom'
 import {mount, render, shallow, configure} from 'enzyme';
 // components imported into component being tested
 import App from "../app";
-import LoginForm from '../loginform.js';
+import Header from '../header.js';
 import DataTable from '../data-table.js';
 import StockUpdateModal from '../stock-update-modal.js';
 import Message from '../message.js';
@@ -21,9 +21,9 @@ describe('App Component', () => {
 // test child components render
 
 describe('App Component', () => {
-    it('renders the LoginForm wrapper', () => {
+    it('renders the Header wrapper', () => {
         const wrapper = shallow(<App/>);
-        expect(wrapper.find(LoginForm)).toHaveLength(1)
+        expect(wrapper.find(Header)).toHaveLength(1)
     });
 });
 

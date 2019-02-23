@@ -1,5 +1,5 @@
 button.close-button {
-    margin-left:auto;
+    margin-left: auto;
 }
 
 .close-modal-button-cell {
@@ -18,16 +18,26 @@ form.transfer-form {
 
 form.transfer-form-danger {
     background-color: #530000;
-    color: yellow;
-    min-height: 250px;
+    color: white;
+    min-height: 350px;
 }
 
 button.delete-btn, button.cancel-btn {
-    margin: 0.25em;
+    margin: 2pc;
+}
+
+button.delete-btn:hover, button.cancel-btn:hover {
+    transform: scale(1.75);
+    transition: all 100ms ease-in-out;
+}
+
+button.stockActionButton:hover {
+    transform: scale(1.25);
+    transition: all 100ms ease-in-out;
 }
 
 input {
-    border-style: none!important;
+    border-style: none !important;
 }
 
 .transfer {
@@ -42,4 +52,17 @@ input {
 .xfer-button {
     margin: 1em 0 0 0;
     text-align: right;
+}
+
+.ReactModal__Overlay {
+    opacity: 0;
+    transition: opacity 250ms ease-in-out;
+}
+
+.ReactModal__Overlay--after-open {
+    opacity: 1;
+}
+
+.ReactModal__Overlay--before-close {
+    opacity: 0;
 }

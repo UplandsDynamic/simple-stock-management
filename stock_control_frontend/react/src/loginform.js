@@ -2,7 +2,6 @@ import React from 'react';
 import './css/loginform.css';
 import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap/dist/js/bootstrap.js'
-import Greeting from './greeting'
 import processRequest from "./api";
 /* helpers */
 import cloneDeep from "lodash.clonedeep"
@@ -253,12 +252,9 @@ class LoginForm extends React.Component {
                 break;
         }
         return (
-            <div className={'container login'}>
-                <div className={'row'}>
-                    <div className={'col-4'}><Greeting greeting={this.props.greeting}/></div>
-                    <div className={'col-8'}>{displayForm}</div>
-                </div>
-            </div>
+            <React.Fragment>
+                    <div className={'login'}>{displayForm}</div>
+            </React.Fragment>
         )
     }
 }
