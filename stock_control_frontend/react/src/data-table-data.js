@@ -23,12 +23,12 @@ const DataTableData = ({stockRecord = {}, handleEditRecord, handleDeleteLine, fo
         return (<tr key={item.id} data-toggle="modal" className={rowClasses.join(' ')}>
             {/*<th scope="row">{item.id}</th>*/}
             <td className={'col-2 sku'}>{sku}</td>
-            <td className={'col-4 desc'}>{desc}</td>
+            <td className={'col-3 desc'}>{desc}</td>
             <td className={'col-1 unitsTotal'}>{units_total > 0 ? units_total : 'Out of Stock'}</td>
-            <td className={'col-1 unitPrice'}>{unit_price}</td>
+            <td className={'col-2 unitPrice'}>{unit_price}</td>
             <td className={'table-small-font col-2 recordUpdated'}>
                 {formatUTCDateTime({dateTime: record_updated})}</td>
-            <td className={'action-col col-2 '}>
+            <td className={'action-col col-2 text-center'}>
                 <button id={`editButton_${item.id}`} onClick={() => {
                     if (userIsAdmin || (!userIsAdmin && units_total > 0)) {
                         Object.assign(stockRecord.data, {
