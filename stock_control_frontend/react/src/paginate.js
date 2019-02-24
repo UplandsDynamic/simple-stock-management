@@ -74,7 +74,7 @@ class Paginate extends React.Component {
         return (
             <React.Fragment>
                 <div className={'linkedPage'}>
-                    <label>Page </label>
+                    <label className={'d-none'}>Current page</label>
                     <input onKeyDown={(e) => e.keyCode === 8 ? this.setState({currentPage: ''}) : null}
                            onChange={(e) => {
                                this.switchPage({
