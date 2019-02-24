@@ -8,11 +8,11 @@ const DataTableHead = ({handleColumnOrderChange, stockRecord} = {}) => {
                     onClick={() => handleColumnOrderChange({stockRecord, newOrder: 'sku'})}>
                     SKU
                 </th>
-                <th className={'col-3'} scope={'col'}
+                <th className={'col-2'} scope={'col'}
                     onClick={() => handleColumnOrderChange({stockRecord, newOrder: 'desc'})}>
                     Description
                 </th>
-                <th className={'col-1'} scope={'col'}
+                <th className={'col-2'} scope={'col'}
                     onClick={() => handleColumnOrderChange({stockRecord, newOrder: 'units_total'})}>
                     Units
                 </th>

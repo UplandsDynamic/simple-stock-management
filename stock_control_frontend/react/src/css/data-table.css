@@ -1,12 +1,12 @@
 div.data-table {
     min-height: 768px;
+    font-size: 1.7vmin;
 }
 
 table {
     background-color: #001e00 !important;
     font-weight: bold;
     color: yellow;
-    font-size: 1pc;
 }
 
 table.table-bordered td, table.table-bordered th {
@@ -15,7 +15,7 @@ table.table-bordered td, table.table-bordered th {
 
 thead th {
     padding: 1em !important;
-    font-size: 0.9pc;
+    font-size: 1.7vmin;
 }
 
 
@@ -105,13 +105,12 @@ input.search {
 }
 
 button.table-btn {
-    margin: 0.25pc;
-    width: 5pc;
     transition: all 200ms ease-in-out
 }
 
 button.table-btn:hover {
-    transform: scale(1.2);
+    transform: scale(1.25);
+    z-index: 10;
 }
 
 div.message-card {
