@@ -11,7 +11,7 @@ import DataTableHead from "./data-table-head";
 
 const DataTable = ({
                        stockRecord = {}, apiOptions = {}, setMessage, openStockUpdateModalHandler,
-                       getRecordsHandler, authMeta = {}
+                       getRecordsHandler, authMeta = {}, setStockRecordState,
                    } = {}) => {
 
     const _formatUTCDateTime = ({dateTime = null} = {}) => {
@@ -28,7 +28,7 @@ const DataTable = ({
         Object.assign(stockRecord.meta, {pageOrderBy: newOrder, pageOrderDir, page: 1}); // maybe page:1 ?
         getRecordsHandler({stockRecord})
     };
-    
+
     const _handleAddRecord = ({stockRecord = null} = {}) => {
         setMessage({message: null});  // clear old messages
         Object.assign(stockRecord.meta, {newRecord: true});
@@ -40,12 +40,17 @@ const DataTable = ({
         openStockUpdateModalHandler({stockRecord});  // open update modal
     };
 
-    const _handleSearch = (stockRecord = null, e = null) => {
-        if (stockRecord && e) {
+    const _handleSearch = ({stockRecord = {}, term = null} = {}) => {
+        if (stockRecord) {
             Object.assign(stockRecord.meta, {
                 pageOrderBy: 'desc', page: 1,
-                search: _validateDesc(e.target.value)
+                search: _validateDesc(term)
             });
+            /* set new record state early, even though stockRecord again when API returns,
+            to ensure search string change keeps pace with user typing speed
+             */
+            setStockRecordState({newStockRecord: stockRecord});
+            // get the matching records from the API
             getRecordsHandler({stockRecord});
         }
     };

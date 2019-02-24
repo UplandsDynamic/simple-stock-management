@@ -34,10 +34,17 @@ const _makeRequest = ({
                           stockRecord = null, requestMethod = null, csrfToken = null, requestData = null,
                           url = null, cacheControl = null
                       } = {}) => {
+    const CancelToken = axios.CancelToken;
+    let cancel;
     // if no requestData passed, see if update data in stock record data. If not, pass empty data to request.
     requestData = requestData ? requestData : stockRecord.data.updateData ? stockRecord.data.updateData : {};
     if (url && requestMethod) {  // make request
+        if (cancel !== undefined) {
+            cancel();
+            console.log('API request cancelled because an existing request was already underway!')
+        }
         return axios({
+            cancelToken: new CancelToken((c) => cancel = c),
             method: requestMethod,
             url: url,
             responseType: 'json',

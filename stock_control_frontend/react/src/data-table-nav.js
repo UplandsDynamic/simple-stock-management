@@ -39,7 +39,9 @@ const DataTableNav = ({
                             <nav className={'search-navigation w-100 d-block ml-1'}>
                                 <input value={stockRecord.meta.search} placeholder={'Search'}
                                        name={'search'} className={'form-control search'}
-                                       onChange={(e) => handleSearch(stockRecord, e)}/>
+                                       onChange={(e) =>
+                                           handleSearch({stockRecord, term: e.target.value})
+                                       }/>
                             </nav>
                         </div>
                     </div>
