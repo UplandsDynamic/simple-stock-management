@@ -19,12 +19,12 @@ const DataTableData = ({stockRecord = {}, handleEditRecord, handleDeleteLine, fo
         let {sku, desc, units_total, unit_price, record_updated} = item;
         let rowClasses = [units_total <= 0 ? 'outOfStock' : '', 'd-flex', 'dataTableRows'];
         let editButtonClasses = [units_total <= 0 && !userIsAdmin ?
-            'disabled' : '', 'table-btn', 'btn', 'btn-primary'];
+            'disabled' : '', 'table-btn', 'btn', 'btn-primary', 'w-100', 'h-50', 'mb-1'];
         return (<tr key={item.id} data-toggle="modal" className={rowClasses.join(' ')}>
             {/*<th scope="row">{item.id}</th>*/}
             <td className={'col-2 sku'}>{sku}</td>
-            <td className={'col-3 desc'}>{desc}</td>
-            <td className={'col-1 unitsTotal'}>{units_total > 0 ? units_total : 'Out of Stock'}</td>
+            <td className={'col-2 desc'}>{desc}</td>
+            <td className={'col-2 unitsTotal'}>{units_total > 0 ? units_total : 'Out of Stock'}</td>
             <td className={'col-2 unitPrice'}>{unit_price}</td>
             <td className={'table-small-font col-2 recordUpdated'}>
                 {formatUTCDateTime({dateTime: record_updated})}</td>
@@ -53,7 +53,7 @@ const DataTableData = ({stockRecord = {}, handleEditRecord, handleDeleteLine, fo
                     Object.assign(stockRecord.meta, {deleteRecord: true});
                     return handleEditRecord({stockRecord: stockRecord})
                 }}
-                                       className={'table-btn btn btn-danger'} id={`deleteButton_${item.id}`}>
+                                       className={'table-btn btn btn-danger w-100 h-50'} id={`deleteButton_${item.id}`}>
                     <FontAwesomeIcon icon={"trash-alt"}/></button> : ''}
             </td>
         </tr>)

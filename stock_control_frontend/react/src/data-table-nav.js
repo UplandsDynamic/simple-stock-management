@@ -36,13 +36,11 @@ const DataTableNav = ({
                             </div>
                         </div>
                         <div className={`${userIsAdmin ? 'col-10' : 'col-11'}`}>
-
-                            <nav className={'search-navigation'}>
+                            <nav className={'search-navigation w-100 d-block ml-1'}>
                                 <input value={stockRecord.meta.search} placeholder={'Search'}
                                        name={'search'} className={'form-control search'}
                                        onChange={(e) => handleSearch(stockRecord, e)}/>
                             </nav>
-
                         </div>
                     </div>
                 </div>
