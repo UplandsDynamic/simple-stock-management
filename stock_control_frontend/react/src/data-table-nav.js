@@ -12,33 +12,37 @@ const DataTableNav = ({
             <React.Fragment>
                 <div className={'container'}>
                     <div className={'row nav-row'}>
-                        <div className={'btn-group'}>
-                            <div className={'col-sm'}>
+                        <div className={'col-12'}>
+                            <div className={'btn-group float-right'}>
+                                <nav className="nav-pagination float-right" aria-label="Table data pages">
+                                    <Paginate stockRecord={stockRecord}
+                                              handleGetRecords={handleGetRecords}
+                                    />
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
+                    <div className={'row nav-row'}>
+                        <div className={`${userIsAdmin ? 'col-2' : 'col-1'}`}>
+                            <div className={'btn-group'}>
                                 <button onClick={() => {
                                     Object.assign(stockRecord.meta, {page: 1});
                                     handleGetRecords({stockRecord})
-                                }} className={'btn btn-warning'}>
+                                }} className={'btn btn-md btn-warning mr-1 '}>
                                     <FontAwesomeIcon icon={"sync-alt"}/></button>
-                            </div>
-                            <div className={userIsAdmin ? 'col-sm' : 'd-none'}>
                                 <button onClick={() => handleAddRecord({stockRecord})}
-                                        className={'btn btn-warning'}>
+                                        className={`btn btn-md btn-warning mr-1 ${userIsAdmin ? '' : 'd-none'}`}>
                                     <FontAwesomeIcon icon={"plus"}/></button>
                             </div>
                         </div>
-                        <div className={'col-sm'}>
+                        <div className={`${userIsAdmin ? 'col-10' : 'col-11'}`}>
+
                             <nav className={'search-navigation'}>
                                 <input value={stockRecord.meta.search} placeholder={'Search'}
                                        name={'search'} className={'form-control search'}
                                        onChange={(e) => handleSearch(stockRecord, e)}/>
                             </nav>
-                        </div>
-                        <div className={'col-sm'}>
-                            <nav className="nav-pagination" aria-label="Table data pages">
-                                <Paginate stockRecord={stockRecord}
-                                          handleGetRecords={handleGetRecords}
-                                />
-                            </nav>
+
                         </div>
                     </div>
                 </div>

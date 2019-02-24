@@ -223,11 +223,11 @@ class App extends React.Component {
         e.g. deleteRecord), and reset the update data.
          */
         if (!state) {  // actions to do when modal set to closed
+            this.setState({stockUpdateModalOpen: state});   // close it first, to avoid showing reset data values
             Object.assign(stockRecord.data.updateData, {...this.initialState.stockRecord.data.updateData});
             // clear delete and update flags from meta
             Object.assign(stockRecord.meta, {deleteRecord: false, newRecord: false});
             this.setStockRecordState({newStockRecord: stockRecord});
-            this.setState({stockUpdateModalOpen: state});
             if (!actionCancelled) {  // if was not cancelled, request updated data from API following the actions.
                 this.getRecordsHandler({stockRecord, notifyResponse: false});
             }

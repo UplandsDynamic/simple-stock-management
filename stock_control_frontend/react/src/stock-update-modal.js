@@ -159,7 +159,7 @@ class StockUpdateModal extends React.Component {
                     onAfterOpen={this.handleAfterOpenModal}
                     onRequestClose={this.handleCloseModal}
                     style={this.state.modalStyles}
-                    closeTimeoutMS={500}
+                    closeTimeoutMS={250}
                     contentLabel="Stock Action"
                 >
                     <div className="container">
