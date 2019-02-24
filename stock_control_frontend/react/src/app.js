@@ -57,9 +57,9 @@ class App extends React.Component {
             stockRecord: {
                 meta: {
                     page: 1,
-                    limit: 25,
-                    pagerMainSize: 5,
-                    pagerEndSize: 3,
+                    limit: process.env.REACT_APP_ROWS_PER_TABLE,
+                    pagerMainSize: process.env.REACT_APP_PAGER_MAIN_SIZE,
+                    pagerEndSize: process.env.REACT_APP_PAGER_END_SIZE,
                     pageOrderBy: '',
                     pageOrderDir: '',
                     previous: null,
