@@ -327,7 +327,7 @@ class SendEmailTestCase(TestCase):
         for k, v in test_params.items():
             self.assertFalse(self.send_email.send(f'{k}={v}'))
         # test True (email sent) if params are present
-        settings.STOCK_MANAGEMENT_OPTIONS['email']['notifications_on'] = True
+        settings.STOCK_MANAGEMENT_OPTIONS[settings.RUN_TYPE]['email']['notifications_on'] = True
         self.assertTrue(self.send_email.send(**test_params))
         # test False if invalid email
         test_params['email_to'] = 'blah'

@@ -37,7 +37,7 @@ class SendEmail:
             self.email_validate(email_from)
             if not self.email_invalid:
                 try:
-                    if settings.STOCK_MANAGEMENT_OPTIONS['email']['notifications_on']:
+                    if settings.STOCK_MANAGEMENT_OPTIONS[settings.RUN_TYPE]['email']['notifications_on']:
                         msg = EmailMultiAlternatives(
                             subject if subject else SendEmail.DEFAULT_SUBJECT,
                             body_plaintext,
@@ -49,7 +49,9 @@ class SendEmail:
                         msg.send()
                     else:
                         logger.info(
-                            f'If in live mode, notification email would be sent to: '
+                            f'Notifications are set to: '
+                            f'{settings.STOCK_MANAGEMENT_OPTIONS[settings.RUN_TYPE]["email"]}.'
+                            f' If in live mode, notification email would be sent to: '
                             f'{[a for a in email_to] if email_to else "Nobody!"}')
                     return True
                 except AnymailAPIError as e:
@@ -74,9 +76,9 @@ class SendEmail:
                                                                                                   flat=True)
                 # list of all stock administrator's email addresses
                 recipient_list = [a for a in admin_email_addr] if \
-                    admin_email_addr and settings.STOCK_MANAGEMENT_OPTIONS['email'][
+                    admin_email_addr and settings.STOCK_MANAGEMENT_OPTIONS[settings.RUN_TYPE]['email'][
                         'notifications_to_administrators'] else []
-                if settings.STOCK_MANAGEMENT_OPTIONS['email']['notifications_to_transfer_requester']:
+                if settings.STOCK_MANAGEMENT_OPTIONS[settings.RUN_TYPE]['email']['notifications_to_transfer_requester']:
                     recipient_list.append(instance.user.email)  # add the transfer requester's email address
                 recipient_list = list(set(recipient_list))  # remove any dupes
                 """
