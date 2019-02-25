@@ -83,7 +83,7 @@ elif RUN_TYPE == 'STAGING':
                               'sm.staging.aninstance.com/media')
 elif RUN_TYPE == 'PRODUCTION':
     DEBUG = False
-    WORKING_URL = 'sm.aninstance.com'
+    WORKING_URL = 'sm.my.domain.com'
     WORKING_PORT = '443'
     SECURE_CONTENT_TYPE_NOSNIFF = True
     SECURE_BROWSER_XSS_FILTER = True
@@ -96,9 +96,9 @@ elif RUN_TYPE == 'PRODUCTION':
     CORS_ALLOW_CREDENTIALS = True
     CORS_ORIGIN_WHITELIST = (WORKING_URL,)
     STATIC_ROOT = os.path.join('/var/www/django/'
-                               'sm.aninstance.com/static')
+                               'sm.my.domain.com/static')
     MEDIA_ROOT = os.path.join('/var/www/django/'
-                              'sm.aninstance.com/media')
+                              'sm.my.domain.com/media')
 
 # # # Application definition
 INSTALLED_APPS = [
@@ -210,36 +210,27 @@ else:
             },
             'KEY_PREFIX': 'stock_management_production_server'
         },
-        # 'my_pages': {
-        #     'BACKEND': 'django_redis.cache.RedisCache',
-        #     'LOCATION': 'redis://redis:6379/2',
-        #     'TIMEOUT': DEFAULT_CACHES_TTL,
-        #     'OPTIONS': {
-        #         'CLIENT_CLASS': 'django_redis.client.DefaultClient'
-        #     },
-        #     'KEY_PREFIX': 'stock_management_production_server'
-        # },
     }
 
 # # # Database
-if RUN_TYPE == 'PRODUCTION':
+if RUN_TYPE == RUN_TYPE_OPTIONS[2]:  # production
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'NAME': 'prod_sm',
-            'USER': 'prod_sm',
-            'PASSWORD': 'my_password',
+            'NAME': 'my_db_name',
+            'USER': 'my_db_user',
+            'PASSWORD': 'my_db_password',
             'HOST': 'localhost',
             'PORT': '5432'
         }
     }
-elif RUN_TYPE == 'STAGING':
+elif RUN_TYPE == RUN_TYPE_OPTIONS[1]:  # staging
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'NAME': 'staging_sm',
-            'USER': 'staging_sm',
-            'PASSWORD': 'my_password',
+            'NAME': 'stockmanagement',
+            'USER': 'stockmanagement',
+            'PASSWORD': 'a_ReAllY-bAd-pw',
             'HOST': 'localhost',
             'PORT': '5432'
         }
@@ -276,29 +267,46 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 # # # Email services
-if RUN_TYPE == 'PRODUCTION':
+if RUN_TYPE == RUN_TYPE_OPTIONS[2]:  # production
     EMAIL_BACKEND = "anymail.backends.sparkpost.EmailBackend"
-    DEFAULT_FROM_EMAIL = 'stockmanagement@sm.aninstance.com'
+    DEFAULT_FROM_EMAIL = 'stockmanagement@sm.my.domain.com'
     ANYMAIL = {
         'IGNORE_UNSUPPORTED_FEATURES': True,
-        'SPARKPOST_API_KEY': 'my_sparkpost_key',
+        'SPARKPOST_API_KEY': 'my_api_key',
         'SPARKPOST_API_URL': 'https://api.eu.sparkpost.com/api/v1',
     }
-else:
+else:  # staging or devel
     EMAIL_BACKEND = "anymail.backends.sparkpost.EmailBackend"
-    DEFAULT_FROM_EMAIL = 'stockmanagement@sm.staging.aninstance.com'
+    DEFAULT_FROM_EMAIL = 'productions@staging.aninstance.com'
     ANYMAIL = {
         'IGNORE_UNSUPPORTED_FEATURES': True,
-        'SPARKPOST_API_KEY': 'my_sparkpost_key',
+        'SPARKPOST_API_KEY': 'my_api_key',
         'SPARKPOST_API_URL': 'https://api.eu.sparkpost.com/api/v1',
     }
 
 # # # StockManagement Application
 STOCK_MANAGEMENT_OPTIONS = {
-    'email': {
-        'notifications_on': not DEBUG,  # don't send notifications if DEBUG is True
-        'notifications_to_transfer_requester': True
-    }
+    RUN_TYPE_OPTIONS[0]: {  # devel
+        'email': {
+            'notifications_on': False,
+            'notifications_to_transfer_requester': True,
+            'notifications_to_administrators': True,
+        }
+    },
+    RUN_TYPE_OPTIONS[1]: {  # staging
+        'email': {
+            'notifications_on': False,
+            'notifications_to_transfer_requester': True,
+            'notifications_to_administrators': True,
+        }
+    },
+    RUN_TYPE_OPTIONS[2]: {  # production
+        'email': {
+            'notifications_on': True,
+            'notifications_to_transfer_requester': True,
+            'notifications_to_administrators': True,
+        }
+    },
 }
 
 # # # Internationalization
@@ -315,6 +323,12 @@ USE_L10N = True
 USE_TZ = True
 
 # Logging
+LOG_FILE = {
+    RUN_TYPE_OPTIONS[0]: '/var/log/django/ssm.devel.log',  # devel
+    RUN_TYPE_OPTIONS[1]: '/var/log/django/ssm.staging.log',  # staging
+    RUN_TYPE_OPTIONS[2]: '/var/log/django/ssm.prod.log',  # production
+}
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -335,25 +349,20 @@ LOGGING = {
         'file': {
             'level': 'INFO',
             'class': 'logging.FileHandler',
-            'filename': '/var/log/django/django_main.log',
+            'filename': LOG_FILE[RUN_TYPE],
             'formatter': 'verbose'
         },
     },
     'loggers': {
         'main': {
-            'handlers': ['file'] if RUN_TYPE == 'PRODUCTION' else ['console'],
+            'handlers': ['file'] if RUN_TYPE == RUN_TYPE_OPTIONS[1] or RUN_TYPE == RUN_TYPE_OPTIONS[2] else ['console'],
             'level': 'INFO',
             'propagate': True,
         },
         'django': {
-            'handlers': ['file'] if RUN_TYPE == 'PRODUCTION' else ['console'],
+            'handlers': ['file'] if RUN_TYPE == RUN_TYPE_OPTIONS[1] or RUN_TYPE == RUN_TYPE_OPTIONS[2] else ['console'],
             'level': 'INFO',
             'propagate': True,
         },
-        # 'django_q': {
-        #     'handlers': ['file'],
-        #     'level': 'INFO',
-        #     'propagate': True,
-        # },
     },
 }
