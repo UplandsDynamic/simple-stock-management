@@ -67,57 +67,61 @@ class SendEmail:
         :return: True|False
         This method composes notification emails, then sends them through the send() method.
         """
-        if notification_type == SendEmail.EmailType.STOCK_TRANSFER:
-            if hasattr(instance, 'units_to_transfer'):
-                """
-                email notification to administrators + requester
-                """
-                admin_email_addr = User.objects.filter(groups__name='administrators').values_list('email',
-                                                                                                  flat=True)
-                # list of all stock administrator's email addresses
-                recipient_list = [a for a in admin_email_addr] if \
-                    admin_email_addr and settings.STOCK_MANAGEMENT_OPTIONS[settings.RUN_TYPE]['email'][
-                        'notifications_to_administrators'] else []
-                if settings.STOCK_MANAGEMENT_OPTIONS[settings.RUN_TYPE]['email']['notifications_to_transfer_requester']:
-                    recipient_list.append(instance.user.email)  # add the transfer requester's email address
-                recipient_list = list(set(recipient_list))  # remove any dupes
-                """
-                Send email notification to admins (and requester if configured to receive in settings.py).
-                Email is only sent on stock transfer, not editing (determined by a truthy units_to_transfer submission).
-                """
-                if recipient_list:
-                    body_plaintext = f"""
-                            The following transfer has taken place on {instance.record_updated.strftime(
-                        "%d/%m/%Y %H:%M:%S %Z")}:
-                            - Transfer to: {instance.user} [{instance.user.email}]
-                            - Stock line details:
-                              - SKU: {instance.sku}
-                              - Description: {instance.desc}
-                              - Units transferred: {instance.units_to_transfer}
-                              - Unit price: {instance.unit_price}
-                            """
-                    body_html = f"""<html>
-                            <body>
-                            <p>The following transfer has taken place on {instance.record_updated.strftime(
-                        "%d/%m/%Y %H:%M:%S %Z")}</p>
-                            <ul>
-                            <li>Transfer to: {instance.user} [<a href="mailto:{instance.user.email}">{instance.user.email}</a>]</li>
-                            <li>Stock line details:
-                            <ul>
-                            <li>SKU: {instance.sku}</li>
-                            <li>Description: {instance.desc}</li>
-                            <li>Units transferred: {instance.units_to_transfer}</li>
-                            <li>Unit price: {instance.unit_price}</li>
-                            </ul>
-                            </li>
-                            </ul>
-                            </body>
-                            </html>
-                            """
-                    return self.send(body_plaintext=body_plaintext, body_html=body_html,
-                                     email_to=recipient_list,
-                                     email_from=settings.DEFAULT_FROM_EMAIL,
-                                     subject='[STOCK MANAGEMENT] A transfer has taken place!')
-            else:
-                logger.info('No email to send as this is not a transfer.')
-            return False
+        try:
+            if notification_type == SendEmail.EmailType.STOCK_TRANSFER:
+                if instance.units_to_transfer:
+                    """
+                    email notification to administrators + requester
+                    """
+                    admin_email_addr = User.objects.filter(groups__name='administrators').values_list('email',
+                                                                                                      flat=True)
+                    # list of all stock administrator's email addresses
+                    recipient_list = [a for a in admin_email_addr] if \
+                        admin_email_addr and settings.STOCK_MANAGEMENT_OPTIONS[settings.RUN_TYPE]['email'][
+                            'notifications_to_administrators'] else []
+                    if settings.STOCK_MANAGEMENT_OPTIONS[settings.RUN_TYPE]['email'][
+                        'notifications_to_transfer_requester']:
+                        recipient_list.append(instance.user.email)  # add the transfer requester's email address
+                    recipient_list = list(set(recipient_list))  # remove any dupes
+                    """
+                    Send email notification to admins (and requester if configured to receive in settings.py).
+                    Email is only sent on stock transfer, not editing (determined by a truthy units_to_transfer submission).
+                    """
+                    if recipient_list:
+                        body_plaintext = f"""
+                                The following transfer has taken place on {instance.record_updated.strftime(
+                            "%d/%m/%Y %H:%M:%S %Z")}:
+                                - Transfer to: {instance.user} [{instance.user.email}]
+                                - Stock line details:
+                                  - SKU: {instance.sku}
+                                  - Description: {instance.desc}
+                                  - Units transferred: {instance.units_to_transfer}
+                                  - Unit price: {instance.unit_price}
+                                """
+                        body_html = f"""<html>
+                                <body>
+                                <p>The following transfer has taken place on {instance.record_updated.strftime(
+                            "%d/%m/%Y %H:%M:%S %Z")}</p>
+                                <ul>
+                                <li>Transfer to: {instance.user} [<a href="mailto:{instance.user.email}">{instance.user.email}</a>]</li>
+                                <li>Stock line details:
+                                <ul>
+                                <li>SKU: {instance.sku}</li>
+                                <li>Description: {instance.desc}</li>
+                                <li>Units transferred: {instance.units_to_transfer}</li>
+                                <li>Unit price: {instance.unit_price}</li>
+                                </ul>
+                                </li>
+                                </ul>
+                                </body>
+                                </html>
+                                """
+                        return self.send(body_plaintext=body_plaintext, body_html=body_html,
+                                         email_to=recipient_list,
+                                         email_from=settings.DEFAULT_FROM_EMAIL,
+                                         subject='[STOCK MANAGEMENT] A transfer has taken place!')
+                else:
+                    logger.info('No email to send as this is not a transfer.')
+        except Exception as e:
+            logger.error(f'An error occurred whilst attempting to send email: {str(e)}')
+        return False
