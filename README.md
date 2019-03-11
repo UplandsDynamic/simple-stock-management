@@ -48,7 +48,11 @@ Password: jduejHje(89K
 
 ## Development Roadmap
 
-- Addition of independent databases for each "store". 
+- Addition of independent databases for each "store".
+
+## Support
+
+- Paid support services (including installation, configuration and development of bespoke features) are available. Please email productions@aninstance.com with "Simple Stock Management Support" in the subject field, or leave a message via the website form at: https://www.aninstance.com/contact
 
 ## Authors
 - Dan Bright (Aninstance Consultancy), productions@aninstance.com
