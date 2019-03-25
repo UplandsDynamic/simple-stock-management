@@ -8,12 +8,15 @@ It has web frontend that connects to a RESTful API backend. Data is stored in ei
 
 ## Key features
 
+Note: The "truck" features are available as of version 2.1.1 (beta, currently devel branch).
+
 - Administrator may add, edit and delete stock from database.
 - Store managers may request transfers ("order") stock from the "warehouse".
-- Warehouse stock levels are adjusted in accordance with incoming transfers ("orders").
-- Email notifications are dispatched to the administrator(s) and store manager(s).
 - Dynamic search of stock lines (SKU and description).
 - Configurable pagination of results table.
+- Transfer requests of stock lines are loaded to a "truck" (i.e. like "adding to a basket/cart" in an e-commerce system), before the request is submitted.
+  - The "truck" retains the transfer data until the "Request truck dispatch" button is clicked. The truck data is retained across sessions (meaning the data remains in the truck even if the user logs out, then resumes their transfer at a later time).
+  - Once the "Request truck dispatch" button is clicked, the transfer request process will complete. The truck empties and a single email containing a summary of the successful transfers - and any failures - is dispatched to both the requesting user and the warehouse administrator. Warehouse quantities are immediately adjusted accordingly.
 
 ## Key technologies
 
@@ -27,8 +30,8 @@ It has web frontend that connects to a RESTful API backend. Data is stored in ei
 ## Screenshots
 
 ![Screenshot 1](./meta/img/screenshot_1.png?raw=true)
-![Screenshot 1](./meta/img/screenshot_2.png?raw=true)
-![Screenshot 1](./meta/img/screenshot_3.png?raw=true)
+![Screenshot 2](./meta/img/screenshot_2.png?raw=true)
+![Screenshot 4](./meta/img/screenshot_4.png?raw=true)
 
 ## Live Demo
 
