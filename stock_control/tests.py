@@ -207,7 +207,7 @@ class StockDataSerializerTestCase(TransactionTestCase):
         """
         test function that determines whether user is an administrator
         """
-        request = APIRequestFactory().get('/api/v1/stock/')
+        request = APIRequestFactory().get('/api/v2/stock/')
         request.user = self.user
         serializer = StockDataSerializer(context={'request': request})
         with as_admin(user=self.user, group=self.group):  # check true if user in administrators
@@ -218,7 +218,7 @@ class StockDataSerializerTestCase(TransactionTestCase):
         """
         test function that creates a datetime object to return as the time of request
         """
-        request = APIRequestFactory().get('/api/v1/stock/')
+        request = APIRequestFactory().get('/api/v2/stock/')
         request.user = self.user
         serializer = StockDataSerializer(context={'request': request})
         self.assertIsInstance(serializer.create_request_time(None), datetime)
@@ -228,7 +228,7 @@ class StockDataSerializerTestCase(TransactionTestCase):
         test new object is created
         """
         stock_object = StockData.objects.create(**self.dummy_orig_stock_creation)  # create dummy stock object
-        request = APIRequestFactory().get('/api/v1/stock/')
+        request = APIRequestFactory().get('/api/v2/stock/')
         request.user = self.user
         serializer = StockDataSerializer(context={'request': request}, data=stock_object)
         serializer.is_valid()
@@ -245,15 +245,18 @@ class StockDataSerializerTestCase(TransactionTestCase):
         test update of object for non-admin user
         """
         stock_object = StockData.objects.create(**self.dummy_orig_stock_creation)  # create dummy stock object
-        request = APIRequestFactory().patch('/api/v1/stock/1/')
+        request = APIRequestFactory().patch('/api/v2/stock/1/')
         request.user = self.user
         serializer = StockDataSerializer(context={'request': request}, data=stock_object)
         serializer.is_valid()
-        # update of description, SKU, and price must fail for non-admin user
-        updated = serializer.update(instance=stock_object, validated_data=self.dummy_new_stock_creation)
-        self.assertEqual(updated.desc, stock_object.desc)  # desc should be the same, no change
-        self.assertEqual(updated.sku, stock_object.sku)  # sku should be the same, no change
-        self.assertEqual(updated.unit_price, stock_object.unit_price)  # unit_price should be the same
+        """update of description, SKU, and price must fail for non-admin user"""
+        # 1) if validation set to fail (comment out option 1 or 2)
+        self.assertFalse(serializer.is_valid())
+        # 2) Or, if validation set to pass, but just not update the illegal fields
+        # updated = serializer.update(instance=stock_object, validated_data=self.dummy_new_stock_creation)
+        # self.assertEqual(updated.desc, stock_object.desc)  # desc should be the same, no change
+        # self.assertEqual(updated.sku, stock_object.sku)  # sku should be the same, no change
+        # self.assertEqual(updated.unit_price, stock_object.unit_price)  # unit_price should be the same
         # reducing stock unit level below 0 must fail
         self.assertRaises(serializers.ValidationError, serializer.update, stock_object,
                           {'units_to_transfer': 150})
@@ -316,6 +319,11 @@ class SendEmailTestCase(TestCase):
             units_total=11,
             unit_price=11.23
         )
+        self.mock_serialized_model_instance = {"success": True, "error": None, "user_is_admin": False,
+                                               "data": {"id": 1, "record_created": datetime.utcnow(),
+                                                        "record_updated": datetime.utcnow(),
+                                                        "sku": "NCC-1701-E", "desc": "USS Enterprise",
+                                                        "units_total": 543, "unit_price": 23.9, "units_to_transfer": 1}}
         self.stock_data.user = self.user2
         self.stock_data.units_to_transfer = 77
         self.send_email = SendEmail()
@@ -341,16 +349,19 @@ class SendEmailTestCase(TestCase):
         self.assertFalse(self.send_email.compose())
         with as_admin(user=self.user, group=self.group):
             # test True to confirm sending
-            self.assertTrue(self.send_email.compose(instance=self.stock_data,
+            self.assertTrue(self.send_email.compose(records=[self.mock_serialized_model_instance],
+                                                    user=self.user,
                                                     notification_type=self.notification_type))
             # test invalid email return False
-            self.stock_data.user.email = 'blah'
-            self.assertFalse(self.send_email.compose(instance=self.stock_data,
+            self.user.email= 'blah'
+            self.assertFalse(self.send_email.compose(records=[self.mock_serialized_model_instance],
+                                                     user=self.user,
                                                      notification_type=self.notification_type))
             # test Attribute error returns False
             self.stock_data.user.email = 'valid_test@anistance.com'
             self.stock_data.desc = 77
-            self.assertFalse(self.send_email.compose(instance=self.stock_data,
+            self.assertFalse(self.send_email.compose(records=[self.mock_serialized_model_instance],
+                                                     user=self.user,
                                                      notification_type=self.notification_type))
 
 
@@ -372,13 +383,13 @@ class PasswordUpdateViewSetTestCase(APITransactionTestCase):
 
     def test_perform_update(self):
         # test password change for non-admin user
-        response = self.client.patch(f'/api/v1/change-password/{self.user.username}/',
+        response = self.client.patch(f'/api/v2/change-password/{self.user.username}/',
                                      json.dumps({"old_password": "myPwd8ntGr8", "new_password": "ser*kenem"}
                                                 ), content_type='application/json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         # test password change for admin user
         with as_admin(user=self.user, group=self.group):
-            response = self.client.patch(f'/api/v1/change-password/{self.user.username}/',
+            response = self.client.patch(f'/api/v2/change-password/{self.user.username}/',
                                          json.dumps({"old_password": "ser*kenem", "new_password": "myPwd8ntGr8"}
                                                     ), content_type='application/json')
             self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -428,7 +439,7 @@ class StockDataViewSetTestCase(APITestCase):
     #     # setup
     #     user = User.objects.create_user('tester', settings.DEFAULT_FROM_EMAIL, 'myPwd8ntGr8', is_staff=True)
     #     factory = APIRequestFactory()
-    #     request = factory.get('/api/v1/stock/', {}, format='json')
+    #     request = factory.get('/api/v2/stock/', {}, format='json')
     #     force_authenticate(request, user=user, token=user.auth_token)
     #     stock = StockDataViewSetTestCase.create_stock(number=25, user=user)  # list of 25 stock objects
     #     # test get list
@@ -441,7 +452,7 @@ class StockDataViewSetTestCase(APITestCase):
     #     """
     #     APIRequestFactory: test query string
     #     """
-    #     request = factory.get('/api/v1/stock/?desc=test', {}, format='json')
+    #     request = factory.get('/api/v2/stock/?desc=test', {}, format='json')
     #     force_authenticate(request, user=user, token=user.auth_token)
     #     view = StockDataViewSet.as_view({'get': 'list'})
     #     response = view(request)
@@ -452,7 +463,7 @@ class StockDataViewSetTestCase(APITestCase):
     #     """
     #     APIRequestFactory: test retrieve a specific record
     #     """
-    #     request = factory.get('/api/v1/stock/11/', {}, format='json')
+    #     request = factory.get('/api/v2/stock/11/', {}, format='json')
     #     force_authenticate(request, user=user, token=user.auth_token)
     #     view = StockDataViewSet.as_view({'get': 'retrieve'})
     #     response = view(request, pk=stock[10].pk)
@@ -476,44 +487,44 @@ class StockDataViewSetTestCase(APITestCase):
         if not staff
         """
         # test returns 403
-        response = client.get(f'/api/v1/stock/')
+        response = client.get(f'/api/v2/stock/')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         # test returns requested specific record
-        response = client.get(f'/api/v1/stock/{stock[10].pk}/')
+        response = client.get(f'/api/v2/stock/{stock[10].pk}/')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         # test returns records in response to query on desc
-        response = client.get(f'/api/v1/stock/?desc=tes')
+        response = client.get(f'/api/v2/stock/?desc=tes')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-        response = client.get(f'/api/v1/stock/?desc=tes_i_do_not_exist')
+        response = client.get(f'/api/v2/stock/?desc=tes_i_do_not_exist')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         """
         if staff
         """
         with as_staff(user):
             # test returns records
-            response = client.get(f'/api/v1/stock/', format='json')
+            response = client.get(f'/api/v2/stock/', format='json')
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             self.assertGreater(len(response.data['results']), 0)
             # test returns requested specific record
-            response = client.get(f'/api/v1/stock/{stock[10].pk}/', format='json')
+            response = client.get(f'/api/v2/stock/{stock[10].pk}/', format='json')
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             self.assertEqual(response.data['id'], stock[10].id)
             # test returns records in response to query on desc
-            response = client.get(f'/api/v1/stock/?desc=Test%20description%2011', format='json')
+            response = client.get(f'/api/v2/stock/?desc=Test%20description%2011', format='json')
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             self.assertIn('Test description 11', response.data['results'][0]['desc'])
             # test returns empty results if invalid characters
-            response = client.get(f'/api/v1/stock/?desc=Test%20description%20*(', format='json')
+            response = client.get(f'/api/v2/stock/?desc=Test%20description%20*(', format='json')
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             self.assertEqual(len(response.data['results']), 0)
             # test returns empty if query does not exist
-            response = client.get(f'/api/v1/stock/?desc=Test%20description%2011_i_do_not_exist', format='json')
+            response = client.get(f'/api/v2/stock/?desc=Test%20description%2011_i_do_not_exist', format='json')
             self.assertEqual(response.data['count'], 0)
             # test order by id
-            response = client.get(f'/api/v1/stock/?order_by=id', format='json')
+            response = client.get(f'/api/v2/stock/?order_by=id', format='json')
             self.assertGreater(response.json()['results'][1]['id'], response.data['results'][0]['id'])
             # test order by SKU
-            response = client.get(f'/api/v1/stock/?order_by=sku', format='json')
+            response = client.get(f'/api/v2/stock/?order_by=sku', format='json')
             sku_list = [r['sku'] for r in response.data['results']]
             self.assertEqual(sku_list, sorted(sku_list))
             # test order by desc
@@ -529,13 +540,13 @@ class StockDataViewSetTestCase(APITestCase):
             updated_list = [r['record_updated'] for r in response.data['results']]
             self.assertEqual(updated_list, sorted(updated_list))
             # test order by id negative
-            response = client.get(f'/api/v1/stock/?order_by=-id', format='json')
+            response = client.get(f'/api/v2/stock/?order_by=-id', format='json')
             self.assertLess(response.data['results'][1]['id'], response.json()['results'][0]['id'])
             # test limit
-            response = client.get(f'/api/v1/stock/?limit=5', format='json')
+            response = client.get(f'/api/v2/stock/?limit=5', format='json')
             self.assertEqual(len(response.data['results']), 5)
             # test offset
-            response = client.get(f'/api/v1/stock/?limit=5&offset=1', format='json')
+            response = client.get(f'/api/v2/stock/?limit=5&offset=1', format='json')
             self.assertEqual(response.data['results'][4]['id'], 6)
 
     def test_perform_create(self):
@@ -549,19 +560,19 @@ class StockDataViewSetTestCase(APITestCase):
         client = APIClient()
         client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
         # test returns 403 if user not staff
-        response = client.post(f'/api/v1/stock/', {"units_total": "1", "unit_price": "5.36", "desc": "tester",
+        response = client.post(f'/api/v2/stock/', {"units_total": "1", "unit_price": "5.36", "desc": "tester",
                                                    "sku": "008-952"}, format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         # test returns 400 if staff but not admin
         with as_staff(user):
-            response = client.post(f'/api/v1/stock/', {
+            response = client.post(f'/api/v2/stock/', {
                 "units_total": "1", "unit_price": "5.36", "desc": "tester",
                 "sku": "008-952"}, format='json')
             self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         # test returns 200 if staff and admin
         with as_staff(user):
             with as_admin(user=user, group=group):
-                response = client.post(f'/api/v1/stock/', {"units_total": "1", "unit_price": "5.36", "desc": "tester",
+                response = client.post(f'/api/v2/stock/', {"units_total": "1", "unit_price": "5.36", "desc": "tester",
                                                            "sku": "008-952"}, format='json')
                 self.assertEqual(response.status_code, status.HTTP_201_CREATED)
                 # test response is correct
@@ -581,34 +592,33 @@ class StockDataViewSetTestCase(APITestCase):
         client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
         stock = StockDataViewSetTestCase.create_stock(number=25, user=user)  # list of 25 stock objects
         # test returns 403 if user not staff
-        response = client.patch(f'/api/v1/stock/{stock[0].pk}/', data={"units_total": 77}, format='json')
+        response = client.patch(f'/api/v2/stock/{stock[0].pk}/', data={"units_total": 77}, format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         with as_staff(user):
-            """test changing any other value than units_to_transfer is ignored if staff but not administrator
+            """test changing any other value than units_to_transfer fails if staff but not administrator
             and also that units_to_transfer is accepted"""
             orig_values = {"desc": stock[0].desc, "unit_price": stock[0].unit_price, "sku": stock[0].sku}
             new_values = {"desc": "A new description", "unit_price": "56.32", "sku": "896-528",
                           "units_to_transfer": "7"}
             for key, value in new_values.items():
-                response = client.patch(f'/api/v1/stock/{stock[0].pk}/', data={key: value}, format='json')
-                self.assertEqual(response.status_code, status.HTTP_200_OK)
+                response = client.patch(f'/api/v2/stock/{stock[0].pk}/', data={key: value}, format='json')
                 if key != 'units_to_transfer':
-                    self.assertEqual(response.data[key], str(orig_values[key]))
+                    self.assertEqual(getattr(stock[0], key), orig_values[key])
                 else:
-                    self.assertEqual(response.data[key], "7")
+                    self.assertEqual(response.data['data'][key], 7)
             with as_admin(user=user, group=group):
                 # test increase stock succeeds if staff and if administrator
-                response = client.patch(f'/api/v1/stock/{stock[0].pk}/', data={"units_total": 77}, format='json')
+                response = client.patch(f'/api/v2/stock/{stock[0].pk}/', data={"units_total": 77}, format='json')
                 self.assertEqual(response.status_code, status.HTTP_200_OK)
-                self.assertEqual(response.data['units_total'], 77)
+                self.assertEqual(response.data['data']['units_total'], 77)
                 """test changing other values succeeds if staff and administrator"""
                 # first delete units_to_transfer from test, as that wouldn't be changed as not part of model
                 del new_values['units_to_transfer']
                 # now run test
                 for key, value in new_values.items():
-                    response = client.patch(f'/api/v1/stock/{stock[0].pk}/', data={key: value}, format='json')
+                    response = client.patch(f'/api/v2/stock/{stock[0].pk}/', data={key: value}, format='json')
                     self.assertEqual(response.status_code, status.HTTP_200_OK)
-                    self.assertNotEqual(response.data[key], str(orig_values[key]))
+                    self.assertNotEqual(response.data['data'][key], str(orig_values[key]))
 
     def test_perform_destroy(self):
         # setup
@@ -619,16 +629,60 @@ class StockDataViewSetTestCase(APITestCase):
         client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
         stock = StockDataViewSetTestCase.create_stock(number=25, user=user)  # list of 25 stock objects
         # test returns 403 if not staff
-        response = client.delete(f'/api/v1/stock/{stock[11].pk}/', format='json')
+        response = client.delete(f'/api/v2/stock/{stock[11].pk}/', format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         with as_staff(user):
             # test returns 403 if staff but not administrator
-            response = client.delete(f'/api/v1/stock/{stock[11].pk}/', format='json')
+            response = client.delete(f'/api/v2/stock/{stock[11].pk}/', format='json')
             self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
             self.assertEqual(response.data[0], 'You are not authorized to delete stock lines!')
             with as_admin(user=user, group=group):
                 # test deletes stock item if staff and administrator
-                response = client.delete(f'/api/v1/stock/{stock[11].pk}/', format='json')
+                response = client.delete(f'/api/v2/stock/{stock[11].pk}/', format='json')
                 assert response.status_code == status.HTTP_204_NO_CONTENT
-                verify_response = client.get(f'/api/v1/stock/{stock[11].pk}/', format='json')
+                verify_response = client.get(f'/api/v2/stock/{stock[11].pk}/', format='json')
                 assert verify_response.status_code == status.HTTP_404_NOT_FOUND
+
+    def test_perform_bulk_partial_update(self):
+        # setup
+        user = User.objects.create_user('tester', settings.DEFAULT_FROM_EMAIL, 'myPwd8ntGr8', is_staff=False)
+        group = Group.objects.create(name='administrators')  # create 'administrators' group
+        token = Token.objects.get(user__username='tester')
+        client = APIClient()
+        client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+        stock = StockDataViewSetTestCase.create_stock(number=25, user=user)  # list of 25 stock objects
+        # test returns 403 if user not staff
+        response = client.patch(f'/api/v2/stock/', data={"units_total": 77}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        with as_staff(user):
+            """test changing any other value than units_to_transfer is ignored if staff but not administrator
+            and also that units_to_transfer is accepted"""
+            orig_values = {
+                "records": [
+                    {"id": stock[0].id, "desc": stock[0].desc, "units_total": stock[0].units_total,
+                     "unit_price": stock[0].unit_price, "sku": stock[0].sku}]}
+            new_values = {
+                "records": [{"id": stock[0].id, "desc": "A new description", "unit_price": "56.32", "sku": "896-528",
+                             "units_to_transfer": "7", "units_total": "777"}]}
+            response = client.patch(f'/api/v2/stock/', data=new_values, format='json')
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            for key, value in response.data[0]['data'].items():
+                if key in new_values['records'][0]:
+                    if key != 'units_to_transfer':
+                        self.assertEqual(str(response.data[0]['data'][key]), str(orig_values['records'][0][key]))
+                    else:
+                        self.assertEqual(str(response.data[0]['data'][key]), "7")
+            with as_admin(user=user, group=group):
+                # test increase stock succeeds if staff and if administrator
+                response = client.patch(f'/api/v2/stock/', data=new_values, format='json')
+                self.assertEqual(response.status_code, status.HTTP_200_OK)
+                self.assertEqual(response.data[0]['data']['units_total'], 777)
+                """test changing other values succeeds if staff and administrator"""
+                # first delete units_to_transfer from test, as that wouldn't be changed as not part of model
+                del new_values['records'][0]['units_to_transfer']
+                # now run test
+                for key, value in new_values['records'][0].items():
+                    if key != 'id':  # id clearly will not change, so ignore that in test
+                        response = client.patch(f'/api/v2/stock/', data=new_values, format='json')
+                        self.assertEqual(response.status_code, status.HTTP_200_OK)
+                        self.assertNotEqual(str(response.data[0]['data'][key]), str(orig_values['records'][0][key]))

@@ -50,8 +50,7 @@ const DataTableData = ({stockRecord = {}, handleEditRecord, handleDeleteLine, fo
                             start_units_total: units_total
                         }
                     });
-                    Object.assign(stockRecord.meta, {deleteRecord: true});
-                    return handleEditRecord({stockRecord: stockRecord})
+                    return handleEditRecord({stockRecord: stockRecord, deleteRecord: true})
                 }}
                                        className={'table-btn btn btn-danger w-100'} id={`deleteButton_${item.id}`}>
                     <FontAwesomeIcon icon={"trash-alt"}/></button> : ''}

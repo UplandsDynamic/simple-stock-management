@@ -3,8 +3,6 @@ import './css/loginform.css';
 import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap/dist/js/bootstrap.js'
 import processRequest from "./api";
-/* helpers */
-import cloneDeep from "lodash.clonedeep"
 
 class LoginForm extends React.Component {
 
@@ -34,7 +32,7 @@ class LoginForm extends React.Component {
             newPassword: '',
             messages: LoginForm._MESSAGES
         };
-        this.state = cloneDeep(this.initialState);
+        this.state = JSON.parse(JSON.stringify(this.initialState));
     }
 
     resetState() {

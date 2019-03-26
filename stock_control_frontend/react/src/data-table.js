@@ -31,13 +31,12 @@ const DataTable = ({
 
     const _handleAddRecord = ({stockRecord = null} = {}) => {
         setMessage({message: null});  // clear old messages
-        Object.assign(stockRecord.meta, {newRecord: true});
-        openStockUpdateModalHandler({stockRecord: stockRecord}); // open modal
+        openStockUpdateModalHandler({stockRecord: stockRecord, newRecord: true}); // open modal
     };
 
-    const _handleEditRecord = ({stockRecord = null} = {}) => {
+    const _handleEditRecord = ({stockRecord = null, deleteRecord = false} = {}) => {
         setMessage({message: null}); // clear old messages
-        openStockUpdateModalHandler({stockRecord});  // open update modal
+        openStockUpdateModalHandler({stockRecord, deleteRecord});  // open update modal
     };
 
     const _handleSearch = ({stockRecord = {}, term = null} = {}) => {

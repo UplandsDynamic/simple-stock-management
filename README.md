@@ -8,8 +8,6 @@ It has web frontend that connects to a RESTful API backend. Data is stored in ei
 
 ## Key features
 
-Note: The "truck" features are available as of version 2.1.1 (beta, currently devel branch).
-
 - Administrator may add, edit and delete stock from database.
 - Store managers may request transfers ("order") stock from the "warehouse".
 - Dynamic search of stock lines (SKU and description).

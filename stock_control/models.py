@@ -5,7 +5,6 @@ from django.conf import settings
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 from . import custom_validators
-from .email import SendEmail
 import logging
 
 # Get an instance of a logger
@@ -79,7 +78,10 @@ class StockData(models.Model):
         super(StockData, self).save(*args, **kwargs)
 
 
-@receiver(post_save, sender=StockData)
-def email(sender, instance, **kwargs):
-    if hasattr(instance, 'update'):  # only send email if an update (not following new model creation)
-        SendEmail().compose(instance=instance, notification_type=SendEmail.EmailType.STOCK_TRANSFER)
+"""
+Dispatch email on save (note: commented out now, as this moved to views.perform_update()
+"""
+# @receiver(post_save, sender=StockData)
+# def email(sender, instance, **kwargs):
+#     if hasattr(instance, 'update'):  # only send email if an update (not following new model creation)
+#         SendEmail().compose(instance=instance, notification_type=SendEmail.EmailType.STOCK_TRANSFER)
