@@ -153,7 +153,7 @@ class StockDataSerializer(serializers.HyperlinkedModelSerializer):
         """
         validate units_to_transfer (a non-model field), on update (hence test for self.instance), if it's present
         """
-        if self.instance and data.get('units_to_transfer', None):
+        if self.instance and 'units_to_transfer' in data:
             try:
                 int(data.get('units_to_transfer'))
             except ValueError as e:
@@ -194,28 +194,22 @@ class StockDataSerializer(serializers.HyperlinkedModelSerializer):
         """
         for k in list(validated_data.keys()):
             if k not in StockData.STAFF_ALLOWED_TO_UPDATE and not self.administrators_check(self):
-                # raise serializers.ValidationError(detail=f'Record update denied for this user level')
-                del validated_data[k]  # rather than throw error, simply delete keys from update if unauthorized
+                raise serializers.ValidationError(detail=f'Record update denied for this user level')
+                # del validated_data[k]  # OR, rather than throw error, simply delete keys from update if unauthorized
             # allow only superusers to INCREASE units_total
             if 'units_total' in validated_data and not self.administrators_check(self) and \
                     int(validated_data['units_total']) > instance.units_total:
                 raise serializers.ValidationError(detail=f'Only administrators may increase stock!')
-        # identify as update (not new record) for purpose of email generation in post_save signal
-        instance.update = True
-        # add request user to instance, to pass to post_save callback for email
-        instance.user = self.context['request'].user
-        # pass non-model field units_to_transfer through, for email
         if 'units_to_transfer' in validated_data:
-            instance.units_to_transfer = int(validated_data['units_to_transfer'])
-        else:
-            instance.units_to_transfer = 0
-        if instance.units_to_transfer <= instance.units_total:  # if not trying to transfer more than remaining stock
-            """calculate & set the remaining stock on the instance 
-            (needs to be done manually, as units_to_transfer wasn't a model field)"""
-            instance.units_total -= instance.units_to_transfer
-            # call parent method to do the update
-            super().update(instance, validated_data)
-            # return the updated instance
-            return instance
-        else:
-            raise serializers.ValidationError(detail=f'Stock levels must not fall below 0!')
+            transfer = int(validated_data['units_to_transfer'])  # how many to transfer
+            # if transferring stock, calculate the new number and also ensure it doesn't fall below 0
+            if transfer <= instance.units_total:
+                """calculate & set the remaining stock on the instance 
+                (needs to be done manually, as units_to_transfer wasn't a model field)"""
+                instance.units_total -= transfer
+            else:
+                raise serializers.ValidationError(detail=f'Stock levels must not fall below 0!')
+        # call parent method to do the update
+        super().update(instance, validated_data)
+        # return the updated instance
+        return instance

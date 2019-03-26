@@ -2,12 +2,12 @@ import './css/data-table.css';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
 import React from 'react'
 
-const StockUpdateTable = ({stockRecord = null, authMeta = null, handleRecordUpdate, dataUpdate} = {}) => {
+const StockUpdateTable = ({stockRecord = null, authMeta = null, handleRecordUpdate, dataUpdate,
+                          newRecord = false, deleteRecord = false} = {}) => {
     let {units_total, desc, unit_price, sku, units_to_transfer = 0, start_units_total = 0} = stockRecord.data.updateData;
-    const {newRecord, deleteRecord} = stockRecord.meta;
     const {userIsAdmin} = authMeta;
     // const to disable edit button if user not admin or it's a new record
-    const editDisabled = !(userIsAdmin || newRecord);
+    const managerTransfer = !(userIsAdmin || newRecord);
 
     const handleEnterKey = (e) => {
         if (e.keyCode === 13) {
@@ -17,7 +17,7 @@ const StockUpdateTable = ({stockRecord = null, authMeta = null, handleRecordUpda
              "Enter" as a keystroke, however testing onKeyDown does.
              */
             e.preventDefault();
-            handleRecordUpdate();  // submit immediately if Enter pressed
+            handleRecordUpdate({adminUpdate: !managerTransfer, newRecord});  // submit immediately if Enter pressed
         }
     };
 
@@ -37,7 +37,7 @@ const StockUpdateTable = ({stockRecord = null, authMeta = null, handleRecordUpda
             <div className={'container'}>
                 <div className={'row'}>
                     <div className="col-sm">
-                        <table className={`table stockTable${editDisabled ? "-disabled" : ''}
+                        <table className={`table stockTable${managerTransfer ? "-disabled" : ''}
                         table-bordered table-dark table-hover`}>
                             <caption>Current Record</caption>
                             <thead>
@@ -55,7 +55,7 @@ const StockUpdateTable = ({stockRecord = null, authMeta = null, handleRecordUpda
                                            onKeyDown={(e => !disableButton ? handleEnterKey(e) : null)}
                                            onChange={e => dataUpdate({stockRecord, updated: {sku: e.target.value}})}
                                            className={'form-control'} type={'text'}
-                                           disabled={editDisabled}
+                                           disabled={managerTransfer}
                                     />
                                 </td>
                             </tr>
@@ -70,13 +70,13 @@ const StockUpdateTable = ({stockRecord = null, authMeta = null, handleRecordUpda
                                                updated: {desc: validateDesc(e.target.value)}
                                            })}
                                            className={'form-control'} type={'text'}
-                                           disabled={editDisabled}/>
+                                           disabled={managerTransfer}/>
                                 </td>
                             </tr>
                             <tr>
                                 <th scope={'row'}><label>Warehouse quantity</label></th>
                                 <td>
-                                    <input value={!editDisabled ? units_total : start_units_total}
+                                    <input value={!managerTransfer ? units_total : start_units_total}
                                            name={'quantity'}
                                            onKeyDown={(e => !disableButton ? handleEnterKey(e) : null)}
                                            onChange={e => {
@@ -91,7 +91,7 @@ const StockUpdateTable = ({stockRecord = null, authMeta = null, handleRecordUpda
                                                return dataUpdate({stockRecord, updated: {units_total: ''}})
                                            }}
                                            className={'form-control'} type={'text'}
-                                           disabled={editDisabled} autoFocus={true}/>
+                                           disabled={managerTransfer} autoFocus={true}/>
                                 </td>
                             </tr>
                             <tr>
@@ -107,13 +107,13 @@ const StockUpdateTable = ({stockRecord = null, authMeta = null, handleRecordUpda
                                                }
                                            })}
                                            className={'form-control'} type={'text'}
-                                           disabled={editDisabled}
+                                           disabled={managerTransfer}
                                     />
                                 </td>
                             </tr>
                             </tbody>
                         </table>
-                        <div className={!editDisabled ? 'd-none' : 'row transfer'}>
+                        <div className={!managerTransfer ? 'd-none' : 'row transfer'}>
                             <div className={'col-sm'}>
                                 Units to Transfer
                             </div>
@@ -174,14 +174,14 @@ const StockUpdateTable = ({stockRecord = null, authMeta = null, handleRecordUpda
                             onClick={(e) => {
                                 if (!disableButton) {
                                     e.preventDefault();
-                                    handleRecordUpdate()
+                                    handleRecordUpdate({adminUpdate: !managerTransfer, newRecord})
                                 }
                             }}
                             className={'btn btn-lg btn-warning stockActionButton pull-right'}
                             disabled={disableButton}
                         >
                             {newRecord ?
-                                'New Stock Item' : editDisabled ? 'Transfer Now!' : 'Edit Stock Record'}
+                                'New Stock Item' : managerTransfer ? 'Load Truck' : 'Edit Stock Record'}
                         </button>
                     </div>
                 </div>

@@ -80,8 +80,12 @@ const _getStock = ({stockRecord = null, csrfToken = null, requestMethod = null, 
 };
 
 const _updateStock = ({stockRecord = null, csrfToken = null, requestMethod = null, url = null} = {}) => {
-    if (stockRecord) {
-        // build url
+    // manager's transfer updates
+    if ('records' in stockRecord) {
+        url =  `${process.env.REACT_APP_API_DATA_ROUTE}/stock/`;
+        return _makeRequest({requestData: {...stockRecord}, csrfToken, requestMethod, url})
+    } else if (stockRecord) // admin's stock record updates
+    { // build url
         url = url ? url : `${process.env.REACT_APP_API_DATA_ROUTE}/stock/${stockRecord.data.updateData.id}/`;
         return _makeRequest({stockRecord, csrfToken, requestMethod, url})
     }

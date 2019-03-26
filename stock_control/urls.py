@@ -26,17 +26,19 @@ Note: Mapping for actions (used in as_view), are:
     'post': 'create'
     'put': 'update',
     'patch': 'partial_update',
-    'delete': 'destroy'
+    'patch': 'perform_single_update', # CUSTOM ACTION, routed in /api/v1/stock/<PK> (with path)
+    'patch': 'perform_bulk_partial_update',  # CUSTOM ACTION, routed in /api/v1/stock/ (without the ID in the path)
+    'delete': 'destroy',
     }
 """
 functional_view_urlpatterns = [
-    url('^v1/change-password/(?P<username>[a-zA-Z0-9.].+)/$', views.PasswordUpdateViewSet.as_view(
+    url('^v2/change-password/(?P<username>[a-zA-Z0-9.].+)/$', views.PasswordUpdateViewSet.as_view(
         {'patch': 'partial_update'})),
-    url('^v1/stock/$', views.StockDataViewSet.as_view(
-        {'get': 'list', 'post': 'create'})),
-    url('^v1/stock/(?P<pk>\d+)/$', views.StockDataViewSet.as_view(
-        {'get': 'retrieve', 'patch': 'partial_update', 'delete': 'destroy', 'put': 'update'})),
-    url('^v1/stock/latest/$', views.StockDataViewSet.as_view(
+    url('^v2/stock/$', views.StockDataViewSet.as_view(
+        {'get': 'list', 'post': 'create', 'patch': 'perform_bulk_partial_update'})),
+    url('^v2/stock/(?P<pk>\d+)/$', views.StockDataViewSet.as_view(
+        {'get': 'retrieve', 'patch': 'perform_single_update', 'delete': 'destroy', 'put': 'update'})),
+    url('^v2/stock/latest/$', views.StockDataViewSet.as_view(
         {'get': 'latest'})),
 ]
 

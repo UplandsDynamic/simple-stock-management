@@ -1,10 +1,9 @@
 import logging
 from django.contrib.auth.models import User, Group
 from django.core.exceptions import ValidationError
-from rest_framework import (viewsets, permissions, serializers)
+from rest_framework import (viewsets, permissions, serializers, status)
 from rest_framework.decorators import action
 from rest_framework.response import Response
-
 from .custom_validators import RequestQueryValidator, validate_search
 from .serializers import (
     UserSerializer,
@@ -15,6 +14,7 @@ from .serializers import (
 from .models import StockData
 from .custom_permissions import AccessPermissions
 from django.db.models import Q
+from .email import SendEmail
 
 """
 Note about data object (database record):
@@ -133,7 +133,7 @@ class StockDataViewSet(viewsets.ModelViewSet):
         """
         override perform_update to perform any additional filtering, modification, etc
         """
-        super().perform_update(serializer)
+        super().perform_update(serializer)  # call to parent method to save the update
 
     def perform_destroy(self, instance):
         # only allow admins to delete objects
@@ -141,6 +141,22 @@ class StockDataViewSet(viewsets.ModelViewSet):
             super().perform_destroy(instance)
         else:
             raise serializers.ValidationError(detail='You are not authorized to delete stock lines!')
+
+    """
+    Custom actions
+    """
+
+    @staticmethod
+    def serialize_model_instance(instance=None):
+        return {
+            'id': instance.id,
+            'record_created': instance.record_created,
+            'record_updated': instance.record_updated,
+            'sku': instance.sku,
+            'desc': instance.desc,
+            'units_total': instance.units_total,
+            'unit_price': instance.unit_price,
+        } if instance else None
 
     @action(methods=['get'], detail=False)
     def latest(self, request):
@@ -151,3 +167,105 @@ class StockDataViewSet(viewsets.ModelViewSet):
         latest = self.get_queryset().order_by('record_created').last()
         serializer = self.get_serializer_class()(latest, context={'request': request})
         return Response(serializer.data)
+
+    @action(methods=['patch'], detail=True)
+    def perform_single_update(self, request, pk):
+        """
+        Use a custom action rather than call perform_update direct, to allow data to be
+        nicely formatted to pass to email method
+        """
+        err = []
+        record = request.data
+        updated_record = {}
+        user_is_admin = request.user.groups.filter(name='administrators').exists()
+        transfer = False
+        try:
+            instance = self.get_queryset().get(id=pk)
+            serializer = self.get_serializer(data=record, instance=instance, partial=True)
+            transfer = 'units_to_transfer' in serializer.initial_data  # set this for dispatch_email()
+            serializer.is_valid(raise_exception=True)
+            saved = serializer.save()
+            updated_record = self.serialize_model_instance(instance=saved)
+            updated_record['units_to_transfer'] = int(serializer.initial_data['units_to_transfer']) if transfer else 0
+        except StockData.DoesNotExist as e:
+            err.append(str(e))
+        except serializers.ValidationError as e:
+            err.append(e.detail[0])
+        except KeyError as e:
+            err.append('Request data list was empty! Perhaps the record id was incorrect or missing.')
+        except Exception as e:
+            err.append(f'An unspecified error occurred whilst attempting to update: {str(e)}')
+        if not err:
+            result = {'success': True, 'error': None, 'user_is_admin': user_is_admin,
+                      'data': updated_record}  # return updated data
+        else:
+            result = {'success': False, 'error': err, 'user_is_admin': user_is_admin,
+                      'data': record}  # return original data
+        try:
+            self.dispatch_email(records=[result], user=request.user, transfer=transfer)  # dispatch email
+        except Exception as e:
+            logger.error(f'An error occurred whilst attempting to send email: {e}')
+        return Response(result, status=status.HTTP_400_BAD_REQUEST if not result['success'] else status.HTTP_200_OK)
+
+    @action(methods=['patch'], detail=True)
+    def perform_bulk_partial_update(self, request):
+        """
+        Custom method to receive & process stock unit updates in bulk.
+        Route: /api/v1/stock/ (with no id in path, as is the case for updates on single items)
+        """
+        data = request.data.get('records') if 'records' in request.data else []
+        result = []
+        updated_record = None
+        transfer = False
+        units_to_transfer = 0
+        for record in data:
+            err = []
+            try:  # get the existing record from StockRecord model
+                instance = self.get_queryset().get(id=record['id'])
+            except (StockData.DoesNotExist, Exception) as e:  # if the record did not exist
+                instance = None
+                err.append(str(e))
+                result.append({'success': False, 'error': err, 'data': {}})
+            if instance:  # if the existing record instance did exist in the StockRecord model
+                try:
+                    serializer = self.get_serializer(data=record, instance=instance, partial=True)
+                    if 'units_to_transfer' in serializer.initial_data:
+                        # set these variables for dispatch_email()
+                        transfer = True
+                        units_to_transfer = int(serializer.initial_data['units_to_transfer'])
+                    serializer.is_valid(raise_exception=True)
+                    saved = serializer.save()
+                    updated_record = self.serialize_model_instance(instance=saved)
+                    updated_record['units_to_transfer'] = int(
+                        serializer.initial_data['units_to_transfer']) if transfer else 0
+                except serializers.ValidationError as e:
+                    err.append(e.detail[0])
+                except KeyError as e:
+                    err.append('Request data list was empty! Perhaps the record id was incorrect or missing.')
+                except Exception as e:
+                    err.append(f'An unspecified error occurred whilst attempting to update: {str(e)}')
+                if not err:
+                    result.append({'success': True, 'error': None, 'data': updated_record})
+                else:
+                    record = {'id': instance.id, 'record_created': instance.record_created,
+                              'record_updated': instance.record_updated, 'sku': instance.sku,
+                              'desc': instance.desc, 'units_total': instance.units_total,
+                              'unit_price': instance.unit_price, 'units_to_transfer': units_to_transfer}
+                    result.append({'success': False, 'error': err, 'data': record})
+                del instance  # delete the instance
+        if data:  # if data was submitted, dispatch transaction confirmation email
+            try:
+                self.dispatch_email(records=result, user=request.user, transfer=transfer)
+            except Exception as e:
+                logger.error(f'An error occurred whilst attempting to send email: {e}')
+        return Response(result, status=status.HTTP_400_BAD_REQUEST if not data else status.HTTP_200_OK)
+
+    @staticmethod
+    def dispatch_email(records=None, transfer=False, user=None):
+        """
+        method to dispatch email on successful update if transferring
+        """
+        email_notify_on_transfer = (records and len(records) > 0) and transfer
+        if email_notify_on_transfer:
+            SendEmail().compose(records=records,
+                                user=user, notification_type=SendEmail.EmailType.STOCK_TRANSFER)

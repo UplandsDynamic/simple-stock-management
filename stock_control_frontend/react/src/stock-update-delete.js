@@ -1,9 +1,9 @@
 import './css/data-table.css';
 import React from 'react'
 
-const StockUpdateDelete = ({stockRecord = null, handleCloseModal, handleRecordUpdate} = {}) => {
+const StockUpdateDelete = ({stockRecord = null, handleCloseModal, handleRecordUpdate, deleteRecord = false} = {}) => {
     const {desc, sku, unit_price, units_total} = stockRecord.data.updateData;
-    if (stockRecord.meta.deleteRecord) {
+    if (deleteRecord) {
         return (
             <React.Fragment>
                 <div className={'container'}>
@@ -23,7 +23,7 @@ const StockUpdateDelete = ({stockRecord = null, handleCloseModal, handleRecordUp
                                         <button
                                             onClick={(e) => {
                                                 e.preventDefault();
-                                                return handleRecordUpdate();
+                                                return handleRecordUpdate({adminUpdate: true, deleteRecord: true});
                                             }}
                                             className={'delete-btn btn btn-danger'}>Yes, delete!
                                         </button>

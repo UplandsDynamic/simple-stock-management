@@ -4,14 +4,13 @@ import React from 'react';
 import Header from './header.js';
 import DataTable from './data-table.js';
 import StockUpdateModal from './stock-update-modal.js';
+import TruckModal from './truck.js';
 import Message from './message.js';
 import Footer from './footer.js';
 /* functions */
 import processRequest from "./api";
 /* cookies */
 import Cookies from 'js-cookie';
-/* helpers */
-import cloneDeep from "lodash.clonedeep"
 /* axios */
 import axios from 'axios/index';
 /* css */
@@ -20,10 +19,10 @@ import './css/index.css';
 import {library} from '@fortawesome/fontawesome-svg-core'
 import {
     faSyncAlt, faEllipsisH, faPlus, faPlusSquare, faMinus, faMinusSquare,
-    faTrashAlt, faEdit
+    faTrashAlt, faEdit, faTruck
 } from '@fortawesome/free-solid-svg-icons'
 
-library.add(faSyncAlt, faEllipsisH, faPlus, faTrashAlt, faEdit, faPlusSquare, faMinus, faMinusSquare);
+library.add(faSyncAlt, faEllipsisH, faPlus, faTrashAlt, faEdit, faPlusSquare, faMinus, faMinusSquare, faTruck);
 
 
 axios.defaults.withCredentials = true;
@@ -65,9 +64,7 @@ class App extends React.Component {
                     previous: null,
                     next: null,
                     cacheControl: 'no-cache',  // no caching by default, so always returns fresh data
-                    search: '',
-                    newRecord: false,
-                    deleteRecord: false
+                    search: ''
                 },
                 data: {
                     results: [],
@@ -86,14 +83,14 @@ class App extends React.Component {
                 authenticated: false,
                 userIsAdmin: false,
             },
-            stockUpdateModalOpen: false,
-            apiMode: this.apiOptions.GET_STOCK,  // will be one of apiOptions when triggered
+            stockUpdateModalOpen: {state: false, deleteRecord: false, newRecord: false},
+            truckModalOpen: false,
             message: null,
             messageClass: '',
             greeting: process.env.REACT_APP_GREETING,
-            csrfToken: null
+            csrfToken: null,
         };
-        this.state = cloneDeep(this.initialState);
+        this.state = JSON.parse(JSON.stringify(this.initialState));
     }
 
     componentDidMount() {
@@ -129,7 +126,7 @@ class App extends React.Component {
 
     setAuthentication = () => {
         let authenticated = !!this.getSessionStorage('token');
-        let clonedAuthMeta = cloneDeep(this.state.authMeta);
+        let clonedAuthMeta = JSON.parse(JSON.stringify(this.state.authMeta));
         Object.assign(clonedAuthMeta, {authenticated});
         // set authentication state and fetch new stock records when done (in a callback)
         this.setState({authMeta: {...clonedAuthMeta}}, this.getRecordsHandler);
@@ -138,7 +135,7 @@ class App extends React.Component {
 
     setAuthorized = ({role = 'admin', state = false} = {}) => {
         // called after each api response returning stock data
-        let clonedAuthMeta = cloneDeep(this.state.authMeta);
+        let clonedAuthMeta = JSON.parse(JSON.stringify(this.state.authMeta));
         if (role === 'admin') {
             Object.assign(clonedAuthMeta, {userIsAdmin: state});
         }
@@ -163,23 +160,87 @@ class App extends React.Component {
         this.setState({stockRecord: newStockRecord});
     };
 
-    openStockUpdateModalHandler = ({stockRecord = null} = {}) => {
+    openStockUpdateModalHandler = ({stockRecord = null, deleteRecord = false, newRecord = false} = {}) => {
         /*
         method to open the stock addition/update/delete modal
          */
-        let apiMode = this.state.apiMode;
-        if (stockRecord.meta.deleteRecord) {
-            apiMode = this.apiOptions.DELETE_STOCK_LINE
-        } else if (stockRecord.meta.newRecord) {
-            apiMode = this.apiOptions.ADD_STOCK
-        } else {
-            apiMode = this.apiOptions.PATCH_STOCK
-        }
         Object.assign(stockRecord, {...stockRecord});
         this.setStockRecordState({newStockRecord: stockRecord});
-        this.setState({apiMode});
-        this.setStockUpdateModalState({state: true});
+        this.setStockUpdateModalState({state: true, deleteRecord, newRecord});
     };
+
+    openTruckModalHandler = ({returnedRecords = null, state = false, actionCancelled = false} = {}) => {
+        /*
+        method to open the truck modal
+         */
+        if (!state) {  // actions to do when modal set to closed
+            this.setState({truckModalOpen: state});   // close it first, to avoid showing reset data values
+            if (!actionCancelled) {  // actions to do if CANCEL was NOT clicked when it closes (i.e. action time)
+                let stockRecordCopy = JSON.parse(JSON.stringify(this.state.stockRecord));
+                returnedRecords.forEach((returnedRecord, index) => {
+                    stockRecordCopy.data.results.forEach((stockRecord, i) => {
+                        if (stockRecord.id === returnedRecord.data.id) {
+                            stockRecordCopy.data.results[i].units_total = returnedRecord.data.units_total;
+                        }
+                    })
+                });
+                this.setState({stockRecord: stockRecordCopy});
+                this.setMessage({
+                    message: 'Transfer successfully initiated! Check email for confirmation of transferred units.',
+                    messageClass: 'alert alert-success'
+                });
+            }
+        } else { // actions to do when modal set to open
+            this.setState({truck: this.getTruck()}); // refresh truck data from local storage
+            this.setState({truckModalOpen: state});
+        }
+    };
+
+    getTruck() {
+        const truck = localStorage.getItem('truck');
+        return truck ? JSON.parse(localStorage.getItem('truck')) : [];
+    };
+
+    emptyTruck() {
+        localStorage.removeItem('truck');
+    }
+
+    loadTruck({cargo = null} = {}) {
+        let exists = false;
+        let truck = this.getTruck();
+        if (truck.length > 0) {
+            for (let consignment = 0; consignment < truck.length; consignment++) {
+                if (truck[consignment].cargo.id === cargo.id) {
+                    truck[consignment].cargo = {...cargo};
+                    exists = true;
+                }
+            }
+        }
+        if (!exists) truck.push({cargo});
+        localStorage.setItem('truck', JSON.stringify(truck));
+    }
+
+    changeTruckUnits({consignmentListIndex = null, func = null, cargo = null} = {}) {
+        if (consignmentListIndex !== null) {
+            let truckLoad = this.getTruck();
+            if (func === 'add') {
+                let units = truckLoad[consignmentListIndex].cargo.units_to_transfer;
+                if (cargo.start_units_total >= units + 1) {
+                    truckLoad[consignmentListIndex].cargo.units_to_transfer++;
+                }
+            }
+            if (func === 'minus') {
+                if (cargo.units_total > 0 && cargo.units_to_transfer > 1) {
+                    truckLoad[consignmentListIndex].cargo.units_to_transfer--;
+                }
+            }
+            if (func === 'clear') {
+                truckLoad.splice(consignmentListIndex, 1);
+            }
+            localStorage.setItem('truck', JSON.stringify(truckLoad));
+            this.setState({truck: this.getTruck()})
+        }
+    }
 
     getRecordsHandler = ({stockRecord = this.state.stockRecord, url = null, notifyResponse = true} = {}) => {
         if (this.state.authMeta.authenticated) {
@@ -217,22 +278,34 @@ class App extends React.Component {
         return false
     };
 
-    setStockUpdateModalState = ({stockRecord = this.state.stockRecord, state = false, actionCancelled = false} = {}) => {
+    setStockUpdateModalState = ({
+                                    stockRecord = this.state.stockRecord, state = false, actionCancelled = false,
+                                    deleteRecord = false, newRecord = false
+                                } = {}) => {
         /*
         method to update the state for the modal open/close state. If closed, ensure ensure meta flags cleared (
         e.g. deleteRecord), and reset the update data.
          */
         if (!state) {  // actions to do when modal set to closed
-            this.setState({stockUpdateModalOpen: state});   // close it first, to avoid showing reset data values
+            this.setState({stockUpdateModalOpen: {state, deleteRecord, newRecord}});   // close it first, to avoid showing reset data values
             Object.assign(stockRecord.data.updateData, {...this.initialState.stockRecord.data.updateData});
-            // clear delete and update flags from meta
-            Object.assign(stockRecord.meta, {deleteRecord: false, newRecord: false});
             this.setStockRecordState({newStockRecord: stockRecord});
             if (!actionCancelled) {  // if was not cancelled, request updated data from API following the actions.
                 this.getRecordsHandler({stockRecord, notifyResponse: false});
             }
         } else { // actions to do when modal set to open
-            this.setState({stockUpdateModalOpen: state});
+            // always update the updateData with truck data (held in local storage) if any
+            let stockRecordClone = JSON.parse(JSON.stringify(stockRecord));
+            let truck = this.getTruck();
+            let recordID = stockRecordClone.data.updateData.id;
+            truck.forEach((consignment) => {
+                if (recordID === consignment.cargo.id) {
+                    Object.assign(stockRecordClone.data.updateData, consignment.cargo)
+                }
+            });
+            this.setState({stockRecord: stockRecordClone});
+            stockRecordClone = null;
+            this.setState({stockUpdateModalOpen: {state, deleteRecord, newRecord}});
         }
     };
 
@@ -258,13 +331,14 @@ class App extends React.Component {
                     <div className={'row'}>
                         <div className={'col-12'}>
                             <Header authMeta={this.state.authMeta}
-                                       apiOptions={this.apiOptions}
-                                       csrfToken={this.state.csrfToken}
-                                       setMessage={this.setMessage}
-                                       getSessionStorage={this.getSessionStorage}
-                                       setSessionStorage={this.setSessionStorage}
-                                       deleteSessionStorage={this.deleteSessionStorage}
-                                       setAuthentication={this.setAuthentication}
+                                    apiOptions={this.apiOptions}
+                                    csrfToken={this.state.csrfToken}
+                                    setMessage={this.setMessage}
+                                    getSessionStorage={this.getSessionStorage}
+                                    setSessionStorage={this.setSessionStorage}
+                                    deleteSessionStorage={this.deleteSessionStorage}
+                                    setAuthentication={this.setAuthentication}
+                                    openTruck={this.openTruckModalHandler}
                             />
                             <Message message={this.state.message}
                                      messageClass={this.state.messageClass}
@@ -279,10 +353,21 @@ class App extends React.Component {
                                 authMeta={this.state.authMeta}
                                 openStockUpdateModal={this.state.stockUpdateModalOpen}
                                 apiOptions={this.apiOptions}
-                                apiMode={this.state.apiMode}
+                                loadTruck={this.loadTruck.bind(this)}
                                 setStockUpdateModalState={this.setStockUpdateModalState}
                                 setStockRecordState={this.setStockRecordState}
                                 setMessage={this.setMessage}
+                            />
+                            <TruckModal
+                                stockRecord={this.state.stockRecord}
+                                authMeta={this.state.authMeta}
+                                openTruckModal={this.state.truckModalOpen}
+                                apiOptions={this.apiOptions}
+                                changeTruckUnits={this.changeTruckUnits.bind(this)}
+                                emptyTruck={this.emptyTruck.bind(this)}
+                                openTruckModalHandler={this.openTruckModalHandler}
+                                setMessage={this.setMessage}
+                                getTruck={this.getTruck.bind(this)}
                             />
                         </div>
                     </div>

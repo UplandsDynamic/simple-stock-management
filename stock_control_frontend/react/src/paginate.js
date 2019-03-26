@@ -1,7 +1,6 @@
 import React from "react";
 import './css/paginate.css'
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
-import cloneDeep from "lodash.clonedeep"
 
 class Paginate extends React.Component {
 
@@ -65,7 +64,7 @@ class Paginate extends React.Component {
                 page = linkedPage;
                 break;
         }
-        let newStockRecord = cloneDeep(this.state.stockRecord);
+        let newStockRecord = JSON.parse(JSON.stringify(this.state.stockRecord));
         Object.assign(newStockRecord.meta, {page: page, limit: this.state.stockRecord.meta.limit});
         this.props.handleGetRecords({stockRecord: newStockRecord, url: url});
     };
