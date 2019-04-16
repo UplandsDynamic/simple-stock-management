@@ -7,6 +7,5 @@ django-cors-headers
 django-anymail[sparkpost]
 gunicorn
 gevent
-psycopg2
 postgres
 pip-licenses
