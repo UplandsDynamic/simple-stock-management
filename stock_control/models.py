@@ -27,6 +27,9 @@ def clean_on_update(sender, instance=None, created=False, **kwargs):
     """
     if updating, run clean (not called by default if save() method invoked directly,
     such as when updating.
+    Note: full_clean runs validation on model fields AND then also calls custom
+    validations defined in clean(). To ONLY run custom validations, use
+    instance.clean() instead on instance.full_clean().
     """
     instance.clean()
 

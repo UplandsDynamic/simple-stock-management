@@ -7,6 +7,11 @@ const DataTableNav = ({
                           stockRecord = null, handleGetRecords, handleAddRecord, handleSearch, authMeta = null
                       } = {}) => {
     const {userIsAdmin} = authMeta;
+    const addRecordButton = (
+        <button onClick={() => handleAddRecord({stockRecord})}
+                className={`btn btn-md btn-warning mr-1 `}>
+            <FontAwesomeIcon icon={"plus"}/></button>);
+
     if (stockRecord) {
         return (
             <React.Fragment>
@@ -30,9 +35,7 @@ const DataTableNav = ({
                                     handleGetRecords({stockRecord})
                                 }} className={'btn btn-md btn-warning mr-1 '}>
                                     <FontAwesomeIcon icon={"sync-alt"}/></button>
-                                <button onClick={() => handleAddRecord({stockRecord})}
-                                        className={`btn btn-md btn-warning mr-1 ${userIsAdmin ? '' : 'd-none'}`}>
-                                    <FontAwesomeIcon icon={"plus"}/></button>
+                                {userIsAdmin ? addRecordButton : ''}
                             </div>
                         </div>
                         <div className={`${userIsAdmin ? 'col-10' : 'col-11'}`}>
