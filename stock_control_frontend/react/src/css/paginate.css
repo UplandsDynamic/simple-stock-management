@@ -51,7 +51,7 @@ span.splitter {
 }
 
 input.page-input {
-    max-width: 3em;
+    max-width: 4em;
     background-color: darkorange;
     color: #001e00;
     border: 2px solid darkgoldenrod !important;
