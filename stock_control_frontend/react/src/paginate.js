@@ -67,6 +67,8 @@ class Paginate extends React.Component {
         let newStockRecord = JSON.parse(JSON.stringify(this.state.stockRecord));
         Object.assign(newStockRecord.meta, {page: page, limit: this.state.stockRecord.meta.limit});
         this.props.handleGetRecords({stockRecord: newStockRecord, url: url});
+        // locally set page state, to prevent delay when quick typing, pending overwrite by new source-of-truth prop
+        this.setState({currentPage: page})
     };
 
     currentPage = () => {
