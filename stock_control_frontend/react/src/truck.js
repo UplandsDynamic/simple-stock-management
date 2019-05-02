@@ -20,7 +20,8 @@ const REGULAR_STYLES = {
         border: '1px solid yellow',
         borderRadius: '7px 7px 7px 7px',
         boxShadow: '-7px -7px 17px 7px #001e00',
-        maxWidth: '800px'
+        maxWidth: '800px',
+        height: '50%'
     },
     overlay: {
         backgroundColor: '#2a3517',
@@ -135,7 +136,7 @@ class TruckModal extends React.Component {
 
     render() {
         if (this.props.stockRecord) {
-            const dispatchButtonClasses = ['btn', 'btn', 'btn-warning', 'mr-1'];
+            const dispatchButtonClasses = ['btn', 'btn', 'btn-warning', 'm-2', 'table-btn'];
             if (!this.props.getTruck().length > 0) {
                 dispatchButtonClasses.push('d-none')
             }

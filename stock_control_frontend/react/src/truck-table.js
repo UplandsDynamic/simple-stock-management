@@ -1,12 +1,12 @@
 import './css/data-table.css';
-import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
-import React from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import React from 'react';
 
-const TruckTable = ({truck, changeUnits}) => {
+const TruckTable = ({ truck, changeUnits }) => {
     if (truck.length > 0) {
         const tableData = truck.map((consignment, index) => {
             const cargo = consignment.cargo;
-            const editButtonClasses = ['table-btn', 'btn', 'btn-warning', 'w-100', 'm-1'];
+            const editButtonClasses = ['table-btn', 'btn', 'btn-warning', 'w-100'];
             return (
                 <tr key={index}>
                     <td>
@@ -19,21 +19,23 @@ const TruckTable = ({truck, changeUnits}) => {
                         {cargo.units_to_transfer}
                     </td>
                     <td>
-                        <button id={`addButton_${cargo.id}`} onClick={(e) => {
-                            e.preventDefault();
-                            changeUnits({consignmentListIndex: index, func: 'add', cargo});
-                        }} className={editButtonClasses.join(' ')}>
-                            <FontAwesomeIcon icon={"plus-square"}/></button>
-                        <button id={`minusButton_${cargo.id}`} onClick={(e) => {
-                            e.preventDefault();
-                            changeUnits({consignmentListIndex: index, func: 'minus', cargo});
-                        }} className={editButtonClasses.join(' ')}>
-                            <FontAwesomeIcon icon={"minus-square"}/></button>
-                        <button id={`deleteButton_${cargo.id}`} onClick={(e) => {
-                            e.preventDefault();
-                            changeUnits({consignmentListIndex: index, func: 'clear', cargo});
-                        }} className={editButtonClasses.join(' ')}>
-                            <FontAwesomeIcon icon={"trash-alt"}/></button>
+                        <div className={'btn-group'} role={'group'} aria-label={'Quantity buttons'}>
+                            <button id={`addButton_${cargo.id}`} onClick={(e) => {
+                                e.preventDefault();
+                                changeUnits({ consignmentListIndex: index, func: 'add', cargo });
+                            }} className={editButtonClasses.join(' ')}>
+                                <FontAwesomeIcon icon={"plus-square"} /></button>
+                            <button id={`minusButton_${cargo.id}`} onClick={(e) => {
+                                e.preventDefault();
+                                changeUnits({ consignmentListIndex: index, func: 'minus', cargo });
+                            }} className={editButtonClasses.join(' ')}>
+                                <FontAwesomeIcon icon={"minus-square"} /></button>
+                            <button id={`deleteButton_${cargo.id}`} onClick={(e) => {
+                                e.preventDefault();
+                                changeUnits({ consignmentListIndex: index, func: 'clear', cargo });
+                            }} className={editButtonClasses.join(' ')}>
+                                <FontAwesomeIcon icon={"trash-alt"} /></button>
+                        </div>
                     </td>
                 </tr>
             );
@@ -47,15 +49,15 @@ const TruckTable = ({truck, changeUnits}) => {
                         table-bordered table-dark table-hover`}>
                                 <caption>Truck</caption>
                                 <thead>
-                                <tr>
-                                    <th scope={'col'}>SKU</th>
-                                    <th scope={'col'}>Description</th>
-                                    <th scope={'col'}>Units to Transfer</th>
-                                    <th scope={'col'}>Action</th>
-                                </tr>
+                                    <tr>
+                                        <th scope={'col'}>SKU</th>
+                                        <th scope={'col'}>Description</th>
+                                        <th scope={'col'}>Units to Transfer</th>
+                                        <th scope={'col'}>Action</th>
+                                    </tr>
                                 </thead>
                                 <tbody>
-                                {tableData}
+                                    {tableData}
                                 </tbody>
                             </table>
                         </div>
