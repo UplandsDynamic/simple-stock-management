@@ -6,7 +6,7 @@ const TruckTable = ({ truck, changeUnits }) => {
     if (truck.length > 0) {
         const tableData = truck.map((consignment, index) => {
             const cargo = consignment.cargo;
-            const editButtonClasses = ['table-btn', 'btn', 'btn-warning', 'w-100'];
+            const editButtonClasses = ['btn', 'btn-warning'];
             return (
                 <tr key={index}>
                     <td>
