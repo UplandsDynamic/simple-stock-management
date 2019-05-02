@@ -1,0 +1,8 @@
+{
+    "python.pythonPath": "venv/bin/python3.6",
+    "jshint.options": {
+        "esversion": 9
+      },
+      "python.formatting.provider": "autopep8",
+      "python.linting.pylintEnabled": true
+}

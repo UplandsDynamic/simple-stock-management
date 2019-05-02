@@ -25,7 +25,7 @@ const Header = ({
                                                         setAuthentication={setAuthentication}
                     /></div>
                     <div className={'col-1'}>
-                        <button className={'float-right btn btn-lg btn-success'}
+                        <button className={'float-right btn btn-lg table-btn btn-success'}
                                 onClick={(e) => {
                                     e.preventDefault();
                                     openTruck({state: true})

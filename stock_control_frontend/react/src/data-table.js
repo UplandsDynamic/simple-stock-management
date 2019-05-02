@@ -1,10 +1,10 @@
 import React from 'react';
 import './css/data-table.css';
 import 'bootstrap/dist/css/bootstrap.css';
-import 'bootstrap/dist/js/bootstrap.js'
-import moment from 'moment'
-import 'moment/locale/en-gb.js'
-import 'moment-timezone'
+import 'bootstrap/dist/js/bootstrap.js';
+import moment from 'moment';
+import 'moment/locale/en-gb.js';
+import 'moment-timezone';
 import DataTableNav from "./data-table-nav";
 import DataTableData from "./data-table-data";
 import DataTableHead from "./data-table-head";

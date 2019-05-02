@@ -104,15 +104,6 @@ input.search {
     background-color: rebeccapurple;
 }
 
-button.table-btn {
-    transition: all 200ms ease-in-out
-}
-
-button.table-btn:hover {
-    transform: scale(1.25);
-    z-index: 10;
-}
-
 div.message-card {
     margin: 0 0 1em 0;
     text-align: center;
