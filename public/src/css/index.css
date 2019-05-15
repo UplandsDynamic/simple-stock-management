@@ -1,0 +1,23 @@
+html {
+    background-color: #001e00;
+}
+
+div.app-main {
+    padding: 1em;
+    color: #fcfcfc;
+    background-color: #001a00;
+    margin: auto;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: yellow;
+}
+
+button.table-btn {
+    transition: all 200ms ease-in-out
+}
+
+button.table-btn:hover {
+    transform: scale(1.25);
+    z-index: 10;
+}

@@ -1,0 +1,58 @@
+.page-item.active .page-link {
+    background: yellow;
+    color: #001e00;
+    border: 3px solid orange;
+    font-weight: bolder;
+    padding: 0.5em !important;
+}
+
+div.linkedPage {
+    display: inline-block;
+    float: left;
+    margin-right: auto;
+}
+
+div.linkedPage label {
+    display: inline-block;
+    float: left;
+}
+
+.linkedPage input {
+    max-width: 7em;
+    background-color: #001e00;
+    color: yellow;
+    font-weight: bolder;
+    border: 3px solid orange;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+    margin: 0 0.5em;
+}
+
+.page-item .page-link {
+    background: #001e00;
+    color: yellow;
+    border: 2px solid darkorange;
+    font-weight: bold;
+    padding: 1em !important;
+    z-index: 0!important;
+}
+
+ul.pagination, li.page-item {
+    display: inline-flex;
+}
+
+div.pager {
+    text-align: right;
+}
+
+span.splitter {
+    margin: 0 0.5em;
+}
+
+input.page-input {
+    max-width: 4em;
+    background-color: darkorange;
+    color: #001e00;
+    border: 2px solid darkgoldenrod !important;
+}

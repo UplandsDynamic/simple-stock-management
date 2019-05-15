@@ -1,0 +1,30 @@
+div.header {
+    margin: 1em auto 1em auto;
+    padding: 1em;
+    background-color: yellow;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+    font-weight: bold;
+    vertical-align: middle !important;
+    color: #001e00;
+}
+
+.logo {
+    animation: Box-logo-scale 500ms 6 alternate-reverse ease-in-out;
+    color: transparent; /* hides alt text while image loading */
+    transition: all 500ms ease-in-out;
+}
+
+.logo:hover {
+    transform: rotate(360deg);
+}
+
+@keyframes Box-logo-scale {
+    from {
+        transform: scale3d(0,0,0)
+    }
+    to {
+        transform: scale3d(1,1,1);
+    }
+}
