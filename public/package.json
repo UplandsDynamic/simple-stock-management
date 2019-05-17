@@ -38,6 +38,7 @@
     "start": "HTTPS=false BROWSER='google chrome' react-scripts start",
     "build:staging": "env-cmd .env.staging react-scripts build",
     "build:production": "env-cmd .env.production react-scripts build",
+    "build:docker": "env-cmd .env.docker react-scripts build",
     "test": "react-scripts test",
     "test:once": "CI=true react-scripts test",
     "test:debug": "react-scripts --inspect-brk test --runInBand",

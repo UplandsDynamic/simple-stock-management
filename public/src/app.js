@@ -1,3 +1,5 @@
+/*version*/
+import APP_VERSION from './version';
 /* react */
 import React from 'react';
 /* app components */
@@ -351,7 +353,7 @@ class App extends React.Component {
                             {dataTable}
                             <Footer footer={process.env.REACT_APP_FOOTER}
                                 copyright={process.env.REACT_APP_COPYRIGHT}
-                                version={process.env.REACT_APP_VERSION}
+                                version={APP_VERSION}
                             />
                             <StockUpdateModal
                                 stockRecord={this.state.stockRecord}
