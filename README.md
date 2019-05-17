@@ -75,19 +75,23 @@ To use this source code for non-dockerised builds, please amend the settings.py 
 
 ## Installation & usage (on Linux systems)
 
-__Note: These are basic instructions to install and run the app on an Linux Ubuntu 18.04 server, and for demonstration purposes only. They do not provide for a secure installation, such as would be required if the app was publicly available. Steps should be taken to harden the environment if using in production, such as applying suitable file & directory permissions and ensuring both backend & frontend are served over a TLS connection.__
+__These are basic instructions to install and run the app on an Linux Ubuntu 18.04 server, and for demonstration purposes only. They do not provide for a secure installation, such as would be required if the app was publicly available.__
+
+__Steps should be taken to harden the environment if using in production, such as applying suitable file & directory permissions and ensuring both backend & frontend are served over a TLS connection.__
+
+__A note on TLS: By default, `docker-compose-example.yml` exposes port to 80 on the server (`app`) container, and mounts the `settings.docker.insecure.py` Django settings file, which serves the app over an unencrypted connection. To serve over TLS, change the exposed port to 443 and mount `settings.docker.py`__
 
 To use the Docker images orchestrated with docker-compose:
 
 - Create your app root directory & clone the repository into it:
 
-  `mkdir ssm`
-  `cd ssm`
-  `git clone https://github.com/Aninstance/simple-stock-management.git .`
+  - `mkdir ssm`
+  - `cd ssm`
+  - `git clone https://github.com/Aninstance/simple-stock-management.git .`
 
 - Set directory ownership. The default user and group as used in the demo are user: `ssm` (UID `9001`), group `ssm` (GID `9001`). These are the user and group both the server and app run under (they may be changed by editing the `Dockerfile`'s). To do this:
 
-  - Add user to the host server: `sudo useradd --no-log-init -r -g 9001 -u 9001 ssm`.
+  - Add user to the host server: `sudo useradd --no-log-init -r -g 9001 -u 9001 ssm`
   - After ensuring you're still in the `ssm` directory, change ownership of directories and files: `sudo chown -R ssm:ssm .`
   - Ensure the postgres database directories are owned by user UID 999: `sudo chown -R 999 postgres`
   - Add the `docker` group if it does not already exist: `sudo groupadd docker`
@@ -116,9 +120,7 @@ To use the Docker images orchestrated with docker-compose:
 
 - If running for the first time (i.e. your persistent database folder is empty), define a superuser & by issuing the following commands:
 
-  - Note down the name of the server app (exposing port 8000) that is output in the following command (e.g. `ssm_app_1`):
-
-    `docker-compose ps`
+  - Note down the name of the server app (exposing port 8000) that is output in the following command (e.g. `ssm_app_1`): `docker-compose ps`
 
   - Run the following, substituting `ssm_app_1` with the correct name for the server app, as discussed above.
 
