@@ -18,7 +18,7 @@ services:
     depends_on:
     - db
   app:
-    image: aninstance/simple-stock_management
+    image: aninstance/simple-stock-management
     restart: always
     environment:
       - DEBUG=1
