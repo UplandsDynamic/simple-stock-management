@@ -8,7 +8,6 @@ RUN mkdir /src
 RUN mkdir /config
 RUN mkdir /var/log/gunicorn
 RUN git clone https://github.com/Aninstance/simple-stock-management /repo
-ADD config /repo/config
 RUN cp -a /repo/src/. /src
 RUN cp -a /repo/config/. /config
 RUN rm -rf /repo
