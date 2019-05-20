@@ -20,8 +20,6 @@ python manage.py makemigrations stock_control --no-input;  # ensure app migratio
 python manage.py migrate --no-input;
 # collect static
 python manage.py collectstatic --no-input
-# run qcluster & gunicorn
-python manage.py qcluster &
 #gunicorn spm_api.wsgi:application --name=SimplePhotoManagement --bind 0.0.0.0:8000 --config /config/gunicorn.py --error-logfile /var/log/gunicorn/errors.log
 # run server
 python manage.py runserver 0.0.0.0:8000;  # comment out if using gunicorn
