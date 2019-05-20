@@ -35,7 +35,7 @@ It has web frontend that connects to a RESTful API backend. Data is stored in ei
 
 There is a live demo available here:
 
-https://sm.staging.aninstance.com
+https://ssm.staging.aninstance.com
 
 There are two test users - one for the warehouse administrator, the other for a 'store manager'. Credentials are:
 
@@ -83,20 +83,22 @@ __A note on TLS: By default, `docker-compose-example.yml` exposes port to 80 on 
 
 To use the Docker images orchestrated with docker-compose:
 
-- Create your app root directory & clone the repository into it:
+- Create `ssm` directory, change to it and clone the repository:
 
   - `mkdir ssm`
   - `cd ssm`
   - `git clone https://github.com/Aninstance/simple-stock-management.git .`
 
+- Create the following directories in the application's root directory. These are for persistent storage (i.e. they persist even after the app server & client containers have been stopped, started, deleted, upgraded):
+
+  - `mkdir -p static postgres log/gunicorn`
+
 - Set directory ownership. The default user and group as used in the demo are user: `ssm` (UID `9001`), group `ssm` (GID `9001`). These are the user and group both the server and app run under (they may be changed by editing the `Dockerfile`'s). To do this:
 
+  - Create group: `sudo groupadd  -g 9001 ssm`
   - Add user to the host server: `sudo useradd --no-log-init -r -g 9001 -u 9001 ssm`
-  - After ensuring you're still in the `ssm` directory, change ownership of directories and files: `sudo chown -R ssm:ssm .`
+  - After ensuring you're still in the `ssm` directory, change ownership of directories and files: `sudo chown -R ssm:ssm static log config/secret_key`
   - Ensure the postgres database directories are owned by user UID 999: `sudo chown -R 999 postgres`
-  - Add the `docker` group if it does not already exist: `sudo groupadd docker`
-  - Add `ssm` user to the `docker` group: `sudo gpasswd -a ssm docker`
-  - Change to use the ssm user for the rest of the installation process: `sudo su ssm`
 
 - Edit the following files to your specification:
 
@@ -104,13 +106,7 @@ To use the Docker images orchestrated with docker-compose:
   - `config/nginx/spm-example.config` - save as spm.conf
   - `config/.env.docker` - save as .env.docker (this is the frontend client configuration, where you may configure things like the number of items displayed per page)
 
-  __Note: Don't forget to set the URL in both the `docker-compose.yml` (`app`'s `APP_URL` variable) and the `.env.docker` (`REACT_APP_ROUTE`, `REACT_APP_API_ROUTE` & `REACT_APP_API_DATA_ROUTE` variables) files (as above).__
-
-- Create the following directories in the application's root directory. These are for persistent storage (i.e. they persist even after the app server & client containers have been stopped, started, deleted, upgraded):
-
-  - `mkdir static` - this is the directory where static content will be stored (including the client code).
-  - `mkdir postgres` - this is the directory where the database will be located.
-  - `mkdir -p log/gunicorn` - this is the directory where the logs will be located.
+  __Note: Don't forget to set the URL in both the `docker-compose.yml` (`app`'s `APP_URL` variable) and the `.env.docker` (`REACT_APP_API_ROUTE` & `REACT_APP_API_DATA_ROUTE` variables) files (as above).__
 
 - You may remove the `src` directory, since the source will already be installed in the Docker image.
 
