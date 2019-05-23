@@ -2,9 +2,9 @@
 
 This a simple stock management and inventory application.
 
-The app is designed to allow "stores" to request transfers of stock (or "order" it) from a central stock database (the "warehouse"). Warehouse stock is adjusted as stock transfers are ordered.
+The app is designed to allow "stores" to request transfers of stock ("order" it) from a central stock repository (the "warehouse"). "Warehouse" stock is adjusted as stock transfers are "ordered" and email notifications are sent to the "warehouse" administrator(s) and the ordering "store manager".
 
-It has web frontend that connects to a RESTful API backend. Data is stored in either a SQLite, mySQL or PostgreSQL (recommended) database.
+This application has web frontend that connects to a RESTful API backend. Data is stored in either a SQLite, mySQL or PostgreSQL (recommended) database.
 
 ## Key features
 
@@ -30,6 +30,7 @@ It has web frontend that connects to a RESTful API backend. Data is stored in ei
 ![Screenshot 1](./meta/img/screenshot_1.png?raw=true)
 ![Screenshot 2](./meta/img/screenshot_2.png?raw=true)
 ![Screenshot 4](./meta/img/screenshot_4.png?raw=true)
+![Screenshot 5](./meta/img/screenshot_5.png?raw=true)
 
 ## Live Demo
 
