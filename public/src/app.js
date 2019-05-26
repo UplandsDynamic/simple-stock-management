@@ -87,6 +87,7 @@ class App extends React.Component {
             },
             stockUpdateModalOpen: { state: false, deleteRecord: false, newRecord: false },
             truckModalOpen: false,
+            truck: [],
             message: null,
             messageClass: '',
             greeting: process.env.REACT_APP_GREETING,
@@ -198,14 +199,19 @@ class App extends React.Component {
                 });
             }
         } else { // actions to do when modal set to open
-            this.setState({ truck: this.getTruck() }); // refresh truck data from local storage
+            this.getTruck();  // set state with up-to-date truck data
             this.setState({ truckModalOpen: state });
         }
     };
 
     getTruck() {
-        const truck = localStorage.getItem('truck');
-        return truck ? JSON.parse(localStorage.getItem('truck')) : [];
+        const truck = JSON.parse(localStorage.getItem('truck'));
+        if (truck && truck.user === this.getSessionStorage('username')) {
+            this.setState({truck: truck.data});
+            return truck.data;
+        }
+        this.setState({truck: []});
+        return [];
     };
 
     emptyTruck() {
@@ -224,12 +230,13 @@ class App extends React.Component {
             }
         }
         if (!exists) truck.push({ cargo });
-        localStorage.setItem('truck', JSON.stringify(truck));
+        const truckData = JSON.stringify({user: this.getSessionStorage('username'), data: truck})
+        localStorage.setItem('truck', truckData);
     }
 
     changeTruckUnits({ consignmentListIndex = null, func = null, cargo = null } = {}) {
         if (consignmentListIndex !== null) {
-            let truckLoad = this.getTruck();
+            let truckLoad = this.state.truck;
             if (func === 'add') {
                 let units = truckLoad[consignmentListIndex].cargo.units_to_transfer;
                 if (cargo.start_units_total >= units + 1) {
@@ -237,15 +244,16 @@ class App extends React.Component {
                 }
             }
             if (func === 'minus') {
-                if (cargo.units_total > 0 && cargo.units_to_transfer > 1) {
+                if (cargo.units_total >= 0 && cargo.units_to_transfer > 1) {
                     truckLoad[consignmentListIndex].cargo.units_to_transfer--;
                 }
             }
             if (func === 'clear') {
                 truckLoad.splice(consignmentListIndex, 1);
             }
-            localStorage.setItem('truck', JSON.stringify(truckLoad));
-            this.setState({ truck: this.getTruck() })
+            const truckData = JSON.stringify({user: this.getSessionStorage('username'), data: truckLoad})
+            localStorage.setItem('truck', truckData);
+            this.setState({truck: truckLoad});
         }
     }
 
@@ -282,7 +290,7 @@ class App extends React.Component {
                 });
             }
         }
-        return false
+        return false;
     };
 
     setStockUpdateModalState = ({
@@ -304,14 +312,16 @@ class App extends React.Component {
             // always update the updateData with truck data (held in local storage) if any
             let stockRecordClone = JSON.parse(JSON.stringify(stockRecord));
             let truck = this.getTruck();
-            let recordID = stockRecordClone.data.updateData.id;
-            truck.forEach((consignment) => {
-                if (recordID === consignment.cargo.id) {
-                    Object.assign(stockRecordClone.data.updateData, consignment.cargo)
-                }
-            });
-            this.setState({ stockRecord: stockRecordClone });
-            stockRecordClone = null;
+            if (truck.length > 0) {
+                let recordID = stockRecordClone.data.updateData.id;
+                truck.forEach((consignment) => {
+                    if (recordID === consignment.cargo.id) {
+                        Object.assign(stockRecordClone.data.updateData, consignment.cargo)
+                    }
+                });
+                this.setState({ stockRecord: stockRecordClone });
+                stockRecordClone = null;
+            }
             this.setState({ stockUpdateModalOpen: { state, deleteRecord, newRecord } });
         }
     };
@@ -374,7 +384,7 @@ class App extends React.Component {
                                 emptyTruck={this.emptyTruck}
                                 openTruckModalHandler={this.openTruckModalHandler}
                                 setMessage={this.setMessage}
-                                getTruck={this.getTruck}
+                                truck={this.state.truck}
                             />
                         </div>
                     </div>

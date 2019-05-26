@@ -63,6 +63,7 @@ class TruckModal extends React.Component {
         this.state = {
             modalStyles: REGULAR_STYLES,
             modalIsOpen: this.props.openTruckModal,
+            truck: this.props.truck
         };
         // Remember! This binding is necessary to make `this` work in the callback
         this.handleAfterOpenModal = this.handleAfterOpenModal.bind(this);
@@ -78,6 +79,9 @@ class TruckModal extends React.Component {
     componentWillReceiveProps(nextProps, nextContext) {
         // set modal open/close state (source of truth in parent component - app.js)
         this.setState({modalIsOpen: nextProps.openTruckModal});
+        if (nextProps.truck !== this.state.truck) {
+            this.setState({truck: nextProps.truck})
+        }
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
@@ -95,7 +99,7 @@ class TruckModal extends React.Component {
         method to make API request to transfer stock (PATCH request).
          */
         // copy truck obj to work on, by converting to string representation, then back (use JSON obj representation)
-        let truck = JSON.parse(JSON.stringify(this.props.getTruck()));
+        let truck = JSON.parse(JSON.stringify(this.props.truck));
         if (truck.length > 0) {
             try {
                 /* if transferring, delete all superfluous fields from the query to prevent auth issues */
@@ -137,7 +141,7 @@ class TruckModal extends React.Component {
     render() {
         if (this.props.stockRecord) {
             const dispatchButtonClasses = ['btn', 'btn', 'btn-warning', 'm-2', 'table-btn'];
-            if (!this.props.getTruck().length > 0) {
+            if (!this.state.truck.length > 0) {
                 dispatchButtonClasses.push('d-none')
             }
             return (
@@ -155,7 +159,7 @@ class TruckModal extends React.Component {
                                 <h2 ref={subtitle => this.subtitle = subtitle}>Truck</h2>
                             </div>
                             <TruckTable
-                                truck={this.props.getTruck()}
+                                truck={this.state.truck}
                                 changeUnits={this.props.changeTruckUnits}
                             />
                             <div className="col-sm modal-button-cell">

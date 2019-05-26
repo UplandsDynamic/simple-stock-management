@@ -44,9 +44,6 @@
     "test:debug": "react-scripts --inspect-brk test --runInBand",
     "eject": "react-scripts eject"
   },
-  "eslintConfig": {
-    "extends": "react-app"
-  },
   "jest": {
     "collectCoverageFrom": [
       "src/**/*.{js,jsx,ts,tsx}",
@@ -62,6 +59,7 @@
     "not op_mini all"
   ],
   "devDependencies": {
-    "enzyme": "^3.9.0"
+    "enzyme": "^3.9.0",
+    "eslint-plugin-react": "^7.13.0"
   }
 }
