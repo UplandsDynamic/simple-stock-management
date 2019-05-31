@@ -111,12 +111,14 @@ class StockDataSerializer(serializers.HyperlinkedModelSerializer):
 
     # return staff status of requester
     user_is_admin = serializers.SerializerMethodField(method_name='administrators_check')
-
+    
     def administrators_check(self, obj):
         return self.context['request'].user.groups.filter(name='administrators').exists()
 
     # receive non-model field in request POST/PATCH that represents the number of units to transfer
     units_to_transfer = serializers.CharField(required=False)
+    # allow non-model field for requesting user (already added as attribute of instance in views.py, read_only as non-model field)
+    requester = serializers.CharField(read_only=True)
 
     # def superuser_check(self, obj):
     #     return self.user.is_superuser
@@ -131,7 +133,7 @@ class StockDataSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = StockData
         fields = ('id', 'record_updated', 'owner', 'sku', 'desc',
-                  'units_total', 'unit_price', 'user_is_admin',
+                  'units_total', 'unit_price', 'user_is_admin', 'requester',
                   'datetime_of_request', 'units_to_transfer')
 
     """

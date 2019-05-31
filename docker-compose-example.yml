@@ -22,7 +22,7 @@ services:
     restart: always
     environment:
       - DEBUG=1
-      - APP_URL=localhost
+      - APP_URL=http://localhost  # change to https if served over encrypted conntection
       - SQL_ENGINE=django.db.backends.postgresql
       - SQL_DATABASE=ssm  # match postgres database name (chosen above)
       - SQL_USER=example_db_user  # match postgres username (chosen above)
