@@ -14,7 +14,7 @@ from .serializers import (
 from .models import StockData
 from .custom_permissions import AccessPermissions
 from django.db.models import Q
-from .email import SendEmail
+from email_service.email import SendEmail
 
 """
 Note about data object (database record):
@@ -181,6 +181,7 @@ class StockDataViewSet(viewsets.ModelViewSet):
         transfer = False
         try:
             instance = self.get_queryset().get(id=pk)
+            instance.requester = request.user  # add requester for post_save signal accounts db update
             serializer = self.get_serializer(data=record, instance=instance, partial=True)
             transfer = 'units_to_transfer' in serializer.initial_data  # set this for dispatch_email()
             serializer.is_valid(raise_exception=True)
@@ -221,13 +222,14 @@ class StockDataViewSet(viewsets.ModelViewSet):
         for record in data:
             err = []
             try:  # get the existing record from StockRecord model
-                instance = self.get_queryset().get(id=record['id'])
+                instance = self.get_queryset().get(id=int(record['id']))
             except (StockData.DoesNotExist, Exception) as e:  # if the record did not exist
                 instance = None
                 err.append(str(e))
                 result.append({'success': False, 'error': err, 'data': {}})
             if instance:  # if the existing record instance did exist in the StockRecord model
                 try:
+                    instance.requester = request.user   # add requester for post_save signal accounts db update
                     serializer = self.get_serializer(data=record, instance=instance, partial=True)
                     if 'units_to_transfer' in serializer.initial_data:
                         # set these variables for dispatch_email()
@@ -235,6 +237,7 @@ class StockDataViewSet(viewsets.ModelViewSet):
                         units_to_transfer = int(serializer.initial_data['units_to_transfer'])
                     serializer.is_valid(raise_exception=True)
                     saved = serializer.save()
+                    # update record to return in http response
                     updated_record = self.serialize_model_instance(instance=saved)
                     updated_record['units_to_transfer'] = int(
                         serializer.initial_data['units_to_transfer']) if transfer else 0
