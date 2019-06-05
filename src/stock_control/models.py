@@ -6,9 +6,6 @@ from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 from . import custom_validators
 import logging
-from accounts.models import AccountStockData
-from django.db.models import F
-from decimal import Decimal, ROUND_HALF_UP
 
 # Get an instance of a logger
 logger = logging.getLogger('django')
@@ -23,37 +20,6 @@ def create_auth_token(sender, instance=None, created=False, **kwargs):
     """
     if created:
         Token.objects.create(user=instance)
-
-@receiver(post_save, sender='stock_control.StockData')
-def transfer_to_account(sender, instance=None, created=False, **kwargs):
-    """
-    Signal receiver to update accounts.model with the data for the user
-    """
-    # transfer to transfer's store account if a shop manager (i.e. units_to_transfer exists & not an administrator)
-    sterling = Decimal('0.01')
-    try:
-        if hasattr(instance, 'units_to_transfer') \
-                and not instance.requester.groups.filter(name='administrators').exists():
-            record, created = AccountStockData.objects.update_or_create(
-                owner=instance.requester,
-                sku=instance.sku,
-                defaults={
-                    'desc': instance.desc,
-                    'xfer_price': instance.unit_price,
-                }
-            )
-            """annoyingly, F filters only work on updates, not create, so need 
-            do things like to increment units_total with a 2nd database hit
-            """
-            AccountStockData.objects.filter(id=record.id).update(
-                units_total=F('units_total') + int(instance.units_to_transfer),
-                running_total_xfer_value=F('running_total_xfer_value') 
-                + Decimal(int(instance.units_to_transfer) * instance.unit_price).quantize(sterling, ROUND_HALF_UP),
-                selling_price=F('selling_price')
-            )
-    except Exception as e:
-        logger.error(f'Error in saving to the account stock database: {e}')
-        raise
 
 
 @receiver(pre_save)
@@ -113,6 +79,7 @@ class StockData(models.Model):
         """
         # nothing custom to do here, move along ...
         super(StockData, self).save(*args, **kwargs)
+
 
 """
 Dispatch email on save (note: commented out now, as this moved to views.perform_update()

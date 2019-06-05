@@ -1,8 +1,9 @@
 FROM python:3.7
 ENV PYTHONUNBUFFERED 1
 ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONIOENCODING=UTF-8
 RUN apt update && apt dist-upgrade -y
-RUN apt install build-essential python-all-dev libboost-python-dev libpq-dev -y
+RUN apt install build-essential python-all-dev libboost-python-dev libpq-dev locales tzdata netcat -y
 RUN mkdir /repo
 RUN mkdir /src
 RUN mkdir /config

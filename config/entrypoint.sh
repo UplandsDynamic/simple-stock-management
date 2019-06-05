@@ -1,7 +1,7 @@
 #!/bin/sh
 ## startup script
 
-if [ "$DATABASE" = "postgres"]
+if [ "$DATABASE" = "postgres" ]
 then
 echo "Waiting for postgres..."
 while ! nc -z $SQL_HOST $SQL_PORT; do
