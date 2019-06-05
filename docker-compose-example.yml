@@ -21,6 +21,13 @@ services:
     image: aninstance/simple-stock-management
     restart: always
     environment:
+      - LC_ALL=en_GB.UTF-8
+      - LANG=en_GB.UTF-8
+      - LANGUAGE=en_GB:en
+      - LANGUAGE_CODE=en-GB
+      - TIME_ZONE=Europe/London
+      - TZ=Europe/London
+      - PYTHONIOENCODING=UTF-8
       - DEBUG=1
       - APP_URL=http://localhost  # change to https if served over encrypted conntection
       - SQL_ENGINE=django.db.backends.postgresql

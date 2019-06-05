@@ -4,7 +4,7 @@ from rest_framework.utils import json
 from .models import StockData
 from django.contrib.auth.models import User, Group
 from .custom_validators import *
-from email_service.email import SendEmail
+from .email import SendEmail
 from django.core.exceptions import ValidationError
 from rest_framework import serializers, status
 from contextlib import contextmanager
@@ -262,9 +262,6 @@ class StockDataSerializerTestCase(TransactionTestCase):
                           {'units_to_transfer': 150})
         # decreasing stock if level stays 0 or above must succeed
         units_before_update = stock_object.units_total
-        # add requester as per view
-        stock_object.requester = request.user
-        # test update
         updated = serializer.update(instance=stock_object, validated_data={'units_to_transfer': 10})
         self.assertNotEqual(updated.units_total, units_before_update)
         """

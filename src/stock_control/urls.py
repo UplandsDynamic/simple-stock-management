@@ -3,6 +3,7 @@ from rest_framework import routers, permissions
 from rest_framework.urlpatterns import format_suffix_patterns
 from . import views
 from rest_framework.schemas import get_schema_view
+from rest_framework.authtoken import views as authviews
 
 app_name = 'stock-control'
 
@@ -31,13 +32,13 @@ Note: Mapping for actions (used in as_view), are:
     }
 """
 functional_view_urlpatterns = [
-    url('^change-password/(?P<username>[a-zA-Z0-9.].+)/$', views.PasswordUpdateViewSet.as_view(
+    url('^v2/change-password/(?P<username>[a-zA-Z0-9.].+)/$', views.PasswordUpdateViewSet.as_view(
         {'patch': 'partial_update'})),
-    url('^stock/$', views.StockDataViewSet.as_view(
+    url('^v2/stock/$', views.StockDataViewSet.as_view(
         {'get': 'list', 'post': 'create', 'patch': 'perform_bulk_partial_update'})),
-    url('^stock/(?P<pk>\d+)/$', views.StockDataViewSet.as_view(
+    url('^v2/stock/(?P<pk>\d+)/$', views.StockDataViewSet.as_view(
         {'get': 'retrieve', 'patch': 'perform_single_update', 'delete': 'destroy', 'put': 'update'})),
-    url('^stock/latest/$', views.StockDataViewSet.as_view(
+    url('^v2/stock/latest/$', views.StockDataViewSet.as_view(
         {'get': 'latest'})),
 ]
 
@@ -58,7 +59,7 @@ schema_view = get_schema_view(
 # final url patterns (everything included)
 urlpatterns += [
     url(r'^(/?)$', schema_view),
+    url(r'^api-token-auth/', authviews.obtain_auth_token),
     url(r'^schema(/?)$', schema_view),
     # url(r'^v1/', include(router.urls)),
 ]
-
