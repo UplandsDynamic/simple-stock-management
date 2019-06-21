@@ -16,11 +16,14 @@ fi
 cd /src
 python manage.py makemigrations --no-input;
 python manage.py makemigrations stock_control --no-input;  # ensure app migrations have happened
+python manage.py makemigrations accounts --no-input;  # ensure app migrations have happened
 # migrate
 python manage.py migrate --no-input;
 # collect static
 python manage.py collectstatic --no-input
-#gunicorn spm_api.wsgi:application --name=SimplePhotoManagement --bind 0.0.0.0:8000 --config /config/gunicorn.py --error-logfile /var/log/gunicorn/errors.log
+# run django_q
+python manage.py qcluster &
 # run server
+#gunicorn spm_api.wsgi:application --name=SimplePhotoManagement --bind 0.0.0.0:8000 --config /config/gunicorn.py --error-logfile /var/log/gunicorn/errors.log
 python manage.py runserver 0.0.0.0:8000;  # comment out if using gunicorn
 exec "$@"

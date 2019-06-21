@@ -24,9 +24,9 @@ Note: Mapping for actions (used in as_view), are:
 """
 functional_view_urlpatterns = [
     url('^stock/$', views.AccountStockDataViewSet.as_view(
-        {'get': 'list', 'patch': 'perform_bulk_partial_update'})),
+        {'get': 'list',  'post': 'create'})),
     url('^stock/(?P<pk>\d+)/$', views.AccountStockDataViewSet.as_view(
-         {'get': 'retrieve', 'patch': 'perform_single_update', 'delete': 'destroy', 'put': 'update'})),
+         {'get': 'retrieve', 'patch': 'perform_single_update', 'delete': 'destroy'})),
     url('^take-stock/$', views.AccountStockDataViewSet.as_view(
          {'get': 'take_stock'})), 
 ]

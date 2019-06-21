@@ -55,7 +55,9 @@ class AccountStockDataSerializer(serializers.HyperlinkedModelSerializer):
         model = AccountStockData
         fields = ('id', 'record_updated', 'owner', 'sku', 'desc',
                   'units_total', 'xfer_price', 'selling_price', 'user_is_admin',
-                  'datetime_of_request', 'opening_stock', 'closing_stock', 'incoming_units_transferred')
+                  'datetime_of_request', 'opening_stock', 'incoming_units_transferred',
+                  'running_total_xfer_value', 'sold_units', 'shrinkage', 'running_total_sold_value', 
+                  'running_total_shrinkage_value', 'all_time_total_xfer_value', 'xferred_units')
 
     """
     Additional validations. 

@@ -53,8 +53,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'stock_control.apps.StockControlConfig',
-    #'accounts.apps.AccountsConfig',
-    #'email_service.apps.EmailServiceConfig',
+    'accounts.apps.AccountsConfig',
+    'email_service.apps.EmailServiceConfig',
     'rest_framework',
     'rest_framework.authtoken',
     'corsheaders',
@@ -237,7 +237,7 @@ STOCK_MANAGEMENT_OPTIONS = {
     }
 
 # # # Internationalization
-locale.setlocale(locale.LC_ALL)  # set locale
+locale.setlocale(locale.LC_ALL, 'en_GB.UTF-8')  # set locale
 LANGUAGE_CODE = (os.environ.get('LANGUAGE_CODE'))  # set language code
 # LOCALE_PATHS = (
 #     os.path.join(BASE_DIR, 'locale'),
