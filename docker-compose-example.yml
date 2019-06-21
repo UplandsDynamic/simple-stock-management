@@ -43,7 +43,7 @@ services:
       - ./log:/var/log # assumes non-transient host directory at $build_directory/log
       - ./static:/src/static # assumes non-transient host directory at $build_directory/static
       - ./media:/src/media  # assumes non-transient host directory at $build_directory/media
-      - ./config/settings.docker.py:/src/StockManagement/settings.py # assumes settings.docker.py file (edit to spec) at $build_directory/config/settings.docker.py
+      - ./config/settings.docker.py:/src/StockManagement/settings.py:ro # assumes settings.docker.py file (edit to spec) at $build_directory/config/settings.docker.py
     entrypoint: /config/entrypoint.sh
     expose:
       - 8000
