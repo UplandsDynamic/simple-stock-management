@@ -3,7 +3,10 @@ ENV PYTHONUNBUFFERED 1
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONIOENCODING=UTF-8
 RUN apt update && apt dist-upgrade -y
-RUN apt install build-essential python-all-dev libboost-python-dev libpq-dev locales tzdata netcat -y
+RUN apt install build-essential python-all-dev libboost-python-dev libpq-dev locales locales-all tzdata netcat -y
+ENV LC_ALL en_GB.UTF-8
+ENV LANG en_GB.UTF-8
+ENV LANGUAGE en_GB.UTF-8
 RUN mkdir /repo
 RUN mkdir /src
 RUN mkdir /config
