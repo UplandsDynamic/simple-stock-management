@@ -113,11 +113,13 @@ def stock_taker(stock_data: list) -> bool:
                 note: needs to be done before generate_report() so value can be used in the report
                 """
                 try:
-                    accountData = AccountData.objects.get(owner=item.owner)
-                    new_all_time_total_xfer_value = accountData.all_time_total_xfer_value \
-                        + grand_total_xferred_value_since_last_stock_take
+                    accountData, created = AccountData.objects.get_or_create(
+                        owner=item.owner)
+                    new_all_time_total_xfer_value = Decimal(accountData.all_time_total_xfer_value).quantize(
+                        sterling, ROUND_HALF_UP) + grand_total_xferred_value_since_last_stock_take
                 except AccountData.DoesNotExist:
-                    new_all_time_total_xfer_value = xferred_value
+                    logger.info(
+                        'AccountData all_time_total_xfer_value field did not exist in database ...')
                 # generate report for lines
                 generate_report(user=user,stats_list=report_stats, type='LINES')
                 # generate report for grand totals

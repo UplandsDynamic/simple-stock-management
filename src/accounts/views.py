@@ -191,7 +191,8 @@ class AccountStockDataViewSet(viewsets.ModelViewSet):
                 # update running total value
                 serializer.validated_data['running_total_shrinkage_value'] = instance.running_total_shrinkage_value + Decimal(
                     shrinkage * instance.selling_price).quantize(self.sterling, ROUND_HALF_UP)  # add to running sold total
-            serializer.is_valid(raise_exception=True)  # ensure still valid following data changes
+            # ensure still valid following data changes
+            serializer.is_valid(raise_exception=True)  
             saved = serializer.save()
             updated_record = self.serialize_model_instance(instance=saved)
         except AccountStockData.DoesNotExist as e:
