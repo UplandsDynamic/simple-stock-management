@@ -59,7 +59,7 @@ const mockProps = {
         authenticated: false,
         userIsAdmin: false,
     },
-    stockUpdateModalOpen: false,
+    updateModalOpen: false,
     apiMode: mockAPIOptions.GET_STOCK,  // will be one of apiOptions when triggered
     message: null,
     messageClass: '',

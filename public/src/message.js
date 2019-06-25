@@ -31,7 +31,7 @@ class Message extends React.Component {
         let
             messageClass = this.state.messageClass ? this.state.messageClass : 'alert alert-info';
         return (
-            <div className={'card message-card'}>
+            <div className={'card message-card'} style={this.props.getStyles().messageBackground}>
                 <div className={'card-body'}>
                     <span className={'card-title'}></span>
                     <div className={`card-text ${messageClass}`}>

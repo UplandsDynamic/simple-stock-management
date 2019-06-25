@@ -21,7 +21,7 @@ const REGULAR_STYLES = {
         borderRadius: '7px 7px 7px 7px',
         boxShadow: '-7px -7px 17px 7px #001e00',
         maxWidth: '800px',
-        height: '50%'
+        maxHeight: '95%'
     },
     overlay: {
         backgroundColor: '#2a3517',

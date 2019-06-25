@@ -1,6 +1,6 @@
 import React from "react";
 import './css/paginate.css'
-import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 class Paginate extends React.Component {
 
@@ -30,7 +30,7 @@ class Paginate extends React.Component {
 
     componentWillReceiveProps(nextProps) {
         let count = nextProps.stockRecord.data.count || 0;
-        let {stockRecord} = nextProps;
+        let { stockRecord } = nextProps;
         this.setState({
             stockRecord,
             totalPages: Math.ceil(count / stockRecord.meta.limit),
@@ -44,8 +44,8 @@ class Paginate extends React.Component {
         return /^[\d\s]*$/.test(value) ? parseInt(value) === 0 ? 1 : value : this.state.currentPage;
     }
 
-    switchPage = ({linkedPage = 0, dir = 'selected'} = {}) => {
-        let {url, page, previous, next} = this.state.stockRecord.meta;
+    switchPage({ linkedPage = 0, dir = 'selected' } = {}) {
+        let { url, page, previous, next } = this.state.stockRecord.meta;
         switch (dir) {
             case 'selected':
                 page = linkedPage;
@@ -65,73 +65,74 @@ class Paginate extends React.Component {
                 break;
         }
         let newStockRecord = JSON.parse(JSON.stringify(this.state.stockRecord));
-        Object.assign(newStockRecord.meta, {page: page, limit: this.state.stockRecord.meta.limit});
-        this.props.handleGetRecords({stockRecord: newStockRecord, url: url});
+        Object.assign(newStockRecord.meta, { page: page, limit: this.state.stockRecord.meta.limit });
+        this.props.handleGetRecords({ stockRecord: newStockRecord, url: url });
         // locally set page state, to prevent delay when quick typing, pending overwrite by new source-of-truth prop
-        this.setState({currentPage: page})
-    };
+        this.setState({ currentPage: page })
+    }
 
-    currentPage = () => {
+    currentPage() {
         return (
             <React.Fragment>
                 <div className={'linkedPage'}>
                     <label className={'d-none'}>Current page</label>
-                    <input onKeyDown={(e) => e.keyCode === 8 ? this.setState({currentPage: ''}) : null}
-                           onChange={(e) => {
-                               this.switchPage({
-                                   linkedPage: parseInt(e.target.value) > 0 ? parseInt(e.target.value)
-                                   <= this.state.totalPages ? parseInt(e.target.value) : this.state.totalPages : 1,
-                                   dir: 'selected'
-                               });
-                           }} value={this.state.currentPage} type={'text'}
-                           className={'form-control input-sm page-input'}/>
+                    <input onKeyDown={(e) => e.keyCode === 8 ? this.setState({ currentPage: '' }) : null}
+                        onChange={(e) => {
+                            this.switchPage({
+                                linkedPage: parseInt(e.target.value) > 0 ? parseInt(e.target.value)
+                                    <= this.state.totalPages ? parseInt(e.target.value) : this.state.totalPages : 1,
+                                dir: 'selected'
+                            });
+                        }} value={this.state.currentPage} type={'text'}
+                        className={'form-control input-sm page-input'} />
                 </div>
             </React.Fragment>
         );
-    };
+    }
 
-    prevSection = () => {
+    prevSection() {
         return (
             <React.Fragment>
                 <li className="page-item">
-                    <button aria-label="previous" onClick={
-                        () => this.switchPage({dir: 'previous'})} className="page-link"><span
-                        aria-hidden="true">&laquo;</span>
+                    <button style={this.props.getStyles().pagerButtons} aria-label="previous" onClick={
+                        () => this.switchPage({ dir: 'previous' })} className="page-link"><span
+                            aria-hidden="true">&laquo;</span>
                         <span className="sr-only">Previous</span></button>
                 </li>
             </React.Fragment>
         )
-    };
+    }
 
-    nextSection = () => {
+    nextSection() {
         return (
             <React.Fragment>
                 <li className="page-item">
-                    <button aria-label="next" onClick={
-                        () => this.switchPage({dir: 'next'})} className="page-link"><span
-                        aria-hidden="true">&raquo;</span>
+                    <button style={this.props.getStyles().pagerButtons} aria-label="next" onClick={
+                        () => this.switchPage({ dir: 'next' })} className="page-link"><span
+                            aria-hidden="true">&raquo;</span>
                         <span className="sr-only">Next</span></button>
                 </li>
             </React.Fragment>
         )
-    };
+    }
 
-    mainSection = () => {
+    mainSection() {
         let pageItemClass;
         let pagerMainSize = this.state.stockRecord.meta.pagerMainSize;
         let linkedPage = this.state.stockRecord.meta.page;
         let totalPages = isNaN(this.state.totalPages) ? 0 : this.state.totalPages;
+        let styles = this.props.getStyles();
         return (
             <React.Fragment>
                 {[...Array(totalPages)].map((o, pageIndex) => {
+                    let currentPage = linkedPage === (pageIndex + 1);
                     /* if selected (displayed) page is this list item, add 'active' to class to colour it
                     and remove elements over the max size of displayed list */
-                    pageIndex + 1 > pagerMainSize ? pageItemClass = 'd-none' :
-                        linkedPage === (pageIndex + 1) ? pageItemClass = 'active page-item' :
-                            pageItemClass = 'page-item';
+                    pageIndex + 1 > pagerMainSize ? pageItemClass = 'd-none' : currentPage ? 
+                    pageItemClass = 'active page-item' : pageItemClass = 'page-item';
                     return (<li className={pageItemClass} key={pageIndex + 1}>
-                        <button onClick={() => this.switchPage({linkedPage: pageIndex + 1, dir: 'selected'})}
-                                className="page-link">
+                        <button style={currentPage ? styles.currentPage : styles.pagerButtons} onClick={() => this.switchPage({ linkedPage: pageIndex + 1, dir: 'selected' })}
+                            className="page-link">
                             {pageIndex + 1}
                         </button>
                     </li>);
@@ -140,12 +141,12 @@ class Paginate extends React.Component {
         );
     };
 
-    endSection = () => {
+    endSection() {
         let pagerMainSize = this.state.stockRecord.meta.pagerMainSize;
         let linkedPage = this.state.stockRecord.meta.page;
         let totalPages = this.state.totalPages;
         let numEndEle = this.state.stockRecord.meta.pagerEndSize;
-        let iterArray = Array.apply(null, {length: numEndEle}); // create array as basis for map in frag to iterate
+        let iterArray = Array.apply(null, { length: numEndEle }); // create array as basis for map in frag to iterate
         return (
             <React.Fragment>
                 {iterArray.map((o, c) => {
@@ -154,26 +155,26 @@ class Paginate extends React.Component {
                     return (
                         <li key={p}
                             className={page > pagerMainSize ? linkedPage === page ? 'active page-item' : 'page-item' : 'd-none'}>
-                            <button onClick={() => this.switchPage({linkedPage: page, dir: 'selected'})} href="#"
-                                    className="page-link">{page}</button>
+                            <button onClick={() => this.switchPage({ linkedPage: page, dir: 'selected' })} href="#"
+                                className="page-link">{page}</button>
                         </li>)
                 })}
             </React.Fragment>
         );
-    };
+    }
 
     render() {
         return (<div className={'pager'}>
-                {this.currentPage()}
-                <ul className={'pagination pagination-sm'}>
-                    {this.prevSection()}
-                    {this.mainSection()}
-                    <span className={'splitter'}>
-                <FontAwesomeIcon icon={"ellipsis-h"}/></span>
-                    {this.endSection()}
-                    {this.nextSection()}
-                </ul>
-            </div>
+            {this.currentPage()}
+            <ul className={'pagination pagination-sm'}>
+                {this.prevSection()}
+                {this.mainSection()}
+                <span className={'splitter'}>
+                    <FontAwesomeIcon icon={"ellipsis-h"} /></span>
+                {this.endSection()}
+                {this.nextSection()}
+            </ul>
+        </div>
         );
     }
 }

@@ -22,9 +22,31 @@ const REGULAR_STYLES = {
         borderRadius: '7px 7px 7px 7px',
         boxShadow: '-7px -7px 17px 7px #001e00',
         maxWidth: '800px',
+        maxHeight: '95%'
     },
     overlay: {
         backgroundColor: '#2a3517',
+    }
+};
+
+const REGULAR_STYLES_ACCOUNT = {
+    content: {
+        top: '50%',
+        left: '50%',
+        right: 'auto',
+        bottom: 'auto',
+        marginRight: '-50%',
+        transform: 'translate(-50%, -50%)',
+        backgroundColor: '#000033',
+        color: 'yellow',
+        border: '1px solid yellow',
+        borderRadius: '7px 7px 7px 7px',
+        boxShadow: '-7px -7px 17px 7px 000033',
+        maxWidth: '800px',
+        maxHeight: '95%'
+    },
+    overlay: {
+        backgroundColor: '#000033',
     }
 };
 
@@ -64,7 +86,7 @@ class StockUpdateModal extends React.Component {
             modalStyles: REGULAR_STYLES,
             modalIsOpen: this.props.openStockUpdateModal.state,
             deleteRecord: this.props.openStockUpdateModal.deleteRecord,
-            newRecord: this.props.openStockUpdateModal.newRecord
+            newRecord: this.props.openStockUpdateModal.newRecord,
         };
         // Remember! This binding is necessary to make `this` work in the callback
         this.handleAfterOpenModal = this.handleAfterOpenModal.bind(this);
@@ -79,14 +101,18 @@ class StockUpdateModal extends React.Component {
     }
 
     componentWillReceiveProps(nextProps, nextContext) {
-        nextProps.openStockUpdateModal.deleteRecord ? this.setState({modalStyles: DANGER_STYLES}) :
-            this.setState({modalStyles: REGULAR_STYLES});
+        if (nextProps.openStockUpdateModal.deleteRecord) {
+            this.setState({ modalStyles: DANGER_STYLES })
+        } else if (nextProps.accountMode === nextProps.accountModes.STORE) {
+            this.setState({ modalStyles: REGULAR_STYLES_ACCOUNT })
+        } else if (nextProps.accountMode === nextProps.accountModes.WAREHOUSE) {
+            this.setState({ modalStyles: REGULAR_STYLES })
+        }
         // set modal open/close state (source of truth in parent component - app.js)
         this.setState({
             modalIsOpen: nextProps.openStockUpdateModal.state,
             deleteRecord: nextProps.openStockUpdateModal.deleteRecord,
-            newRecord: nextProps.openStockUpdateModal.newRecord
-
+            newRecord: nextProps.openStockUpdateModal.newRecord,
         });
     }
 
@@ -96,32 +122,34 @@ class StockUpdateModal extends React.Component {
     handleAfterOpenModal() {
     }
 
-    handleCloseModal({stockRecord = this.props.stockRecord, actionCancelled = false} = {}) {
+    handleCloseModal({ stockRecord = this.props.stockRecord, actionCancelled = false } = {}) {
         // set modal state in parent component (app,js) back to closed
-        this.props.setStockUpdateModalState({stockRecord, state: false, actionCancelled: actionCancelled});
+        this.props.setStockUpdateModalState({ stockRecord, state: false, actionCancelled: actionCancelled });
     }
 
 
-    dataUpdate({stockRecord = this.props.stockRecord, updated = {}, commit = false} = {}) {
+    dataUpdate({ stockRecord = this.props.stockRecord, updated = {}, commit = false } = {}) {
         if (commit) {
             // close modal (makes new api request for updated data following update)
-            this.handleCloseModal({stockRecord, actionCancelled: false});
+            this.handleCloseModal({ stockRecord, actionCancelled: false });
         } else {  // called from update modal table, so update just the updateData values, pending eventual api call
-            Object.assign(stockRecord.data.updateData, {...updated});
-            this.props.setStockRecordState({newStockRecord: stockRecord})
+            Object.assign(stockRecord.data.updateData, { ...updated });
+            this.props.setStockRecordState({ newStockRecord: stockRecord })
         }
     }
 
-    handleRecordUpdate({adminUpdate = false, newRecord = false, deleteRecord = false} = {}) {
+    handleRecordUpdate({ adminUpdate = false, accountMode = this.props.accountModes.WAREHOUSE,
+        accountModes = this.props.accountModes, newRecord = false, deleteRecord = false } = {}) {
         /*
         method to update or delete record data (cancel if desc or sku fields were empty)
          */
-        const {desc, sku} = this.props.stockRecord.data.updateData;
+        const { desc, sku } = this.props.stockRecord.data.updateData;
+        const storeAccount = accountMode === accountModes.STORE
         // if deleteRecord was passed in props (i.e. delete button on data table was clicked), prioritse that
         deleteRecord = this.state.deleteRecord ? this.state.deleteRecord : deleteRecord;
         /* if not admin, load the truck for transfer, rather than submit an API request */
-        if (!adminUpdate) {
-            this.props.loadTruck({cargo: this.props.stockRecord.data.updateData});
+        if (!adminUpdate && !storeAccount) {
+            this.props.loadTruck({ cargo: this.props.stockRecord.data.updateData });
             this.handleCloseModal()
         } else {
             /*Administrative update */
@@ -130,12 +158,22 @@ class StockUpdateModal extends React.Component {
             let reqFieldsComplete = !!((desc && sku) || this.props.stockRecord.meta.deleteRecord);
             // set API mode
             let apiMode = null;
-            if (newRecord) {
-                apiMode = this.props.apiOptions.ADD_STOCK;
-            } else if (deleteRecord && adminUpdate) {
-                apiMode = this.props.apiOptions.DELETE_STOCK_LINE;
-            } else {
-                apiMode = this.props.apiOptions.PATCH_STOCK;
+            if (!storeAccount) {  // set API mode for warehouse admin
+                if (newRecord) {
+                    apiMode = this.props.apiOptions.ADD_STOCK;
+                } else if (deleteRecord && adminUpdate) {
+                    apiMode = this.props.apiOptions.DELETE_STOCK_LINE;
+                } else {
+                    apiMode = this.props.apiOptions.PATCH_STOCK;
+                }
+            } else {  // st API mode for store accounts admin
+                if (newRecord) {
+                    apiMode = this.props.apiOptions.ADD_ACCOUNT_STOCK;
+                } else if (deleteRecord && adminUpdate) {
+                    apiMode = this.props.apiOptions.DELETE_ACCOUNT_STOCK_LINE;
+                } else {
+                    apiMode = this.props.apiOptions.PATCH_ACCOUNT_STOCK;
+                }
             }
             //  Hit the api if required fields are complete
             if (reqFieldsComplete) {
@@ -165,14 +203,14 @@ class StockUpdateModal extends React.Component {
                             }
                         }
                         // update the main table with the new values
-                        this.dataUpdate({updated: response.data, commit: true})
+                        this.dataUpdate({ updated: response.data, commit: true })
                     }).catch(error => {
                         console.log(error);
                         this.props.setMessage({
                             message: 'An API error has occurred',
                             messageClass: 'alert alert-danger'
                         });
-                        this.handleCloseModal({actionCancelled: !reqFieldsComplete}); // close modal
+                        this.handleCloseModal({ actionCancelled: !reqFieldsComplete }); // close modal
                     });
                 }
             } else {
@@ -181,54 +219,84 @@ class StockUpdateModal extends React.Component {
         }
     }
 
-    render() {
-        if (this.props.stockRecord) {
+    deletion() {
+        return (
+            <StockUpdateDelete
+                stockRecord={this.props.stockRecord}
+                authMeta={this.props.authMeta}
+                handleCloseModal={this.handleCloseModal.bind(this)}
+                handleRecordUpdate={this.handleRecordUpdate.bind(this)}
+                deleteRecord={this.state.deleteRecord}
+                accountModes={this.props.accountModes}
+                accountMode={this.props.accountMode}
+            />
+        )
+    }
+
+    tables() {
+        if (this.props.accountMode === this.props.accountModes.WAREHOUSE) {
             return (
-                <Modal
-                    isOpen={this.state.modalIsOpen}
-                    onAfterOpen={this.handleAfterOpenModal}
-                    onRequestClose={this.handleCloseModal}
-                    style={this.state.modalStyles}
-                    closeTimeoutMS={250}
-                    contentLabel="Stock Action"
-                >
-                    <div className="container">
-                        <div className="row">
-                            <div className="col-sm">
-                                <h2 ref={subtitle => this.subtitle = subtitle}>Manage Stock</h2>
-                            </div>
-                            <div className="col-sm modal-button-cell">
-                                <button className="btn btn btn-outline-light close-button"
-                                        onClick={() => {
-                                            this.handleCloseModal({actionCancelled: true})
-                                        }}>Cancel
-                                </button>
-                            </div>
+                <div className="col-sm">
+                    <StockUpdateTable
+                        stockRecord={this.props.stockRecord}
+                        authMeta={this.props.authMeta}
+                        handleRecordUpdate={this.handleRecordUpdate.bind(this)}
+                        handleCloseModal={this.handleCloseModal.bind(this)}
+                        dataUpdate={this.dataUpdate.bind(this)}
+                        newRecord={this.state.newRecord}
+                        deleteRecord={this.state.deleteRecord}
+                        accountModes={this.props.accountModes}
+                        accountMode={this.props.accountMode}
+                    />
+                </div>
+            )
+        } else if (this.props.accountMode === this.props.accountModes.STORE) {
+            return (
+                <div className="col-sm">
+                    <StockUpdateTable
+                        stockRecord={this.props.stockRecord}
+                        authMeta={this.props.authMeta}
+                        handleRecordUpdate={this.handleRecordUpdate.bind(this)}
+                        handleCloseModal={this.handleCloseModal.bind(this)}
+                        dataUpdate={this.dataUpdate.bind(this)}
+                        newRecord={this.state.newRecord}
+                        deleteRecord={this.state.deleteRecord}
+                        accountModes={this.props.accountModes}
+                        accountMode={this.props.accountMode}
+                    />
+                </div>
+            )
+        }
+    }
+
+    render() {
+        return (
+            <Modal
+                isOpen={this.state.modalIsOpen}
+                onAfterOpen={this.handleAfterOpenModal}
+                onRequestClose={this.handleCloseModal}
+                style={this.state.modalStyles}
+                closeTimeoutMS={250}
+                contentLabel="Stock Action">
+                <div className="container">
+                    <div className="row">
+                        <div className="col-sm">
+                            <h2 ref={subtitle => this.subtitle = subtitle}>Manage Stock</h2>
                         </div>
-                        <div className="row">
-                            <div className="col-sm">
-                                <StockUpdateDelete
-                                    stockRecord={this.props.stockRecord}
-                                    handleCloseModal={this.handleCloseModal.bind(this)}
-                                    handleRecordUpdate={this.handleRecordUpdate.bind(this)}
-                                    deleteRecord={this.state.deleteRecord}
-                                />
-                                <StockUpdateTable
-                                    stockRecord={this.props.stockRecord}
-                                    authMeta={this.props.authMeta}
-                                    handleRecordUpdate={this.handleRecordUpdate.bind(this)}
-                                    handleCloseModal={this.handleCloseModal.bind(this)}
-                                    dataUpdate={this.dataUpdate.bind(this)}
-                                    newRecord={this.state.newRecord}
-                                    deleteRecord={this.state.deleteRecord}
-                                />
-                            </div>
+                        <div className="col-sm modal-button-cell">
+                            <button className="btn btn btn-outline-light close-button"
+                                onClick={() => {
+                                    this.handleCloseModal({ actionCancelled: true })
+                                }}>Cancel
+                                </button>
                         </div>
                     </div>
-                </Modal>
-            );
-        }
-        return null;
+                    <div className="row">
+                        {this.state.deleteRecord ? this.deletion() : this.tables()}
+                    </div>
+                </div>
+            </Modal>
+        );
     }
 }
 

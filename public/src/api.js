@@ -1,21 +1,36 @@
 import axios from 'axios/index';
 
 const processRequest = ({
-                            stockRecord = {}, requestData = null, apiMode = null, csrfToken = null, url = null
-                        } = {}) => {
-    const {requestType, method} = apiMode;
+    stockRecord = null, requestData = null, apiMode = null, csrfToken = null, url = null
+} = {}) => {
+    const { requestType, method } = apiMode;
     if (apiMode && requestType) {
         if (requestType === 'get_stock') {
-            return _getStock({stockRecord, csrfToken, requestMethod: method, url})  // returns a promise
-        } else if (apiMode.requestType === 'patch_stock') {
-            return _updateStock({stockRecord, csrfToken, requestMethod: method, url})  // returns a promise
-        } else if (apiMode.requestType === 'patch_stock') {
-        } else if (apiMode.requestType === 'add_stock') {
-            return _addStock({stockRecord, csrfToken, requestMethod: method, url})  // returns a promise
-        } else if (apiMode.requestType === 'delete_stock_line') {
-            return _deleteStock({stockRecord, csrfToken, requestMethod: method})
-        } else if (apiMode.requestType === 'post_auth' || requestType === 'patch_change_pw') {
-            return _auth({csrfToken, requestData, apiMode, requestMethod: method})
+            return _getStock({ stockRecord, csrfToken, requestMethod: method, url })  // returns a promise
+        } else if (requestType === 'get_account_stock') {
+            return _getAccountStock({ stockRecord, csrfToken, requestMethod: method, url })  // returns a promise
+        } else if (requestType === 'get_take_stock') {
+            return _getTakeStock({ stockRecord, csrfToken, requestMethod: method, url })  // returns a promise
+        }
+        else if (requestType === 'patch_stock') {
+            return _updateStock({ stockRecord, csrfToken, requestMethod: method, url })  // returns a promise
+        } else if (requestType === 'patch_account_stock') {
+            return _updateAccountStock({ stockRecord, csrfToken, requestMethod: method, url })  // returns a promise
+        }
+        else if (requestType === 'add_stock') {
+            return _addStock({ stockRecord, csrfToken, requestMethod: method, url })  // returns a promise
+        }
+        else if (requestType === 'add_account_stock') {
+            return _addAccountStock({ stockRecord, csrfToken, requestMethod: method, url })  // returns a promise
+        }
+        else if (requestType === 'delete_stock_line') {
+            return _deleteStock({ stockRecord, csrfToken, requestMethod: method })
+        }
+        else if (requestType === 'delete_account_stock_line') {
+            return _deleteAccountStock({ stockRecord, csrfToken, requestMethod: method })
+        }
+        else if (requestType === 'post_auth' || requestType === 'patch_change_pw') {
+            return _auth({ csrfToken, requestData, apiMode, requestMethod: method })
         }
     }
     console.log(`
@@ -31,17 +46,17 @@ const _getSessionStorage = (key) => {
 };
 
 const _makeRequest = ({
-                          stockRecord = null, requestMethod = null, csrfToken = null, requestData = null,
-                          url = null, cacheControl = null
-                      } = {}) => {
+    stockRecord = null, requestMethod = null, csrfToken = null, requestData = null,
+    url = null, cacheControl = null
+} = {}) => {
     const CancelToken = axios.CancelToken;
     let cancel;
-    // if no requestData passed, see if update data in stock record data. If not, pass empty data to request.
-    requestData = requestData ? requestData : stockRecord.data.updateData ? stockRecord.data.updateData : {};
+    // if no requestData passed, see if update data in stock record data.
+    if (!requestData && stockRecord !== null) { requestData = stockRecord.data.updateData; }
     if (url && requestMethod) {  // make request
         if (cancel !== undefined) {
             cancel();
-            console.log('API request cancelled because an existing request was already underway!')
+            console.log('API request cancelled because an existing request was already underway!');
         }
         return axios({
             cancelToken: new CancelToken((c) => cancel = c),
@@ -59,14 +74,15 @@ const _makeRequest = ({
             } // additional headers here
         })
     }
-    console.log('API did not send a request')
+    console.log('API did not send a request');
 };
 
 
-const _getStock = ({stockRecord = null, csrfToken = null, requestMethod = null, url = null} = {}) => {
+const _getStock = ({ stockRecord = null, csrfToken = null, requestMethod = null, url = null } = {}) => {
+    // get stock for warehouse
     if (stockRecord) {
         if (!url) {
-            let {pageOrderBy, pageOrderDir, search, limit, page} = stockRecord.meta;
+            let { pageOrderBy, pageOrderDir, search, limit, page } = stockRecord.meta;
             if (!url) { // constructs request URL, unless pre-defined in paginate.js through api 'next' or 'previous'.
                 // build url
                 url = `${process.env.REACT_APP_API_DATA_ROUTE}/stock/?limit=${limit}` +
@@ -74,49 +90,102 @@ const _getStock = ({stockRecord = null, csrfToken = null, requestMethod = null, 
                     `&order_by=${pageOrderDir}${pageOrderBy}&desc=${search}`; // update URL
             }
         }
-        return _makeRequest({stockRecord, csrfToken, requestMethod, url})  // returns a promise
-    }
-    return false
-};
-
-const _updateStock = ({stockRecord = null, csrfToken = null, requestMethod = null, url = null} = {}) => {
-    // manager's transfer updates
-    if ('records' in stockRecord) {
-        url =  `${process.env.REACT_APP_API_DATA_ROUTE}/stock/`;
-        return _makeRequest({requestData: {...stockRecord}, csrfToken, requestMethod, url})
-    } else if (stockRecord) // admin's stock record updates
-    { // build url
-        url = url ? url : `${process.env.REACT_APP_API_DATA_ROUTE}/stock/${stockRecord.data.updateData.id}/`;
-        return _makeRequest({stockRecord, csrfToken, requestMethod, url})
-    }
-    return false
-};
-
-const _addStock = ({stockRecord = null, csrfToken = null, requestMethod = null, url = null} = {}) => {
-    if (stockRecord) {
-        // build url
-        url = url ? url : `${process.env.REACT_APP_API_DATA_ROUTE}/stock/`;
-        return _makeRequest({stockRecord, csrfToken, requestMethod, url})
-    }
-    return false
-};
-
-const _deleteStock = ({stockRecord = null, csrfToken = null, requestMethod = null, url = null} = {}) => {
-    if (stockRecord) {
-        // build url
-        url = url ? url : `${process.env.REACT_APP_API_DATA_ROUTE}/stock/${stockRecord.data.updateData.id}/`;
-        return _makeRequest({stockRecord, csrfToken, requestMethod, url})
+        return _makeRequest({ stockRecord, csrfToken, requestMethod, url }); // returns a promise
     }
     return false;
 };
 
-const _auth = ({requestMethod = null, csrfToken = null, requestData = null, apiMode = null} = {}) => {
+const _getAccountStock = ({ stockRecord = null, csrfToken = null, requestMethod = null, url = null } = {}) => {
+    // get stock for store account
+    if (stockRecord) {
+        if (!url) {
+            let { pageOrderBy, pageOrderDir, search, limit, page } = stockRecord.meta;
+            if (!url) { // constructs request URL, unless pre-defined in paginate.js through api 'next' or 'previous'.
+                // build url
+                url = `${process.env.REACT_APP_API_DATA_ROUTE}/accounts/stock/?limit=${limit}` +
+                    `&offset=${(page * limit) - limit}` +
+                    `&order_by=${pageOrderDir}${pageOrderBy}&desc=${search}`; // update URL
+            }
+        }
+        return _makeRequest({ stockRecord, csrfToken, requestMethod, url }); // returns a promise
+    }
+    return false;
+};
+
+const _getTakeStock = ({ stockRecord = null, csrfToken = null, requestMethod = null, url = null } = {}) => {
+    // initiate stock take
+    url = url ? url : `${process.env.REACT_APP_API_DATA_ROUTE}/accounts/take-stock/`;
+    return _makeRequest({ stockRecord, csrfToken, requestMethod, url });
+};
+
+const _updateStock = ({ stockRecord = null, csrfToken = null, requestMethod = null, url = null } = {}) => {
+    // manager's transfer updates
+    if ('records' in stockRecord) {
+        url = `${process.env.REACT_APP_API_DATA_ROUTE}/stock/`;
+        return _makeRequest({ requestData: { ...stockRecord }, csrfToken, requestMethod, url })
+    } else if (stockRecord) // admin's stock record updates
+    { // build url
+        url = url ? url : `${process.env.REACT_APP_API_DATA_ROUTE}/stock/${stockRecord.data.updateData.id}/`;
+        return _makeRequest({ stockRecord, csrfToken, requestMethod, url });
+    }
+    return false;
+};
+
+const _updateAccountStock = ({ stockRecord = null, csrfToken = null, requestMethod = null, url = null } = {}) => {
+    // store account updates
+    if (stockRecord) // admin's stock record updates
+    { // build url
+        url = url ? url : `${process.env.REACT_APP_API_DATA_ROUTE}/accounts/stock/${stockRecord.data.updateData.id}/`;
+        return _makeRequest({ stockRecord, csrfToken, requestMethod, url });
+    }
+    return false;
+};
+
+
+const _addStock = ({ stockRecord = null, csrfToken = null, requestMethod = null, url = null } = {}) => {
+    if (stockRecord) {
+        // build url
+        url = url ? url : `${process.env.REACT_APP_API_DATA_ROUTE}/stock/`;
+        return _makeRequest({ stockRecord, csrfToken, requestMethod, url });
+    }
+    return false;
+};
+
+const _addAccountStock = ({ stockRecord = null, csrfToken = null, requestMethod = null, url = null } = {}) => {
+    if (stockRecord) {
+        // build url
+        url = url ? url : `${process.env.REACT_APP_API_DATA_ROUTE}/accounts/stock/`;
+        return _makeRequest({ stockRecord, csrfToken, requestMethod, url });
+    }
+    return false;
+};
+
+const _deleteStock = ({ stockRecord = null, csrfToken = null, requestMethod = null, url = null } = {}) => {
+    if (stockRecord) {
+        // build url
+        url = url ? url : `${process.env.REACT_APP_API_DATA_ROUTE}/stock/${stockRecord.data.updateData.id}/`;
+        return _makeRequest({ stockRecord, csrfToken, requestMethod, url });
+    }
+    return false;
+};
+
+const _deleteAccountStock = ({ stockRecord = null, csrfToken = null, requestMethod = null, url = null } = {}) => {
+    if (stockRecord) {
+        // build url
+        url = url ? url : `${process.env.REACT_APP_API_DATA_ROUTE}/accounts/stock/${stockRecord.data.updateData.id}/`;
+        return _makeRequest({ stockRecord, csrfToken, requestMethod, url });
+    }
+    return false;
+};
+
+
+const _auth = ({ requestMethod = null, csrfToken = null, requestData = null, apiMode = null } = {}) => {
     const apiRoute = process.env.REACT_APP_API_ROUTE;
     const loginURL = `${apiRoute}/api-token-auth/`;
-    const changePWURL = `${apiRoute}/v1/change-password/${_getSessionStorage('username')}/`;
+    const changePWURL = `${apiRoute}/v2/change-password/${_getSessionStorage('username')}/`;
     const url = apiMode.requestType === 'patch_change_pw' ? changePWURL : loginURL;
     const cacheControl = 'no-cache';
-    return _makeRequest({requestMethod, requestData, csrfToken, cacheControl, url: url})
+    return _makeRequest({ requestMethod, requestData, csrfToken, cacheControl, url: url });
 };
 
 export default processRequest;

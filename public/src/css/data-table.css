@@ -1,6 +1,6 @@
 div.data-table {
     min-height: 768px;
-    font-size: 1.7vm;
+    font-size: 1.7vm!important;
 }
 
 table {
@@ -11,11 +11,11 @@ table {
 
 table.table-bordered td, table.table-bordered th {
     border: 1px solid darkorange !important;
+    font-size: 0.8pc;
 }
 
 thead th {
     padding: 1em !important;
-    font-size: 1.7vm;
 }
 
 

@@ -1,5 +1,14 @@
 div.footer {
+    padding: 1vh;
+    margin: auto auto 1vh auto;
     font-size: 0.75em;
-    margin: auto;
     text-align: center;
+    color: silver;
+    background-color:teal;
+    -webkit-border-bottom-right-radius: 45px;
+    -webkit-border-bottom-left-radius: 45px;
+    -moz-border-radius-bottomright: 45px;
+    -moz-border-radius-bottomleft: 45px;
+    border-bottom-right-radius: 45px;
+    border-bottom-left-radius: 45px;
 }

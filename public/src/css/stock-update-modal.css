@@ -31,6 +31,10 @@ button.delete-btn:hover, button.cancel-btn:hover {
     transition: all 100ms ease-in-out;
 }
 
+button.stockActionButton {
+    margin-bottom: 1vmax;
+}
+
 button.stockActionButton:hover {
     transform: scale(1.25);
     transition: all 100ms ease-in-out;
@@ -51,7 +55,8 @@ input {
 
 .ReactModal__Overlay {
     opacity: 0;
-    transition: opacity 250ms ease-in-out;
+    transition: opacity 100ms ease-in-out;
+    z-index: 10;  /* prevents buttons lingering after clicked */
 }
 
 .ReactModal__Overlay--after-open {

@@ -17,6 +17,7 @@
     "bootstrap": "^4.3.1",
     "env-cmd": "^8.0.2",
     "enzyme-adapter-react-16": "^1.14.0",
+    "jest-enzyme": "^7.0.2",
     "jquery": "^3.4.1",
     "js-cookie": "^2.2.0",
     "lodash.clonedeep": "^4.5.0",
@@ -35,13 +36,30 @@
   "scripts": {
     "analyze": "source-map-explorer build/static/js/main.*",
     "start": "HTTPS=false react-scripts start",
+    "build:staging": "env-cmd .env.staging react-scripts build",
+    "build:production": "env-cmd .env.production react-scripts build",
     "build:docker": "env-cmd .env.docker react-scripts build",
+    "test": "react-scripts test",
+    "test:once": "CI=true react-scripts test",
+    "test:debug": "react-scripts --inspect-brk test --runInBand",
     "eject": "react-scripts eject"
+  },
+  "jest": {
+    "collectCoverageFrom": [
+      "src/**/*.{js,jsx,ts,tsx}",
+      "!<rootDir>/node_modules/",
+      "!<rootDir>/src/serviceWorker.js",
+      "!<rootDir>/src/index.js"
+    ]
   },
   "browserslist": [
     ">0.2%",
     "not dead",
     "not ie <= 11",
     "not op_mini all"
-  ]
+  ],
+  "devDependencies": {
+    "enzyme": "^3.10.0",
+    "eslint-plugin-react": "^7.13.0"
+  }
 }

@@ -21,10 +21,10 @@ import './css/index.css';
 import { library } from '@fortawesome/fontawesome-svg-core'
 import {
     faSyncAlt, faEllipsisH, faPlus, faPlusSquare, faMinus, faMinusSquare,
-    faTrashAlt, faEdit, faTruck
-} from '@fortawesome/free-solid-svg-icons'
+    faTrashAlt, faEdit, faTruck, faUserCircle, faEye
+} from '@fortawesome/free-solid-svg-icons';
 
-library.add(faSyncAlt, faEllipsisH, faPlus, faTrashAlt, faEdit, faPlusSquare, faMinus, faMinusSquare, faTruck);
+library.add(faSyncAlt, faEllipsisH, faPlus, faTrashAlt, faEdit, faPlusSquare, faMinus, faMinusSquare, faTruck, faUserCircle, faEye);
 
 
 axios.defaults.withCredentials = true;
@@ -37,23 +37,25 @@ class App extends React.Component {
         /* set local state. Only initialise stockData with required defaults for 1st request and
         BEFORE data returned. Rest all added in call to stockDataHandler called after response received
         */
+        this.ACCOUNT_MODES = {
+            WAREHOUSE: 'Main stock warehouse',
+            STORE: 'Stores'
+        }
         this.apiOptions = {
             /* used to define available API options in the api-request component */
             GET_STOCK: { requestType: 'get_stock', method: 'GET', desc: 'request to get stock data' },
+            GET_ACCOUNT_STOCK: { requestType: 'get_account_stock', method: 'GET', desc: 'request to get account stock data' },
+            GET_TAKE_STOCK: { requestType: 'get_take_stock', method: 'GET', desc: 'request to initiate stock take (count)' },
             PATCH_STOCK: { requestType: 'patch_stock', method: 'PATCH', desc: 'PATCH request to update stock data' },
+            PATCH_ACCOUNT_STOCK: { requestType: 'patch_account_stock', method: 'PATCH', desc: 'PATCH request to update account stock data' },
             ADD_STOCK: { requestType: 'add_stock', method: 'POST', desc: 'POST request to add stock data' },
-            DELETE_STOCK_LINE: {
-                requestType: 'delete_stock_line',
-                method: 'DELETE',
-                desc: 'DELETE request to delete stock line'
-            },
+            ADD_ACCOUNT_STOCK: { requestType: 'add_account_stock', method: 'POST', desc: 'POST request to add account stock line' },
+            DELETE_STOCK_LINE: { requestType: 'delete_stock_line', method: 'DELETE', desc: 'DELETE request to delete stock line' },
+            DELETE_ACCOUNT_STOCK_LINE: { requestType: 'delete_account_stock_line', method: 'DELETE', desc: 'DELETE request to delete account stock line' },
             POST_AUTH: { requestType: 'post_auth', method: 'POST', desc: 'POST request to for authorization' },
-            PATCH_CHANGE_PW: {
-                requestType: 'patch_change_pw',
-                method: 'PATCH',
-                desc: 'PATCH request to for changing password'
-            },
+            PATCH_CHANGE_PW: { requestType: 'patch_change_pw', method: 'PATCH', desc: 'PATCH request to for changing password' },
         };
+
         this.initialState = {
             stockRecord: {
                 meta: {
@@ -70,35 +72,53 @@ class App extends React.Component {
                 },
                 data: {
                     results: [],
-                    updateData: {
-                        id: '',
-                        sku: '',
-                        desc: '',
-                        units_total: 0,
-                        unit_price: 0,
-                        units_to_transfer: 0,
-                        start_units_total: 0
-                    }
+                    updateData: {}
                 }
             },
             authMeta: {
                 authenticated: false,
                 userIsAdmin: false,
             },
-            stockUpdateModalOpen: { state: false, deleteRecord: false, newRecord: false },
+            updateModalOpen: {
+                state: false,
+                accountRecord: {},
+                deleteRecord: false,
+                newRecord: false
+            },
             truckModalOpen: false,
             truck: [],
             message: null,
             messageClass: '',
             greeting: process.env.REACT_APP_GREETING,
             csrfToken: null,
-        };
+            accountMode: this.ACCOUNT_MODES.WAREHOUSE // set default as WAREHOUSE
+        }
         this.state = JSON.parse(JSON.stringify(this.initialState));
         // bind methods to be passed as props
         this.changeTruckUnits = this.changeTruckUnits.bind(this);
         this.emptyTruck = this.emptyTruck.bind(this);
         this.getTruck = this.getTruck.bind(this);
         this.loadTruck = this.loadTruck.bind(this);
+        this.setAccountMode = this.setAccountMode.bind(this);
+        this.getRecordsHandler = this.getRecordsHandler.bind(this);
+        this.stockTakeHandler = this.stockTakeHandler.bind(this);
+        this.getStyles = this.getStyles.bind(this);
+    }
+
+    getStyles() {
+        // contextual overrides (inline) for CSS stylesheet
+        if (this.state.accountMode === this.ACCOUNT_MODES.STORE) {
+            return {
+                messageBackground: { backgroundColor: 'teal', color: 'yellow' },
+                mainBackground: { backgroundColor: '#000023', color: 'yellow' },
+                recordTable: { backgroundColor: '#000033', color: 'yellow' },
+                pagerButtons: { backgroundColor: '#000033', color: 'yellow' },
+                currentPage: { backgroundColor: 'yellow', color: '#000033' }
+            }
+        } else return {
+            messageBackground: { backgroundColor: 'teal', color: 'yellow' },
+            mainBackground: {backgroundColor: '#002300'}
+        };
     }
 
     componentDidMount() {
@@ -150,6 +170,19 @@ class App extends React.Component {
         this.setState({ authMeta: { ...clonedAuthMeta } });
     };
 
+    setAccountMode = () => {
+        // reset page so switching modes always opens page 1 of results
+        this.setState({ // toggle account mode & get appropriate records
+            accountMode: this.state.accountMode === this.ACCOUNT_MODES.WAREHOUSE ?
+                this.ACCOUNT_MODES.STORE : this.ACCOUNT_MODES.WAREHOUSE,
+            stockRecord: {
+                data: this.state.stockRecord.data,
+                meta: { ...this.state.stockRecord.meta, page: 1 }
+            }
+        }, () => this.getRecordsHandler({ notifyResponse: true }));
+        // get records for the account mode
+    };
+
     setStockRecordState = ({ newStockRecord } = {}) => {
         /*
         method to update state for record being retrieved (GET request)
@@ -166,15 +199,6 @@ class App extends React.Component {
             }
         }
         this.setState({ stockRecord: newStockRecord });
-    };
-
-    openStockUpdateModalHandler = ({ stockRecord = null, deleteRecord = false, newRecord = false } = {}) => {
-        /*
-        method to open the stock addition/update/delete modal
-         */
-        Object.assign(stockRecord, { ...stockRecord });
-        this.setStockRecordState({ newStockRecord: stockRecord });
-        this.setStockUpdateModalState({ state: true, deleteRecord, newRecord });
     };
 
     openTruckModalHandler = ({ returnedRecords = null, state = false, actionCancelled = false } = {}) => {
@@ -207,10 +231,10 @@ class App extends React.Component {
     getTruck() {
         const truck = JSON.parse(localStorage.getItem('truck'));
         if (truck && truck.user === this.getSessionStorage('username')) {
-            this.setState({truck: truck.data});
+            this.setState({ truck: truck.data });
             return truck.data;
         }
-        this.setState({truck: []});
+        this.setState({ truck: [] });
         return [];
     };
 
@@ -230,7 +254,7 @@ class App extends React.Component {
             }
         }
         if (!exists) truck.push({ cargo });
-        const truckData = JSON.stringify({user: this.getSessionStorage('username'), data: truck})
+        const truckData = JSON.stringify({ user: this.getSessionStorage('username'), data: truck })
         localStorage.setItem('truck', truckData);
     }
 
@@ -251,9 +275,9 @@ class App extends React.Component {
             if (func === 'clear') {
                 truckLoad.splice(consignmentListIndex, 1);
             }
-            const truckData = JSON.stringify({user: this.getSessionStorage('username'), data: truckLoad})
+            const truckData = JSON.stringify({ user: this.getSessionStorage('username'), data: truckLoad })
             localStorage.setItem('truck', truckData);
-            this.setState({truck: truckLoad});
+            this.setState({ truck: truckLoad });
         }
     }
 
@@ -262,7 +286,8 @@ class App extends React.Component {
             const apiRequest = processRequest({
                 url: url,
                 stockRecord: stockRecord,
-                apiMode: this.apiOptions.GET_STOCK
+                apiMode: this.state.accountMode === this.ACCOUNT_MODES.WAREHOUSE ?
+                    this.apiOptions.GET_STOCK : this.apiOptions.GET_ACCOUNT_STOCK
             });
             if (apiRequest) {
                 apiRequest.then((response) => {
@@ -279,31 +304,64 @@ class App extends React.Component {
                         this.setStockRecordState({ newStockRecord: stockRecord });
                     }
                 }).catch(error => {
-                    console.log(error);
-                    this.setMessage({
-                        message: 'An API error has occurred',
-                        messageClass: 'alert alert-danger'
-                    });
-                    this.setStockRecordState({
-                        newStockRecord: stockRecord,
-                    });
+                    let message = '';
+                    console.log(error.response);
+                    if (error.response.status === 401) {
+                        message = 'User is unauthorised. Perhaps a stock take is in progress.';
+                    } else {
+                        message = `An API error has occurred: ${error.response.data.detail}`;
+                    }
+                    this.setMessage({ message, messageClass: 'alert alert-danger' });
+                    this.setStockRecordState({ newStockRecord: stockRecord });
                 });
             }
         }
         return false;
     };
 
+    stockTakeHandler = () => {
+        if (this.state.authMeta.authenticated) {
+            const apiRequest = processRequest({ apiMode: this.apiOptions.GET_TAKE_STOCK });
+            if (apiRequest) {
+                apiRequest.then((response) => {
+                    if (response) {
+                        this.setMessage({
+                            message: 'Stock take successfully initiated!',
+                            messageClass: 'alert alert-success'
+                        });
+                    }
+                }).catch(error => {
+                    console.log(error);
+                    this.setMessage({
+                        message: 'An API error has occurred. Stock take failed!',
+                        messageClass: 'alert alert-danger'
+                    });
+                });
+            }
+        }
+        return false;
+    }
+
+    openStockUpdateModalHandler = ({ stockRecord = this.state.stockRecord, deleteRecord = false,
+        newRecord = false } = {}) => {
+        /*
+        method to open the stock addition/update/delete modal
+         */
+        Object.assign(stockRecord, { ...stockRecord });
+        this.setStockRecordState({ newStockRecord: stockRecord });
+        this.setStockUpdateModalState({ state: true, deleteRecord, newRecord });
+    };
+
     setStockUpdateModalState = ({
         stockRecord = this.state.stockRecord, state = false, actionCancelled = false,
-        deleteRecord = false, newRecord = false
-    } = {}) => {
+        deleteRecord = false, newRecord = false } = {}) => {
         /*
         method to update the state for the modal open/close state. If closed, ensure ensure meta flags cleared (
         e.g. deleteRecord), and reset the update data.
          */
         if (!state) {  // actions to do when modal set to closed
-            this.setState({ stockUpdateModalOpen: { state, deleteRecord, newRecord } });   // close it first, to avoid showing reset data values
-            Object.assign(stockRecord.data.updateData, { ...this.initialState.stockRecord.data.updateData });
+            this.setState({ updateModalOpen: { state, deleteRecord, newRecord } });   // close it first, to avoid showing reset data values
+            stockRecord.data.updateData = {};  // clear transient update data
             this.setStockRecordState({ newStockRecord: stockRecord });
             if (!actionCancelled) {  // if was not cancelled, request updated data from API following the actions.
                 this.getRecordsHandler({ stockRecord, notifyResponse: false });
@@ -322,7 +380,9 @@ class App extends React.Component {
                 this.setState({ stockRecord: stockRecordClone });
                 stockRecordClone = null;
             }
-            this.setState({ stockUpdateModalOpen: { state, deleteRecord, newRecord } });
+            this.setState({
+                updateModalOpen: { state, deleteRecord, newRecord }
+            });
         }
     };
 
@@ -337,59 +397,73 @@ class App extends React.Component {
                 apiOptions={this.apiOptions}
                 setStockRecordState={this.setStockRecordState}
                 openStockUpdateModalHandler={this.openStockUpdateModalHandler}
+                stockTakeHandler={this.stockTakeHandler}
                 setMessage={this.setMessage}
                 getRecordsHandler={this.getRecordsHandler}
                 authMeta={this.state.authMeta}
-            />
-        );
+                accountMode={this.state.accountMode}
+                accountModes={this.ACCOUNT_MODES}
+                getStyles={this.getStyles}
+            />);
         return (
-            <div className={'app-main'}>
-                <div className={'container'}>
-                    <div className={'row'}>
-                        <div className={'col-12'}>
-                            <Header authMeta={this.state.authMeta}
-                                apiOptions={this.apiOptions}
-                                csrfToken={this.state.csrfToken}
-                                setMessage={this.setMessage}
-                                getSessionStorage={this.getSessionStorage}
-                                setSessionStorage={this.setSessionStorage}
-                                deleteSessionStorage={this.deleteSessionStorage}
-                                setAuthentication={this.setAuthentication}
-                                openTruck={this.openTruckModalHandler}
-                            />
-                            <Message message={this.state.message}
-                                messageClass={this.state.messageClass}
-                            />
-                            {dataTable}
-                            <Footer footer={process.env.REACT_APP_FOOTER}
-                                copyright={process.env.REACT_APP_COPYRIGHT}
-                                version={APP_VERSION}
-                            />
-                            <StockUpdateModal
-                                stockRecord={this.state.stockRecord}
-                                authMeta={this.state.authMeta}
-                                openStockUpdateModal={this.state.stockUpdateModalOpen}
-                                apiOptions={this.apiOptions}
-                                loadTruck={this.loadTruck}
-                                setStockUpdateModalState={this.setStockUpdateModalState}
-                                setStockRecordState={this.setStockRecordState}
-                                setMessage={this.setMessage}
-                            />
-                            <TruckModal
-                                stockRecord={this.state.stockRecord}
-                                authMeta={this.state.authMeta}
-                                openTruckModal={this.state.truckModalOpen}
-                                apiOptions={this.apiOptions}
-                                changeTruckUnits={this.changeTruckUnits}
-                                emptyTruck={this.emptyTruck}
-                                openTruckModalHandler={this.openTruckModalHandler}
-                                setMessage={this.setMessage}
-                                truck={this.state.truck}
-                            />
+            <React.Fragment>
+                <div className={'app-main'} style={this.getStyles().mainBackground}>
+                    <div className={'container'}>
+                        <div className={'row'}>
+                            <div className={'col-12'}>
+                                <Header authMeta={this.state.authMeta}
+                                    apiOptions={this.apiOptions}
+                                    csrfToken={this.state.csrfToken}
+                                    setMessage={this.setMessage}
+                                    getSessionStorage={this.getSessionStorage}
+                                    setSessionStorage={this.setSessionStorage}
+                                    deleteSessionStorage={this.deleteSessionStorage}
+                                    setAuthentication={this.setAuthentication}
+                                    openTruck={this.openTruckModalHandler}
+                                    accountMode={this.state.accountMode}
+                                    accountModes={this.ACCOUNT_MODES}
+                                    setAccountMode={this.setAccountMode}
+                                />
+                                <Message message={this.state.message}
+                                    messageClass={this.state.messageClass}
+                                    accountModes={this.ACCOUNT_MODES}
+                                    accountMode={this.state.accountMode}
+                                    getStyles={this.getStyles}
+                                />
+                                {dataTable}
+                                <StockUpdateModal
+                                    stockRecord={this.state.stockRecord}
+                                    authMeta={this.state.authMeta}
+                                    openStockUpdateModal={this.state.updateModalOpen}
+                                    apiOptions={this.apiOptions}
+                                    loadTruck={this.loadTruck}
+                                    setStockUpdateModalState={this.setStockUpdateModalState}
+                                    setStockRecordState={this.setStockRecordState}
+                                    setMessage={this.setMessage}
+                                    accountModes={this.ACCOUNT_MODES}
+                                    accountMode={this.state.accountMode}
+                                />
+                                <TruckModal
+                                    stockRecord={this.state.stockRecord}
+                                    authMeta={this.state.authMeta}
+                                    openTruckModal={this.state.truckModalOpen}
+                                    apiOptions={this.apiOptions}
+                                    changeTruckUnits={this.changeTruckUnits}
+                                    emptyTruck={this.emptyTruck}
+                                    openTruckModalHandler={this.openTruckModalHandler}
+                                    setMessage={this.setMessage}
+                                    truck={this.state.truck}
+                                />
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
+                <Footer footer={process.env.REACT_APP_FOOTER}
+                    copyright={process.env.REACT_APP_COPYRIGHT}
+                    version={APP_VERSION}
+                />
+            </React.Fragment>
+            
         );
     };
 }

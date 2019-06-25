@@ -16,7 +16,7 @@ const StockUpdateModalWithProps = (
     <StockUpdateModal
         stockRecord={mockProps.stockRecord}
         authMeta={mockProps.authMeta}
-        openStockUpdateModal={mockProps.stockUpdateModalOpen}
+        openStockUpdateModal={mockProps.updateModalOpen}
         apiOptions={mockProps.apiOptions}
         apiMode={mockProps.apiMode}
         setStockUpdateModalState={jest.fn()}

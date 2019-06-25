@@ -17,5 +17,5 @@ COPY nginx.conf /etc/nginx/
 COPY nginx-entrypoint.sh /
 WORKDIR /
 RUN groupadd -r -g 9001 ssm && useradd --no-log-init -r -g 9001 -u 9001 ssm
-EXPOSE 80
+#EXPOSE 80
 ENTRYPOINT [ "/nginx-entrypoint.sh" ]

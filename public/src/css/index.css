@@ -1,16 +1,29 @@
 html {
-    background-color: #001e00;
+    /* background-color: #001e00; */
+    height: 100%;
+}
+
+body {
+    background-color: #333;
 }
 
 div.app-main {
-    padding: 1em;
+    margin: 1vh 1vh 0 1vh;
+    padding: 1vh;
     color: #fcfcfc;
     background-color: #001a00;
-    margin: auto;
+    min-height: 90vh;
+    -webkit-border-radius: 15px;
+    -moz-border-radius: 15px;
+    border-radius: 15px;
 }
 
 h1, h2, h3, h4, h5, h6 {
     color: yellow;
+}
+
+div.account_type h1 {
+    color:#001a00;
 }
 
 button.table-btn {
