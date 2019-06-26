@@ -1,2 +1,2 @@
-const APP_VERSION = '4.0-beta-0.3';
+const APP_VERSION = '4.0.0';
 export default APP_VERSION;

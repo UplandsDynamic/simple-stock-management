@@ -2,7 +2,7 @@
   "author": "Dan Bright, productions@aninstance.com",
   "license": "GPLv3",
   "name": "stock_control-react-frontend",
-  "version": "3.0.1",
+  "version": "4.0.0",
   "private": true,
   "description": "React frontend for Django REST Simple Stock Management application",
   "main": "index.js",
