@@ -2,7 +2,9 @@
 
 This a simple stock management and inventory application.
 
-The app is designed to allow "stores" to request transfers of stock ("order" it) from a central stock repository (the "warehouse"). "Warehouse" stock is adjusted as stock transfers are "ordered" and email notifications are sent to the "warehouse" administrator(s) and the ordering "store manager".
+***Update: Version 4.x now released. The application now also includes unique stock records for every "store" and a "stock take" feature.***
+
+The app is designed to allow "stores" to request transfers of stock ("order" it) from a central stock repository (the "warehouse"). Stock is adjusted for the "Warehouse Account" and the ordering "Store Account" as stock transfers are "ordered" and email notifications are sent to the "warehouse" administrator(s) and the ordering "store manager".
 
 This application has web frontend that connects to a RESTful API backend. Data is stored in either a SQLite, mySQL or PostgreSQL (recommended) database.
 
@@ -14,23 +16,53 @@ This application has web frontend that connects to a RESTful API backend. Data i
 - Configurable pagination of results table.
 - Transfer requests of stock lines are loaded to a "truck" (i.e. like "adding to a basket/cart" in an e-commerce system), before the request is submitted.
   - The "truck" retains the transfer data until the "Request truck dispatch" button is clicked. The truck data is retained across sessions (meaning the data remains in the truck even if the user logs out, then resumes their transfer at a later time).
-  - Once the "Request truck dispatch" button is clicked, the transfer request process will complete. The truck empties and a single email containing a summary of the successful transfers - and any failures - is dispatched to both the requesting user and the warehouse administrator. Warehouse quantities are immediately adjusted accordingly.
+  - Once the "Request truck dispatch" button is clicked, the transfer request process will complete. The truck empties and a single email containing a summary of the successful transfers - and any failures - is dispatched to both the requesting user and the warehouse administrator. Warehouse quantities are immediately adjusted accordingly, both in the "Warehouse" and "Store" accounts.
+- A "Stock take" feature compiles and emails detailed reports, consisting of:
+
+  - For every unique stock line in a "Store Account" (see screenshot #10, below, for an example report):
+
+    - SKU
+    - Stock description
+    - Units of opening stock
+    - Units of closing stock
+    - Change in stock units since last stock take
+    - Number of units transferred since last stock take
+    - Number of units recorded sold since last stock take
+    - Number of units recorded as shrinkage since last stock take
+    - Differential for units of unrecorded history since last stock take (i.e. unrecorded sales, unrecorded transfers, unrecorded loss)
+    - Current transfer value of a unit
+    - Current retail price of a unit
+    - Total value of units recorded sold since last stock take
+    - Total value of units recorded as shrinkage since last stock take
+    - Total value of units transferred since last stock take
+    - Total value differential of units with unrecorded history since last stock take, at present xfer price
+    - Total value differential of units with unrecorded history since last stock take, at present retail price (i.e. unrecorded sales, unrecorded transfers, shrinkage)
+    - Current total held stock transfer value at present xfer price
+    - Current total held stock retail value at present retail price
+
+  - Overview of the entire "Store Account" (see screenshot #10, below, for an example report):
+
+    - Units of opening stock
+    - Units of closing stock
+    - Units of stock transferred since last stock take
+    - Units of stock recorded sold since last stock take
+    - Units of stock recorded as shrinkage since last stock take
+    - Change in stock holding owing to unrecorded unit history since last stock take (i.e. unrecorded sales, unrecorded transfers, unrecorded loss)
+    - Value of stock recorded sold since last stock take
+    - Value of stock recorded as shrinkage since last stock take
+    - Total value differential of units with unrecorded history since last stock take at current transfer value
+    - Total value differential of units with unrecorded history since last stock take at current retail value (i.e. unrecorded sales, unrecorded transfers, unrecorded loss)
+    - Total value of transfers since last stock take (at actual xfer prices)
+    - All time total value of transfers (at actual xfer prices)
+    - Value of held stock at current transfer price
+    - Value of held stock at current retail price
+
+- Automated removal of obsolete stock line records (lines with zero units of held stock) from the Store accounts following a successful stock take process
+- Historical retention of previous stock take data (not currently exposed on the UI)
 
 ## Key technologies
 
-- Python 3.6
-- Django
-- Django-rest-framework
-- Javascript (ReactJS)
-- HTML5
-- CSS3
-
-## Screenshots
-
-![Screenshot 1](./meta/img/screenshot_1.png?raw=true)
-![Screenshot 2](./meta/img/screenshot_2.png?raw=true)
-![Screenshot 4](./meta/img/screenshot_4.png?raw=true)
-![Screenshot 5](./meta/img/screenshot_5.png?raw=true)
+Key technologies include: Python 3.7; Django; Django-rest-framework; Django_q (for asynchronous processes); Javascript (ReactJS); HTML5; CSS3; BootStrap 4.
 
 ## Live Demo
 
@@ -47,6 +79,19 @@ Password: jduejHje(89K
 Manager:
 Username: test_manager
 Password: jduejHje(89K
+
+## Screenshots
+
+![Screenshot 1](./meta/img/screenshot_1.png?raw=true)
+![Screenshot 2](./meta/img/screenshot_2.png?raw=true)
+![Screenshot 4](./meta/img/screenshot_4.png?raw=true)
+
+![Screenshot 6](./meta/img/screenshot_6.png?raw=true)
+![Screenshot 7](./meta/img/screenshot_7.png?raw=true)
+![Screenshot 8](./meta/img/screenshot_8.png?raw=true)
+![Screenshot 5](./meta/img/screenshot_5.png?raw=true)
+![Screenshot 9](./meta/img/screenshot_9.png?raw=true)
+![Screenshot 10](./meta/img/screenshot_10.png?raw=true)
 
 ## Docker deployment
 
@@ -80,7 +125,9 @@ __These are basic instructions to install and run the app on an Linux Ubuntu 18.
 
 __Steps should be taken to harden the environment if using in production, such as applying suitable file & directory permissions and ensuring both backend & frontend are served over a TLS connection.__
 
-__A note on TLS: By default, `docker-compose-example.yml` exposes port to 80 on the server (`app`) container, and mounts the `settings.docker.insecure.py` Django settings file, which serves the app over an unencrypted connection. To serve over TLS, change the exposed port to 443 and mount `settings.docker.py`__
+__A note on TLS: By default, `docker-compose-example.yml` exposes port to 80 on the server (`nginx`) container, and mounts the `settings.docker.insecure.py` Django settings fil to the `app` container, which serves the app over an unencrypted connection. To serve over TLS, change the exposed port to 443 and mount `settings.docker.py`__
+
+### Brief installation instructions
 
 To use the Docker images orchestrated with docker-compose:
 
@@ -134,13 +181,32 @@ To use the Docker images orchestrated with docker-compose:
 
 - Navigate to the web client url - e.g. http://your_domain.tld __Note: When starting a newly built or pulled container for the first time, the web client may take several minutes (depending on your server's resources) to create a fresh build. You may get `This connection was reset` or timeout errors whilst the NPM build is occurring. Please be patient and try refreshing the page in a few moments.__
 
-- Login to the web client using the superuser credentials you'd previously supplied. Begin using Simple Stock Management.
+- Login to the web client using the superuser credentials you'd previously supplied. Begin using Simple Stock Management. 
+
+### Brief UI instructions
+
+Warehouse administrators:
+
+- Plus sign button allows adding new stock lines
+- Circular arrows button refreshes records from the database
+- Pencil icon button in `Action` column allows editing of stock line
+- Dustbin icon button in `Action` column allows deletion of a stock line
+
+Store account managers:
+  
+- Head-&-shoulders icon (right of top header bar) switches between `Warehouse` account (from where transfers are requested) and the user's `Store` account
+- Truck icon (right of top header bar) opens the user's "transfer truck"
+- Circular arrows button refreshes records from the database
+- Plus sign button allows manual addition of new lines to the `Store` account
+- Pencil icon button in `Action` column allows editing of stock line data (e.g. change stock level, record a sale or shrinkage, etc)
+- `New shrinkage` & `New recorded sold` update fields are ***disabled** during a stock line edit if the `stock quantity` field is changed. This is to prevent user error by inadvertent duplication of submitted data (i.e. user manually decrementing the `stock quantity` field whilst also recording the same data as `New recorded sold`). Likewise, the `stock quantity` field is disabled if the `New shrinkage` and/or `New recorded sold` fields are edited, for the same reason
+- Eye icon button initiates a stock take
 
 Note: The above guide is not definitive and is intended for users who know their way around Docker. Users would need to arrange database backups and to secure the application appropriately when used in a production environment.
 
 ## Development Roadmap
 
-- Addition of independent databases for each "store".
+- Integration with the "ShopWired" e-commerce platform.
 
 ## Support
 
