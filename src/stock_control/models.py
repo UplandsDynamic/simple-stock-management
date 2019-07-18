@@ -24,6 +24,7 @@ def create_auth_token(sender, instance=None, created=False, **kwargs):
     if created:
         Token.objects.create(user=instance)
 
+
 @receiver(post_save, sender='stock_control.StockData')
 def transfer_to_account(sender, instance=None, created=False, **kwargs):
     """
