@@ -33,6 +33,7 @@ Note: Mapping for actions (used in as_view), are:
 functional_view_urlpatterns = [
     url('^change-password/(?P<username>[a-zA-Z0-9.].+)/$', views.PasswordUpdateViewSet.as_view(
         {'patch': 'partial_update'})),
+    url(r'^logout/$', views.Logout.as_view()),
     url('^stock/$', views.StockDataViewSet.as_view(
         {'get': 'list', 'post': 'create', 'patch': 'perform_bulk_partial_update'})),
     url('^stock/(?P<pk>\d+)/$', views.StockDataViewSet.as_view(

@@ -28,7 +28,7 @@ functional_view_urlpatterns = [
     url('^stock/(?P<pk>\d+)/$', views.AccountStockDataViewSet.as_view(
          {'get': 'retrieve', 'patch': 'perform_single_update', 'delete': 'destroy'})),
     url('^take-stock/$', views.AccountStockDataViewSet.as_view(
-         {'get': 'take_stock'})), 
+         {'get': 'take_stock'})),
 ]
 
 """
