@@ -15,6 +15,7 @@ class LoginForm extends React.Component {
         failure: {
             authenticated: 'Authentication failed!',
             changedPW: 'Password change failed!',
+            loggedOut: 'Full server logout failed! Please contact an admin!'
         }
 
     };
@@ -90,11 +91,12 @@ class LoginForm extends React.Component {
     }
 
     handleLogout() {
-        this.props.deleteSessionStorage(['token', 'username']);
-        this.props.setMessage({
-            message: this.state.messages.success.loggedOut,
-            messageClass: 'alert alert-success'
+        // logout of server
+        this.authenticate({
+            apiMode: this.props.apiOptions.POST_LOGOUT
         });
+        // delete local session data
+        this.props.deleteSessionStorage(['token', 'username']);
         this.resetState();
         this.props.setAuthentication();
     }
@@ -117,7 +119,7 @@ class LoginForm extends React.Component {
     }
 
 
-    authenticate = ({apiMode = null, requestData = null} = {}) => {
+    authenticate = ({apiMode = null, requestData = {}} = {}) => {
         // triggers API to get auth token
         const apiRequest = processRequest({
             apiMode: apiMode,
@@ -150,6 +152,20 @@ class LoginForm extends React.Component {
                         this.props.setMessage({
                             message: this.state.messages.failure.changedPW,
                             messageClass: 'alert alert-success'
+                        });
+                    }
+                }
+                if (response.data.hasOwnProperty('logged_in')) {
+                    // logout
+                    if (!response.data.logged_in) {
+                        this.props.setMessage({
+                            message: this.state.messages.success.loggedOut,
+                            messageClass: 'alert alert-success'
+                        });
+                    } else {
+                        this.props.setMessage({
+                            message: this.state.messages.failure.loggedOut,
+                            messageClass: 'alert alert-danger'
                         });
                     }
                 }

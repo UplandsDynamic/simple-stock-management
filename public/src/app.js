@@ -53,6 +53,7 @@ class App extends React.Component {
             DELETE_STOCK_LINE: { requestType: 'delete_stock_line', method: 'DELETE', desc: 'DELETE request to delete stock line' },
             DELETE_ACCOUNT_STOCK_LINE: { requestType: 'delete_account_stock_line', method: 'DELETE', desc: 'DELETE request to delete account stock line' },
             POST_AUTH: { requestType: 'post_auth', method: 'POST', desc: 'POST request to for authorization' },
+            POST_LOGOUT: { requestType: 'post_logout', method: 'POST', desc: 'POST request to for logout of server' },
             PATCH_CHANGE_PW: { requestType: 'patch_change_pw', method: 'PATCH', desc: 'PATCH request to for changing password' },
         };
 
