@@ -1,0 +1,16 @@
+ Name                  | Version | License                                             | URL                                            |
+|-----------------------|---------|-----------------------------------------------------|------------------------------------------------|
+| Django                | 2.0.5   | BSD                                                 | https://www.djangoproject.com/                 |            |
+| coreapi               | 2.3.3   | BSD                                                 | https://github.com/core-api/python-client      |
+| coreschema            | 0.0.4   | BSD                                                 | https://github.com/core-api/python-coreschema  |
+| django-anymail        | 3.0     | BSD License                                         | https://github.com/anymail/django-anymail      |
+| django-cors-headers   | 2.3.0   | MIT License                                         | https://github.com/ottoyiu/django-cors-headers |
+| django-picklefield    | 1.0.0   | UNKNOWN                                             | http://github.com/gintas/django-picklefield    |
+| django-webpack-loader | 0.6.0   | UNKNOWN                                             | https://github.com/owais/django-webpack-loader |
+| djangorestframework   | 3.7.7   | BSD                                                 | http://www.django-rest-framework.org           |
+| itypes                | 1.1.0   | BSD                                                 | http://github.com/tomchristie/itypes           |
+| python-dateutil       | 2.6.1   | Simplified BSD                                      | https://dateutil.readthedocs.io     |
+| pytz                  | 2018.5  | MIT                                                 | http://pythonhosted.org/pytz        |
+| sparkpost             | 1.3.6   | Apache 2.0                                          | https://github.com/SparkPost/python-sparkpost  |
+| uritemplate           | 3.0.0   | BSD 3-Clause License or Apache License, Version 2.0 | https://uritemplate.readthedocs.org            |
+| wcwidth               | 0.1.7   | MIT                                                 | https://github.com/jquast/wcwidth              |
