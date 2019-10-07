@@ -5,19 +5,6 @@ import "bootstrap/dist/js/bootstrap.js";
 import processRequest from "./api";
 
 class LoginForm extends React.Component {
-  static _MESSAGES = {
-    success: {
-      authenticated: "Authentication succeeded!",
-      changedPW: `Password successfully changed. Please log back in with your new credentials!`,
-      loggedOut: "Successfully logged out!"
-    },
-    failure: {
-      authenticated: "Authentication failed!",
-      changedPW: "Password change failed!",
-      loggedOut: "Full server logout failed! Please contact an admin!"
-    }
-  };
-
   constructor(props) {
     super(props);
     // Remember! This binding is necessary to make `this` work in the callback
@@ -29,17 +16,24 @@ class LoginForm extends React.Component {
       username: "",
       oldPassword: "",
       newPassword: "",
-      messages: LoginForm._MESSAGES
+      messages: {
+        success: {
+          authenticated: "Authentication succeeded!",
+          changedPW: `Password successfully changed. Please log back in with your new credentials!`,
+          loggedOut: "Successfully logged out!"
+        },
+        failure: {
+          authenticated: "Authentication failed!",
+          changedPW: "Password change failed!",
+          loggedOut: "Full server logout failed! Please contact an admin!"
+        }
+      }
     };
     this.state = JSON.parse(JSON.stringify(this.initialState));
   }
 
   resetState() {
     this.setState(this.initialState);
-  }
-
-  componentWillMount() {
-    this.setState({ authenticated: this.props.authMeta.authenticated });
   }
 
   componentDidMount() {
@@ -56,11 +50,11 @@ class LoginForm extends React.Component {
     }
   }
 
-  componentWillReceiveProps(nextProps) {
-    this.setState({
+  static getDerivedStateFromProps(nextProps, prevState) {
+    return {
       authenticated: nextProps.authMeta.authenticated,
       csrfToken: nextProps.csrfToken
-    });
+    };
   }
 
   setFormToDisplay({ form = null } = {}) {
@@ -117,7 +111,7 @@ class LoginForm extends React.Component {
     this.resetState();
   }
 
-  authenticate = ({ apiMode = null, requestData = {} } = {}) => {
+  authenticate({ apiMode = null, requestData = {} } = {}) {
     // triggers API to get auth token
     const apiRequest = processRequest({
       apiMode: apiMode,
@@ -177,8 +171,11 @@ class LoginForm extends React.Component {
           }
         })
         .catch(error => {
-          let firstError = Object.keys(error.response.data)[0];
-          let displayError = error.response.data[firstError][0];
+          let displayError = null;
+          if (error.response && error.response.data) {
+            let firstError = Object.keys(error.response.data)[0];
+            displayError = error.response.data[firstError][0];
+          }
           this.resetState();
           this.props.setMessage({
             message: `${
@@ -190,7 +187,7 @@ class LoginForm extends React.Component {
           });
         });
     }
-  };
+  }
 
   receivePassword(e) {
     this.setState({ password: e.target.value });
