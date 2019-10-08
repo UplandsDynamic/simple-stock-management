@@ -68,3 +68,6 @@ input {
     opacity: 0;
 }
 
+.ReactModal__Content {
+    min-width: 35vw!important;
+}
