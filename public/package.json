@@ -2,7 +2,7 @@
   "author": "Dan Bright, productions@aninstance.com",
   "license": "GPLv3",
   "name": "stock_control-react-frontend",
-  "version": "4.0.4",
+  "version": "4.0.5",
   "private": true,
   "description": "React frontend for Django REST Simple Stock Management application",
   "main": "index.js",
@@ -15,7 +15,7 @@
     "@fortawesome/react-fontawesome": "^0.1.7",
     "acorn": "^7.1.0",
     "axios": "^0.19.0",
-    "bootstrap": "^4.3.1",
+    "bootstrap": "^4.4.1",
     "env-cmd": "^10.0.1",
     "enzyme-adapter-react-16": "^1.15.1",
     "jest-enzyme": "^7.1.2",
@@ -24,11 +24,11 @@
     "lodash.clonedeep": "^4.5.0",
     "moment": "^2.24.0",
     "moment-timezone": "^0.5.27",
-    "npm-check-updates": "^3.2.1",
+    "npm-check-updates": "^3.2.2",
     "popper.js": "^1.16.0",
-    "react": "^16.11.0",
+    "react": "^16.12.0",
     "react-app-polyfill": "^1.0.4",
-    "react-dom": "^16.11.0",
+    "react-dom": "^16.12.0",
     "react-markdown": "^4.2.2",
     "react-modal": "^3.11.1",
     "react-router-dom": "^5.1.2",
@@ -61,6 +61,6 @@
   ],
   "devDependencies": {
     "enzyme": "^3.10.0",
-    "eslint-plugin-react": "^7.16.0"
+    "eslint-plugin-react": "^7.17.0"
   }
 }
