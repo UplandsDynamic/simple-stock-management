@@ -68,7 +68,7 @@ Key technologies include: Python 3.7; Django; Django-rest-framework; Django_q (f
 
 There is a live demo available here:
 
-https://ssm.staging.aninstance.com
+https://staging-ssm.aninstance.com
 
 There are two test users - one for the warehouse administrator, the other for a 'store manager'. Credentials are:
 
