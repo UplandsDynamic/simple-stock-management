@@ -6,27 +6,27 @@
 #
 arrow==0.15.5             # via django-q
 asgiref==3.2.3            # via django
-blessed==1.16.1           # via django-q
+blessed==1.17.2           # via django-q
 certifi==2019.11.28       # via requests
 chardet==3.0.4            # via requests
 coreapi==2.3.3
 coreschema==0.0.4         # via coreapi
 django-anymail[sparkpost]==7.0.0
 django-cors-headers==3.2.1
-django-picklefield==2.0   # via django-q
-django-q==1.0.2
+django-picklefield==2.1.1  # via django-q
+django-q==1.1.0
 django-webpack-loader==0.6.0
-django==3.0.2
+django==3.0.3
 djangorestframework==3.11.0
 gevent==1.4.0
 greenlet==0.4.15          # via gevent
 gunicorn==20.0.4
 idna==2.8                 # via requests
 itypes==1.1.0             # via coreapi
-jinja2==2.10.3            # via coreschema
-markdown==3.1.1
+jinja2==2.11.1            # via coreschema
+markdown==3.2
 markupsafe==1.1.1         # via jinja2
-pip-licenses==2.0.1
+pip-licenses==2.1.0
 postgres==3.0.0
 psycopg2-binary==2.8.4    # via postgres, psycopg2-pool
 psycopg2-pool==1.1        # via postgres
@@ -39,5 +39,5 @@ six==1.14.0               # via blessed, django-anymail, python-dateutil
 sparkpost==1.3.6          # via django-anymail
 sqlparse==0.3.0           # via django
 uritemplate==3.0.1        # via coreapi
-urllib3==1.25.7           # via requests
+urllib3==1.25.8           # via requests
 wcwidth==0.1.8            # via blessed
