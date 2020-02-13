@@ -210,7 +210,7 @@ Note: The above guide is not definitive and is intended for users who know their
 
 ## Support
 
-- Paid support services (including installation, configuration and development of bespoke features) are available. Please email productions@aninstance.com with "Simple Stock Management Support" in the subject field, or leave a message via the website form at: https://www.aninstance.com/contact
+- Paid support services (including installation, configuration and development of bespoke features) are available. Please email productions@aninstance.com with "Simple Stock Management Support" in the subject field.
 
 ## Authors
 
