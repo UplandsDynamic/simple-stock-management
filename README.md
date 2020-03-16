@@ -1,5 +1,15 @@
 # Simple Stock Management
 
+## IMPORTANT UPDATE - 16 March 2020
+
+***Due to lack of donations (i.e. zero) - and therefore the assumed lack of interest - the open source branch of this project offered here will no longer be maintained as of this date.***
+
+***This means the application should NOT be used in production (i.e. a "live" working environment) unless whoever is administering it regularly patches project dependencies with upstream security updates as and when they are released by the vendors.*** 
+
+***If anyone IS actually using this project in production and would like maintenance support to apply upstream security patches - and/or would like to request other bespoke work on this project - please feel free to email me to discuss at productions@aninstance.com. Thank you!***
+
+***
+
 This a simple stock management and inventory application.
 
 ***Update: Version 4.x now released. The application now also includes unique stock records for every "store" and a "stock take" feature.***
