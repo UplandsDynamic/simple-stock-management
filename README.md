@@ -2,7 +2,7 @@
 
 ## IMPORTANT UPDATE - 16 March 2020
 
-***Due to lack of donations (i.e. zero) - and therefore the assumed lack of interest - the open source branch of this project offered here will no longer be maintained as of this date.***
+***Due to lack of funding - and therefore assumed lack of interest - the open source branch of this project offered here will no longer be regularly maintained as of this date.***
 
 ***This means the application should NOT be used in production (i.e. a "live" working environment) unless whoever is administering it regularly patches project dependencies with upstream security updates as and when they are released by the vendors.*** 
 
@@ -109,23 +109,26 @@ The `master` branch of this repository is source for the dockerised version of t
 
 If deploying with Docker, it is highly recommended to use Docker Compose. Please find an example docker-compose file (which builds the entire stack, including the web client & server) in the `master` (server) branch.
 
-The associated Docker images for server and client are available on DockerHub:
+~~The associated Docker images for server and client are available on DockerHub:~~
+
+*Note: Public Docker images are no longer maintained on Dockerhub, as per notice at the top of this page.
+To test or deploy the system using Docker, server and client (frontend) images may be built manually, using the included `Dockerfile` files and tagged `simple-stock-management` & `simple-stock-management-client` accordingly.*
 
 - Server:
 
-  URL: <https://hub.docker.com/r/aninstance/simple-stock-management>
+  URL: ~~<https://hub.docker.com/r/aninstance/simple-stock-management>~~
 
   To pull the image:
 
-  `docker pull aninstance/simple-stock-management`
+  ~~`docker pull aninstance/simple-stock-management`~~
 
 - Frontend client:
 
-  URL: <https://hub.docker.com/r/aninstance/simple-stock-management-client>
+  URL: ~~<https://hub.docker.com/r/aninstance/simple-stock-management-client>~~
 
   To pull the image:
 
-  `docker pull aninstance/simple-stock-management`
+  ~~`docker pull aninstance/simple-stock-management`~~
 
 To use this source code for non-dockerised builds, please amend the settings.py configuration file accordingly.
 
