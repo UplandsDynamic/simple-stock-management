@@ -6,13 +6,14 @@ RUN mkdir /var/www/html/react
 RUN mkdir /npm_build
 RUN apt update && apt dist-upgrade -y
 RUN apt install curl git -y
-RUN curl -sL https://deb.nodesource.com/setup_9.x | bash -
+RUN curl -sL https://deb.nodesource.com/setup_12.x | bash -
 RUN git clone --single-branch --branch frontend https://github.com/Aninstance/simple-stock-management /npm_build
 COPY public /npm_build
 WORKDIR  /npm_build
-RUN apt install npm -y
-RUN npm i npm@latest -g
-RUN npm install --save
+RUN apt install nodejs -y
+RUN npm install
+RUN npx npm-force-resolutions  # have to run this manually as won't work in package.json
+RUN npm audit fix
 COPY ssm.conf /etc/nginx/conf.d/
 COPY nginx.conf /etc/nginx/
 COPY nginx-entrypoint.sh /
