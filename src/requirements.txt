@@ -4,9 +4,9 @@
 #
 #    pip-compile
 #
-arrow==0.15.5             # via django-q
+arrow==0.15.6             # via django-q
 asgiref==3.2.7            # via django
-blessed==1.17.4           # via django-q
+blessed==1.17.5           # via django-q
 certifi==2020.4.5.1       # via requests
 chardet==3.0.4            # via requests
 coreapi==2.3.3            # via -r requirements.in
@@ -16,23 +16,24 @@ django-cors-headers==3.2.1  # via -r requirements.in
 django-picklefield==2.1.1  # via django-q
 django-q==1.2.1           # via -r requirements.in
 django-webpack-loader==0.7.0  # via -r requirements.in
-django==3.0.5             # via -r requirements.in, django-anymail, django-cors-headers, django-picklefield, django-q, djangorestframework
+django==3.0.6             # via -r requirements.in, django-anymail, django-cors-headers, django-picklefield, django-q, djangorestframework
 djangorestframework==3.11.0  # via -r requirements.in
-gevent==1.5.0             # via -r requirements.in
+gevent==20.5.0            # via -r requirements.in
 greenlet==0.4.15          # via gevent
 gunicorn==20.0.4          # via -r requirements.in
 idna==2.9                 # via requests
+importlib-metadata==1.6.0  # via markdown
 itypes==1.2.0             # via coreapi
 jinja2==2.11.2            # via coreschema
-markdown==3.2.1           # via -r requirements.in
+markdown==3.2.2           # via -r requirements.in
 markupsafe==1.1.1         # via jinja2
-pip-licenses==2.1.1       # via -r requirements.in
+pip-licenses==2.2.0       # via -r requirements.in
 postgres==3.0.0           # via -r requirements.in
 psycopg2-binary==2.8.5    # via postgres, psycopg2-pool
 psycopg2-pool==1.1        # via postgres
 ptable==0.9.2             # via pip-licenses
 python-dateutil==2.8.1    # via -r requirements.in, arrow
-pytz==2019.3              # via django
+pytz==2020.1              # via django
 pyyaml==5.3.1             # via -r requirements.in
 requests==2.23.0          # via coreapi, django-anymail, sparkpost
 six==1.14.0               # via blessed, django-anymail, python-dateutil
@@ -41,6 +42,7 @@ sqlparse==0.3.1           # via django
 uritemplate==3.0.1        # via coreapi
 urllib3==1.25.9           # via requests
 wcwidth==0.1.9            # via blessed
+zipp==3.1.0               # via importlib-metadata
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools
