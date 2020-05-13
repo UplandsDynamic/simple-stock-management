@@ -2,11 +2,13 @@
 
 ## IMPORTANT UPDATE - 16 March 2020
 
-***Due to lack of funding - and therefore assumed lack of interest - the open source branch of this project offered here will no longer be regularly maintained as of this date.***
+***Due to lack of sponsorship/funding - and therefore assumed lack of interest - the GPL licensed version of this project offered here may no longer be regularly maintained as of this date.***
 
-***This means the application should NOT be used in production (i.e. a "live" working environment) unless whoever is administering it regularly patches project dependencies with upstream security updates as and when they are released by the vendors.*** 
+***For paying clients, I am continuing to maintain a regularly updated, proprietary licensed version (source available), with a private Docker repository serving prebuilt containers.***
 
-***If anyone IS actually using this project in production and would like maintenance support to apply upstream security patches - and/or would like to request other bespoke work on this project - please feel free to email me to discuss at productions@aninstance.com. Thank you!***
+***If anyone wants to avail of this project in production and would like to purchase a subscription to the regularly updated proprietary licensed version, and/or would like to request other bespoke work on this project, please feel free to email me to discuss at productions@aninstance.com. Thank you!***
+
+***Note: The GPL licensed version available here SHOULD NOT BE USED IN PRODUCTION (i.e. a "live" working environment) UNLESS whoever is administering it regularly patches project dependencies with upstream security updates as and when they are released by the vendors. In that case, if running with Docker, the Dockerfiles (both server & frontend) would need to be amended to pull from your forked and updated Github source.*** 
 
 ***
 
