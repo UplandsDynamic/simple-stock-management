@@ -16,7 +16,7 @@ django-cors-headers==3.2.1  # via -r requirements.in
 django-picklefield==2.1.1  # via django-q
 django-q==1.2.1           # via -r requirements.in
 django-webpack-loader==0.7.0  # via -r requirements.in
-django==3.0.6             # via -r requirements.in, django-anymail, django-cors-headers, django-picklefield, django-q, djangorestframework
+django==3.0.7             # via -r requirements.in, django-anymail, django-cors-headers, django-picklefield, django-q, djangorestframework
 djangorestframework==3.11.0  # via -r requirements.in
 gevent==20.5.0            # via -r requirements.in
 greenlet==0.4.15          # via gevent
