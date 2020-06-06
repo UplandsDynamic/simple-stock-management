@@ -22,7 +22,6 @@ gevent==20.5.0            # via -r requirements.in
 greenlet==0.4.15          # via gevent
 gunicorn==20.0.4          # via -r requirements.in
 idna==2.9                 # via requests
-importlib-metadata==1.6.0  # via markdown
 itypes==1.2.0             # via coreapi
 jinja2==2.11.2            # via coreschema
 markdown==3.2.2           # via -r requirements.in
@@ -42,7 +41,6 @@ sqlparse==0.3.1           # via django
 uritemplate==3.0.1        # via coreapi
 urllib3==1.25.9           # via requests
 wcwidth==0.1.9            # via blessed
-zipp==3.1.0               # via importlib-metadata
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools

@@ -229,4 +229,4 @@ Note: The above guide is not definitive and is intended for users who know their
 
 ## Authors
 
-- Dan Bright (Aninstance Consultancy), productions@aninstance.com
+- Dan Bright (Aninstance Technical Consultancy), productions@aninstance.com
