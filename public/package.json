@@ -2,7 +2,7 @@
   "author": "Dan Bright, productions@aninstance.com",
   "license": "GPLv3",
   "name": "stock_control-react-frontend",
-  "version": "4.0.8",
+  "version": "4.0.9",
   "private": true,
   "description": "React frontend for Django REST Simple Stock Management application",
   "main": "index.js",
@@ -12,8 +12,8 @@
     "@fortawesome/free-brands-svg-icons": "^5.13.0",
     "@fortawesome/free-regular-svg-icons": "^5.13.0",
     "@fortawesome/free-solid-svg-icons": "^5.13.0",
-    "@fortawesome/react-fontawesome": "^0.1.9",
-    "acorn": "^7.2.0",
+    "@fortawesome/react-fontawesome": "^0.1.10",
+    "acorn": "^7.3.1",
     "axios": "^0.19.2",
     "bootstrap": "^4.5.0",
     "env-cmd": "^10.1.0",
@@ -22,9 +22,9 @@
     "jquery": "^3.5.1",
     "js-cookie": "^2.2.1",
     "lodash.clonedeep": "^4.5.0",
-    "moment": "^2.25.3",
-    "moment-timezone": "^0.5.28",
-    "npm-check-updates": "^5.0.0",
+    "moment": "^2.26.0",
+    "moment-timezone": "^0.5.31",
+    "npm-check-updates": "^7.0.1",
     "popper.js": "^1.16.1",
     "react": "^16.13.1",
     "react-app-polyfill": "^1.0.6",
@@ -43,8 +43,7 @@
     "test": "react-scripts test",
     "test:once": "CI=true react-scripts test",
     "test:debug": "react-scripts --inspect-brk test --runInBand",
-    "eject": "react-scripts eject",
-    "preinstall": "npx npm-force-resolutions"
+    "eject": "react-scripts eject"
   },
   "jest": {
     "collectCoverageFrom": [
