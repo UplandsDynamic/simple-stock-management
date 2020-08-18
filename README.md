@@ -1,24 +1,41 @@
 # Simple Stock Management
 
-## IMPORTANT UPDATE - 16 March 2020
+## Demo & Prototype Repository
 
-***Due to lack of sponsorship/funding - and therefore assumed lack of interest - the GPL licensed version of this project offered here may no longer be regularly maintained as of this date.***
+This a demo/prototype repository for a simple stock management and inventory system. It is built using web technologies, with a client/server architecture.
 
-***For paying clients, I am continuing to maintain a regularly updated, proprietary licensed version (source available), with a private Docker repository serving prebuilt containers.***
+The system allows "stores" to request transfers of stock ("order") from a central stock repository ("warehouse"). Stock is adjusted for the "Warehouse Account" and the "Store Account" as stock transfers are "ordered". Email notifications are sent to the "warehouse" administrator(s) and the ordering "store manager".
 
-***If anyone wants to avail of this project in production and would like to purchase a subscription to the regularly updated proprietary licensed version, and/or would like to request other bespoke work on this project, please feel free to email me to discuss at productions@aninstance.com. Thank you!***
+This project - available to subscribers & clients as regularly maintained Docker application - offers a web frontend that connects to a RESTful API backend. Data is stored in either a SQLite, mySQL or PostgreSQL (recommended) database.
 
-***Note: The GPL licensed version available here SHOULD NOT BE USED IN PRODUCTION (i.e. a "live" working environment) UNLESS whoever is administering it regularly patches project dependencies with upstream security updates as and when they are released by the vendors. In that case, if running with Docker, the Dockerfiles (both server & frontend) would need to be amended to pull from your forked and updated Github source.*** 
+## Live Demo
 
-***
+There is a live demo available here:
 
-This a simple stock management and inventory application.
+https://staging-ssm.aninstance.com
 
-***Update: Version 4.x now released. The application now also includes unique stock records for every "store" and a "stock take" feature.***
+There are two test users - one for the warehouse administrator, the other for a 'store manager'. Credentials are:
 
-The app is designed to allow "stores" to request transfers of stock ("order" it) from a central stock repository (the "warehouse"). Stock is adjusted for the "Warehouse Account" and the ordering "Store Account" as stock transfers are "ordered" and email notifications are sent to the "warehouse" administrator(s) and the ordering "store manager".
+Adminstrator:
+Username: test_admin
+Password: jduejHje(89K
 
-This application has web frontend that connects to a RESTful API backend. Data is stored in either a SQLite, mySQL or PostgreSQL (recommended) database.
+Manager:
+Username: test_manager
+Password: jduejHje(89K
+
+## Screenshots
+
+![Screenshot 1](./meta/img/screenshot_1.png?raw=true)
+![Screenshot 2](./meta/img/screenshot_2.png?raw=true)
+![Screenshot 4](./meta/img/screenshot_4.png?raw=true)
+
+![Screenshot 6](./meta/img/screenshot_6.png?raw=true)
+![Screenshot 7](./meta/img/screenshot_7.png?raw=true)
+![Screenshot 8](./meta/img/screenshot_8.png?raw=true)
+![Screenshot 5](./meta/img/screenshot_5.png?raw=true)
+![Screenshot 9](./meta/img/screenshot_9.png?raw=true)
+![Screenshot 10](./meta/img/screenshot_10.png?raw=true)
 
 ## Key features
 
@@ -72,38 +89,15 @@ This application has web frontend that connects to a RESTful API backend. Data i
 - Automated removal of obsolete stock line records (lines with zero units of held stock) from the Store accounts following a successful stock take process
 - Historical retention of previous stock take data (not currently exposed on the UI)
 
+## Project status
+
+The GPL licensed version of this project offered here is *not guaranteed to be regularly maintained*. It is made available here for demo/prototype purposes and *SHOULD NOT* be used in production (i.e. a "live" working environment) unless the administrator regularly patches project dependencies with upstream security updates as and when released by vendors. If running with Docker, Dockerfiles (both server & frontend) would need to be amended to pull from the forked and updated Github source and *not* this demo/prototype repository.
+
+A regularly updated, proprietary licensed version (source available), maintained for subscribers and clients, is available from a private Docker repository serving prebuilt containers. Subscriptions to the regularly updated proprietary licensed version - with optional installation, hosting & support services - are currently considered upon request (limited availability). If you would like to avail of the subscription and/or associated services, or request other bespoke work on this project, please email to discuss: ssm@aninstance.com.
+
 ## Key technologies
 
 Key technologies include: Python 3.7; Django; Django-rest-framework; Django_q (for asynchronous processes); Javascript (ReactJS); HTML5; CSS3; BootStrap 4.
-
-## Live Demo
-
-There is a live demo available here:
-
-https://staging-ssm.aninstance.com
-
-There are two test users - one for the warehouse administrator, the other for a 'store manager'. Credentials are:
-
-Adminstrator:
-Username: test_admin
-Password: jduejHje(89K
-
-Manager:
-Username: test_manager
-Password: jduejHje(89K
-
-## Screenshots
-
-![Screenshot 1](./meta/img/screenshot_1.png?raw=true)
-![Screenshot 2](./meta/img/screenshot_2.png?raw=true)
-![Screenshot 4](./meta/img/screenshot_4.png?raw=true)
-
-![Screenshot 6](./meta/img/screenshot_6.png?raw=true)
-![Screenshot 7](./meta/img/screenshot_7.png?raw=true)
-![Screenshot 8](./meta/img/screenshot_8.png?raw=true)
-![Screenshot 5](./meta/img/screenshot_5.png?raw=true)
-![Screenshot 9](./meta/img/screenshot_9.png?raw=true)
-![Screenshot 10](./meta/img/screenshot_10.png?raw=true)
 
 ## Docker deployment
 
