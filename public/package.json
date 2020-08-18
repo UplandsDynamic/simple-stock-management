@@ -2,29 +2,29 @@
   "author": "Dan Bright, productions@aninstance.com",
   "license": "GPLv3",
   "name": "stock_control-react-frontend",
-  "version": "4.0.9",
+  "version": "4.1.0",
   "private": true,
   "description": "React frontend for Django REST Simple Stock Management application",
   "main": "index.js",
   "dependencies": {
     "@csstools/normalize.css": "^10.1.0",
-    "@fortawesome/fontawesome-svg-core": "^1.2.28",
-    "@fortawesome/free-brands-svg-icons": "^5.13.0",
-    "@fortawesome/free-regular-svg-icons": "^5.13.0",
-    "@fortawesome/free-solid-svg-icons": "^5.13.0",
-    "@fortawesome/react-fontawesome": "^0.1.10",
-    "acorn": "^7.3.1",
+    "@fortawesome/fontawesome-svg-core": "^1.2.30",
+    "@fortawesome/free-brands-svg-icons": "^5.14.0",
+    "@fortawesome/free-regular-svg-icons": "^5.14.0",
+    "@fortawesome/free-solid-svg-icons": "^5.14.0",
+    "@fortawesome/react-fontawesome": "^0.1.11",
+    "acorn": "^8.0.1",
     "axios": "^0.19.2",
-    "bootstrap": "^4.5.0",
+    "bootstrap": "^4.5.2",
     "env-cmd": "^10.1.0",
-    "enzyme-adapter-react-16": "^1.15.2",
+    "enzyme-adapter-react-16": "^1.15.3",
     "jest-enzyme": "^7.1.2",
     "jquery": "^3.5.1",
     "js-cookie": "^2.2.1",
     "lodash.clonedeep": "^4.5.0",
-    "moment": "^2.26.0",
+    "moment": "^2.27.0",
     "moment-timezone": "^0.5.31",
-    "npm-check-updates": "^7.0.1",
+    "npm-check-updates": "^7.1.1",
     "popper.js": "^1.16.1",
     "react": "^16.13.1",
     "react-app-polyfill": "^1.0.6",
@@ -32,7 +32,7 @@
     "react-markdown": "^4.3.1",
     "react-modal": "^3.11.2",
     "react-router-dom": "^5.2.0",
-    "react-scripts": "^3.4.1"
+    "react-scripts": "^3.4.3"
   },
   "scripts": {
     "analyze": "source-map-explorer build/static/js/main.*",
@@ -61,7 +61,7 @@
   ],
   "devDependencies": {
     "enzyme": "^3.11.0",
-    "eslint-plugin-react": "^7.20.0"
+    "eslint-plugin-react": "^7.20.6"
   },
   "resolutions": {
     "minimist": "^1.2.5",
