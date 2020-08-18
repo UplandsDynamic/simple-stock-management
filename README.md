@@ -6,11 +6,15 @@ This a demo/prototype repository for a simple stock management and inventory sys
 
 The system allows "stores" to request transfers of stock ("order") from a central stock repository ("warehouse"). Stock is adjusted for the "Warehouse Account" and the "Store Account" as stock transfers are "ordered". Email notifications are sent to the "warehouse" administrator(s) and the ordering "store manager".
 
-This project - available to subscribers & clients as regularly maintained Docker application - offers a web frontend that connects to a RESTful API backend. Data is stored in either a SQLite, mySQL or PostgreSQL (recommended) database.
+This project - available to subscribers and clients as a regularly maintained Docker application - offers a web frontend that connects to a RESTful API backend. Data is stored in either a SQLite, mySQL or PostgreSQL (recommended) database.
+
+## Key technologies
+
+Key technologies include: Python 3.7; Django; Django-rest-framework; Django_q (for asynchronous processes); Javascript (ReactJS); HTML5; CSS3; BootStrap 4.
 
 ## Live Demo
 
-There is a live demo available here:
+There is a live demo, available here:
 
 https://staging-ssm.aninstance.com
 
@@ -89,42 +93,17 @@ Password: jduejHje(89K
 - Automated removal of obsolete stock line records (lines with zero units of held stock) from the Store accounts following a successful stock take process
 - Historical retention of previous stock take data (not currently exposed on the UI)
 
-## Project status
+## Support & project status
 
 The GPL licensed version of this project offered here is *not guaranteed to be regularly maintained*. It is made available here for demo/prototype purposes and *SHOULD NOT* be used in production (i.e. a "live" working environment) unless the administrator regularly patches project dependencies with upstream security updates as and when released by vendors. If running with Docker, Dockerfiles (both server & frontend) would need to be amended to pull from the forked and updated Github source and *not* this demo/prototype repository.
 
 A regularly updated, proprietary licensed version (source available), maintained for subscribers and clients, is available from a private Docker repository serving prebuilt containers. Subscriptions to the regularly updated proprietary licensed version - with optional installation, hosting & support services - are currently considered upon request (limited availability). If you would like to avail of the subscription and/or associated services, or request other bespoke work on this project, please email to discuss: ssm@aninstance.com.
 
-## Key technologies
-
-Key technologies include: Python 3.7; Django; Django-rest-framework; Django_q (for asynchronous processes); Javascript (ReactJS); HTML5; CSS3; BootStrap 4.
-
 ## Docker deployment
 
-The `master` branch of this repository is source for the dockerised version of the server. Please checkout the `frontend` branch for source of the dockerised frontend web client.
+The `master` branch of this repository is source for the server. Please checkout the `frontend` branch for source for the frontend web client.
 
-If deploying with Docker, it is highly recommended to use Docker Compose. Please find an example docker-compose file (which builds the entire stack, including the web client & server) in the `master` (server) branch.
-
-~~The associated Docker images for server and client are available on DockerHub:~~
-
-*Note: Public Docker images are no longer maintained on Dockerhub, as per notice at the top of this page.
-To test or deploy the system using Docker, server and client (frontend) images may be built manually, using the included `Dockerfile` files and tagged `simple-stock-management` & `simple-stock-management-client` accordingly.*
-
-- Server:
-
-  URL: ~~<https://hub.docker.com/r/aninstance/simple-stock-management>~~
-
-  To pull the image:
-
-  ~~`docker pull aninstance/simple-stock-management`~~
-
-- Frontend client:
-
-  URL: ~~<https://hub.docker.com/r/aninstance/simple-stock-management-client>~~
-
-  To pull the image:
-
-  ~~`docker pull aninstance/simple-stock-management`~~
+An example docker-compose file (which builds the entire stack, including the web client & server) resides in the `master` (server) branch. Server and client images may also be built manually, using the included `Dockerfile` files and tagged `simple-stock-management` & `simple-stock-management-client` accordingly.
 
 To use this source code for non-dockerised builds, please amend the settings.py configuration file accordingly.
 
@@ -134,7 +113,7 @@ __These are basic instructions to install and run the app on an Linux Ubuntu 18.
 
 __Steps should be taken to harden the environment if using in production, such as applying suitable file & directory permissions and ensuring both backend & frontend are served over a TLS connection.__
 
-__A note on TLS: By default, `docker-compose-example.yml` exposes port to 80 on the server (`nginx`) container, and mounts the `settings.docker.insecure.py` Django settings fil to the `app` container, which serves the app over an unencrypted connection. To serve over TLS, change the exposed port to 443 and mount `settings.docker.py`__
+__A note on TLS: By default, `docker-compose-example.yml` exposes port to 80 on the server (`nginx`) container and mounts the `settings.docker.insecure.py` Django settings file to the `app` container, which serves the app over an unencrypted connection. To serve over TLS, change the exposed port to 443 and mount `settings.docker.py` rather than `settings.docker.insecure.py`__
 
 ### Brief installation instructions
 
@@ -217,10 +196,6 @@ Note: The above guide is not definitive and is intended for users who know their
 
 - Integration with the "ShopWired" e-commerce platform.
 
-## Support
-
-- Paid support services (including installation, configuration and development of bespoke features) are available. Please email productions@aninstance.com with "Simple Stock Management Support" in the subject field.
-
 ## Authors
 
-- Dan Bright (Aninstance Technical Consultancy), productions@aninstance.com
+- Dan Bright (Aninstance Technological Consultancy), productions@aninstance.com
