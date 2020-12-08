@@ -96,7 +96,7 @@ class StockUpdateModal extends React.Component {
     console.log("Unmounting stock update modal");
   }
 
-  static getDerivedStateFromProps(nextProps, prevState) {
+  static getDerivedStateFromProps(nextProps) {
     let newStyles =
       nextProps.accountMode === nextProps.accountModes.STORE
         ? REGULAR_STYLES_ACCOUNT
@@ -113,7 +113,7 @@ class StockUpdateModal extends React.Component {
     };
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {}
+  componentDidUpdate() {}
 
   handleAfterOpenModal() {}
 

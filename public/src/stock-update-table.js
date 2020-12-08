@@ -8,7 +8,6 @@ const StockUpdateTable = ({
   handleRecordUpdate,
   dataUpdate,
   newRecord = false,
-  deleteRecord = false,
   accountModes,
   accountMode
 } = {}) => {

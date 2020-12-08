@@ -12,7 +12,7 @@ class Message extends React.Component {
 
   componentWillUnmount() {}
 
-  static getDerivedStateFromProps(nextProps, prevState) {
+  static getDerivedStateFromProps(nextProps) {
     return {
       message: nextProps.message,
       messageClass: nextProps.messageClass

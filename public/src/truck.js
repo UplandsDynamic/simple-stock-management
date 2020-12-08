@@ -81,7 +81,7 @@ class TruckModal extends React.Component {
     return { ...newState, modalIsOpen: nextProps.openTruckModal };
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {}
+  componentDidUpdate() {}
 
   componentDidMount() {}
 

@@ -81,7 +81,6 @@ const _makeRequest = ({
   csrfToken = null,
   requestData = null,
   url = null,
-  cacheControl = null
 } = {}) => {
   const CancelToken = axios.CancelToken;
   let cancel;

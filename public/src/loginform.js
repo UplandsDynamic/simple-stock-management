@@ -44,13 +44,13 @@ class LoginForm extends React.Component {
     this.resetState();
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
+  componentDidUpdate(prevProps, prevState) {
     if (prevState.authenticated !== this.state.authenticated) {
       this.setFormToDisplay();
     }
   }
 
-  static getDerivedStateFromProps(nextProps, prevState) {
+  static getDerivedStateFromProps(nextProps) {
     return {
       authenticated: nextProps.authMeta.authenticated,
       csrfToken: nextProps.csrfToken
@@ -121,7 +121,7 @@ class LoginForm extends React.Component {
     if (apiRequest) {
       apiRequest
         .then(response => {
-          if (response && response.data.hasOwnProperty("token")) {
+          if (response && Object.prototype.hasOwnProperty.call(response.data, "token")) {
             // logged in
             this.props.deleteSessionStorage(["token", "username"]); // ensure any existing token deleted 1st
             this.props.setSessionStorage({
@@ -139,7 +139,7 @@ class LoginForm extends React.Component {
             });
             this.props.setAuthentication();
           }
-          if (response.data.hasOwnProperty("password")) {
+          if (Object.prototype.hasOwnProperty.call(response.data, "password")) {
             // changed password
             if (response.data.password === "CHANGED") {
               this.props.deleteSessionStorage(["token", "username"]); // delete existing token to enforce re-login
@@ -155,7 +155,7 @@ class LoginForm extends React.Component {
               });
             }
           }
-          if (response.data.hasOwnProperty("logged_in")) {
+          if (Object.prototype.hasOwnProperty.call(response.data, "logged_in")) {
             // logout
             if (!response.data.logged_in) {
               this.props.setMessage({

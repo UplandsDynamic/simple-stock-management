@@ -128,7 +128,7 @@ class App extends React.Component {
         this.setAuthentication();
     }
 
-    componentDidUpdate(prevProps, prevState, snapshot) {
+    componentDidUpdate() {
     }
 
     getCSRFToken = () => {
@@ -194,7 +194,7 @@ class App extends React.Component {
             let updatedPage = page < 1 ? 1 : page;
             Object.assign(newStockRecord.meta, { page: updatedPage });
             // set user admin status to what was returned from api in stock record data
-            if (!!newStockRecord.data.results.length && newStockRecord.data.results[0].hasOwnProperty('user_is_admin')
+            if (!!newStockRecord.data.results.length && Object.prototype.hasOwnProperty.call(newStockRecord.data.results[0], 'user_is_admin')
             ) {
                 this.setAuthorized({ role: 'admin', state: !!newStockRecord.data.results[0].user_is_admin })
             }
@@ -210,7 +210,7 @@ class App extends React.Component {
             this.setState({ truckModalOpen: state });   // close it first, to avoid showing reset data values
             if (!actionCancelled) {  // actions to do if CANCEL was NOT clicked when it closes (i.e. action time)
                 let stockRecordCopy = JSON.parse(JSON.stringify(this.state.stockRecord));
-                returnedRecords.forEach((returnedRecord, index) => {
+                returnedRecords.forEach((returnedRecord) => {
                     stockRecordCopy.data.results.forEach((stockRecord, i) => {
                         if (stockRecord.id === returnedRecord.data.id) {
                             stockRecordCopy.data.results[i].units_total = returnedRecord.data.units_total;
@@ -237,7 +237,7 @@ class App extends React.Component {
         }
         this.setState({ truck: [] });
         return [];
-    };
+    }
 
     emptyTruck() {
         localStorage.removeItem('truck');
@@ -306,7 +306,7 @@ class App extends React.Component {
                     }
                 }).catch(error => {
                     let message = '';
-                    console.log(error.response);
+                    console.log(error);
                     if (error.response.status === 401) {
                         message = 'User is unauthorised. Perhaps a stock take is in progress.';
                     } else {
@@ -466,7 +466,7 @@ class App extends React.Component {
             </React.Fragment>
             
         );
-    };
+    }
 }
 
 export default App;

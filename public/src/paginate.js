@@ -16,7 +16,7 @@ class Paginate extends React.Component {
 
   componentWillUnmount() {}
 
-  static getDerivedStateFromProps(nextProps, prevState) {
+  static getDerivedStateFromProps(nextProps) {
     let count = nextProps.stockRecord.data.count || 0;
     return {
       stockRecord: nextProps.stockRecord,
