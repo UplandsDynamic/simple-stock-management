@@ -1,3 +1,8 @@
+__Author__ = """By:  Aninstance
+www.githup.com/Aninstance/simple-stock-management"""
+__Copyright__ = "Copyright (c) 2021 Aninstance"
+__Version__ = "Version 1.0"
+
 from django.conf.urls import url, include
 from rest_framework import routers, permissions
 from rest_framework.urlpatterns import format_suffix_patterns

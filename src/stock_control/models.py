@@ -1,3 +1,8 @@
+__Author__ = """By:  Aninstance
+www.githup.com/Aninstance/simple-stock-management"""
+__Copyright__ = "Copyright (c) 2021 Aninstance"
+__Version__ = "Version 1.0"
+
 from django.db import models
 from rest_framework.authtoken.models import Token
 from rest_framework import serializers

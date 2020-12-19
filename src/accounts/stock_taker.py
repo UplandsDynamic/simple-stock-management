@@ -1,3 +1,8 @@
+__Author__ = """By:  Aninstance
+www.githup.com/Aninstance/simple-stock-management"""
+__Copyright__ = "Copyright (c) 2021 Aninstance"
+__Version__ = "Version 1.0"
+
 import logging
 from decimal import Decimal, ROUND_HALF_UP
 from django.db import transaction, IntegrityError

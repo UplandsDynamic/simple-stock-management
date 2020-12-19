@@ -1,3 +1,8 @@
+__Author__ = """By:  Aninstance
+www.githup.com/Aninstance/simple-stock-management"""
+__Copyright__ = "Copyright (c) 2021 Aninstance"
+__Version__ = "Version 1.0"
+
 import logging, datetime, locale, pytz, markdown
 from email_service.email import SendEmail
 from django.contrib.auth.models import User, Group
