@@ -1,3 +1,8 @@
+__Author__ = "Dan Bright, github@aninstance.com"
+__Copyright__ = "(c) Copyright 2021 Dan Bright"
+__License__ = "GPL v3.0"
+__Version__ = "Version 4.1"
+
 from django.shortcuts import render
 from django.http import JsonResponse
 import logging
@@ -133,7 +138,7 @@ class AccountStockDataViewSet(viewsets.ModelViewSet):
             # lock user until stock take process is complete
             User.objects.filter(id=request.user.id).update(is_active=False)
             async_task(stock_taker, stock_data=stock_data,
-                    hook=AccountStockDataViewSet.take_stock_callback)
+                       hook=AccountStockDataViewSet.take_stock_callback)
             return JsonResponse({'success': True}, status=status.HTTP_200_OK)
         return JsonResponse({'success': False}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
 
@@ -192,7 +197,7 @@ class AccountStockDataViewSet(viewsets.ModelViewSet):
                 serializer.validated_data['running_total_shrinkage_value'] = instance.running_total_shrinkage_value + Decimal(
                     shrinkage * instance.selling_price).quantize(self.sterling, ROUND_HALF_UP)  # add to running sold total
             # ensure still valid following data changes
-            serializer.is_valid(raise_exception=True)  
+            serializer.is_valid(raise_exception=True)
             saved = serializer.save()
             updated_record = self.serialize_model_instance(instance=saved)
         except AccountStockData.DoesNotExist as e:

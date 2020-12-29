@@ -1,3 +1,8 @@
+__Author__ = "Dan Bright, github@aninstance.com"
+__Copyright__ = "(c) Copyright 2021 Dan Bright"
+__License__ = "GPL v3.0"
+__Version__ = "Version 4.1"
+
 from django.conf.urls import url, include
 from rest_framework import routers, permissions
 from rest_framework.urlpatterns import format_suffix_patterns
@@ -26,9 +31,9 @@ functional_view_urlpatterns = [
     url('^stock/$', views.AccountStockDataViewSet.as_view(
         {'get': 'list',  'post': 'create'})),
     url('^stock/(?P<pk>\d+)/$', views.AccountStockDataViewSet.as_view(
-         {'get': 'retrieve', 'patch': 'perform_single_update', 'delete': 'destroy'})),
+        {'get': 'retrieve', 'patch': 'perform_single_update', 'delete': 'destroy'})),
     url('^take-stock/$', views.AccountStockDataViewSet.as_view(
-         {'get': 'take_stock'})),
+        {'get': 'take_stock'})),
 ]
 
 """

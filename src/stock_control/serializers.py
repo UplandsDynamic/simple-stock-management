@@ -1,3 +1,8 @@
+__Author__ = "Dan Bright, github@aninstance.com"
+__Copyright__ = "(c) Copyright 2021 Dan Bright"
+__License__ = "GPL v3.0"
+__Version__ = "Version 4.1"
+
 import logging
 from django.contrib.auth.models import User, Group
 from django.core.exceptions import ValidationError
@@ -111,7 +116,7 @@ class StockDataSerializer(serializers.HyperlinkedModelSerializer):
 
     # return staff status of requester
     user_is_admin = serializers.SerializerMethodField(method_name='administrators_check')
-    
+
     def administrators_check(self, obj):
         return self.context['request'].user.groups.filter(name='administrators').exists()
 

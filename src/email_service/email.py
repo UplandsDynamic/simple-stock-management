@@ -1,3 +1,8 @@
+__Author__ = "Dan Bright, github@aninstance.com"
+__Copyright__ = "(c) Copyright 2021 Dan Bright"
+__License__ = "GPL v3.0"
+__Version__ = "Version 4.1"
+
 import logging
 from anymail.exceptions import AnymailAPIError
 from django.core.mail import EmailMultiAlternatives
@@ -64,8 +69,9 @@ class SendEmail:
                     logger.error(f'Error sending email: {e}')
         return False
 
-    def compose(self, records:dict=None, user:User=None, pre_formatted:dict=None, notification_type:str=None,
-        subject:str=None) -> send:
+    def compose(
+            self, records: dict = None, user: User = None, pre_formatted: dict = None, notification_type: str = None,
+            subject: str = None) -> send:
         """
         :param records: updated records
         :param user: user making the update
@@ -151,8 +157,8 @@ class SendEmail:
                 """
                 email stock take report to administrators + requester
                 """
-                admin_email_addr = User.objects.filter(groups__name='administrators').values_list('email',
-                                                                                                  flat=True) # list of all stock administrator's email addresses
+                admin_email_addr = User.objects.filter(groups__name='administrators').values_list(
+                    'email', flat=True)  # list of all stock administrator's email addresses
                 recipient_list = [a for a in admin_email_addr] if \
                     admin_email_addr and settings.STOCK_MANAGEMENT_OPTIONS['email'][
                         'notifications_to_administrators'] else []
@@ -215,7 +221,7 @@ class SendEmail:
 
                     html = html_start + '<h2>Successful transfer requests</h2>' + ''.join(
                         [b for b in success_body_html]) + html_divider + '<h2>Failed transfer requests</h2>' + (''.join(
-                        [b for b in fail_body_html]) if fail_body_html else '<p>None! All good!</p>') + html_end
+                            [b for b in fail_body_html]) if fail_body_html else '<p>None! All good!</p>') + html_end
                     return self.send(body_plaintext=plaintext, body_html=html,
                                      email_to=recipient_list,
                                      email_from=settings.DEFAULT_FROM_EMAIL,

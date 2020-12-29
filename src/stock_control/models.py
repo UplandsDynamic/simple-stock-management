@@ -1,3 +1,8 @@
+__Author__ = "Dan Bright, github@aninstance.com"
+__Copyright__ = "(c) Copyright 2021 Dan Bright"
+__License__ = "GPL v3.0"
+__Version__ = "Version 4.1"
+
 from django.db import models
 from rest_framework.authtoken.models import Token
 from rest_framework import serializers
@@ -49,9 +54,9 @@ def transfer_to_account(sender, instance=None, created=False, **kwargs):
             AccountStockData.objects.filter(id=record.id).update(
                 units_total=F('units_total') + int(instance.units_to_transfer),
                 xferred_units=F('xferred_units') + (int(instance.units_to_transfer)),
-                running_total_xfer_value=F('running_total_xfer_value') 
+                running_total_xfer_value=F('running_total_xfer_value')
                 + Decimal(int(instance.units_to_transfer) * instance.unit_price).quantize(sterling, ROUND_HALF_UP),
-                all_time_total_xfer_value=F('all_time_total_xfer_value') 
+                all_time_total_xfer_value=F('all_time_total_xfer_value')
                 + Decimal(int(instance.units_to_transfer) * instance.unit_price).quantize(sterling, ROUND_HALF_UP)
             )
     except Exception as e:
@@ -116,6 +121,7 @@ class StockData(models.Model):
         """
         # nothing custom to do here, move along ...
         super(StockData, self).save(*args, **kwargs)
+
 
 """
 Dispatch email on save (note: commented out now, as this moved to views.perform_update()

@@ -1,3 +1,8 @@
+__Author__ = "Dan Bright, github@aninstance.com"
+__Copyright__ = "(c) Copyright 2021 Dan Bright"
+__License__ = "GPL v3.0"
+__Version__ = "Version 4.1"
+
 import logging
 from django.contrib.auth.models import User, Group
 from django.core.exceptions import ValidationError
@@ -56,7 +61,7 @@ class AccountStockDataSerializer(serializers.HyperlinkedModelSerializer):
         fields = ('id', 'record_updated', 'owner', 'sku', 'desc',
                   'units_total', 'xfer_price', 'selling_price', 'user_is_admin',
                   'datetime_of_request', 'opening_stock', 'incoming_units_transferred',
-                  'running_total_xfer_value', 'sold_units', 'shrinkage', 'running_total_sold_value', 
+                  'running_total_xfer_value', 'sold_units', 'shrinkage', 'running_total_sold_value',
                   'running_total_shrinkage_value', 'all_time_total_xfer_value', 'xferred_units')
 
     """

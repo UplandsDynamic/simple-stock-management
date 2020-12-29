@@ -1,4 +1,8 @@
 from rest_framework import permissions
+__Author__ = "Dan Bright, github@aninstance.com"
+__Copyright__ = "(c) Copyright 2021 Dan Bright"
+__License__ = "GPL v3.0"
+__Version__ = "Version 4.1"
 
 
 class AccessPermissions(permissions.BasePermission):

@@ -1,3 +1,8 @@
+__Author__ = "Dan Bright, github@aninstance.com"
+__Copyright__ = "(c) Copyright 2021 Dan Bright"
+__License__ = "GPL v3.0"
+__Version__ = "Version 4.1"
+
 from django.conf.urls import url, include
 from rest_framework import routers, permissions
 from rest_framework.urlpatterns import format_suffix_patterns
@@ -62,4 +67,3 @@ urlpatterns += [
     url(r'^schema(/?)$', schema_view),
     # url(r'^v1/', include(router.urls)),
 ]
-

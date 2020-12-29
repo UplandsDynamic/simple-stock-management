@@ -1,4 +1,13 @@
-import logging, datetime, locale, pytz, markdown
+__Author__ = "Dan Bright, github@aninstance.com"
+__Copyright__ = "(c) Copyright 2021 Dan Bright"
+__License__ = "GPL v3.0"
+__Version__ = "Version 4.1"
+
+import logging
+import datetime
+import locale
+import pytz
+import markdown
 from email_service.email import SendEmail
 from django.contrib.auth.models import User, Group
 from django.conf import settings
@@ -6,6 +15,7 @@ from django.utils.formats import date_format
 
 # Get an instance of a logger
 logger = logging.getLogger('django')
+
 
 def generate_report(user: User, type: str, stats: dict = None, stats_list: list = None, ) -> bool:
     # create report emails
