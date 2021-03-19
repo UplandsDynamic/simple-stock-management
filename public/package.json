@@ -2,7 +2,7 @@
   "author": "Dan Bright, productions@aninstance.com",
   "license": "GPLv3",
   "name": "stock_control-react-frontend",
-  "version": "4.1.2",
+  "version": "4.1.3",
   "private": true,
   "description": "React frontend for Django REST Simple Stock Management application",
   "main": "index.js",
@@ -17,13 +17,11 @@
     "axios": "*",
     "bootstrap": "*",
     "env-cmd": "*",
-    "jest-enzyme": "*",
     "jquery": "*",
     "js-cookie": "*",
     "lodash.clonedeep": "*",
     "moment": "*",
     "moment-timezone": "*",
-    "npm-check-updates": "*",
     "popper.js": "*",
     "react": "*",
     "react-app-polyfill": "*",
@@ -43,27 +41,12 @@
     "test:debug": "react-scripts --inspect-brk test --runInBand",
     "eject": "react-scripts eject"
   },
-  "jest": {
-    "collectCoverageFrom": [
-      "src/**/*.{js,jsx,ts,tsx}",
-      "!<rootDir>/node_modules/",
-      "!<rootDir>/src/serviceWorker.js",
-      "!<rootDir>/src/index.js"
-    ]
-  },
   "browserslist": [
     ">0.2%",
     "not dead",
     "not ie <= 11",
     "not op_mini all"
   ],
-  "devDependencies": {
-    "enzyme": "^3.11.0",
-    "eslint-plugin-react": "^7.21.5"
-  },
-  "resolutions": {
-    "minimist": "^1.2.5",
-    "yargs-parser": "^13.1.2",
-    "ini": "^1.3.6"
-  }
+  "devDependencies": {},
+  "resolutions": {}
 }
