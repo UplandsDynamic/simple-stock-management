@@ -12,8 +12,8 @@ COPY public /npm_build
 WORKDIR  /npm_build
 RUN apt install nodejs -y
 RUN npm install
-#RUN npx npm-force-resolutions  # have to run this manually as won't work in package.json
-#RUN npm audit fix
+RUN npx npm-force-resolutions  # have to run this manually as won't work in package.json
+RUN npm audit fix
 RUN npm audit
 COPY ssm.conf /etc/nginx/conf.d/
 COPY nginx.conf /etc/nginx/
