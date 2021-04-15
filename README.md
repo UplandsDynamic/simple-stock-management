@@ -1,12 +1,20 @@
 # Simple Stock Management
 
+## UPDATE 15 April 2021
+
+This repository is currently undergoing reorganisation.
+
+Docker deployment is being removed, to simplify the codebase. Earlier versions of the codebase, showing Docker deployment examples will remain in the `legacy` branches, for reference purposes.
+
+The frontend client (built with React) will be moved to a separate repository in due course.
+
 ## Demo & Prototype Repository
 
 This a demo/prototype repository for a simple stock management and inventory system. It is built using web technologies, with a client/server architecture.
 
 The system allows "stores" to request transfers of stock ("order") from a central stock repository ("warehouse"). Stock is adjusted for the "Warehouse Account" and the "Store Account" as stock transfers are "ordered". Email notifications are sent to the "warehouse" administrator(s) and the ordering "store manager".
 
-This project - available to subscribers and clients as a regularly maintained Docker application - offers a web frontend that connects to a RESTful API backend. Data is stored in either a SQLite, mySQL or PostgreSQL (recommended) database.
+This project - available to subscribers and clients as a regularly maintained application-as-a-service - offers a web frontend that connects to a RESTful API backend. Data is stored in either a SQLite, mySQL or PostgreSQL (recommended) database.
 
 ## Key technologies
 
@@ -95,81 +103,60 @@ Password: jduejHje(89K
 
 ## Support & project status
 
-The GPL licensed version of this project offered here is *not guaranteed to be regularly maintained*. It is made available here for demo/prototype purposes and *SHOULD NOT* be used in production (i.e. a "live" working environment) unless the administrator regularly patches project dependencies with upstream security updates as and when released by vendors. If running with Docker, Dockerfiles (both server & frontend) would need to be amended to pull from the forked and updated Github source and *not* this demo/prototype repository.
+A regularly updated, proprietary licensed application-as-a-service version, which is fully maintained for subscribers and clients, is available upon request (limited availability). A one-off installation service for this GPL open source version is also available.
 
-A regularly updated, proprietary licensed version (source available), maintained for subscribers and clients, is available from a private Docker repository serving prebuilt containers. Subscriptions to the regularly updated proprietary licensed version - with optional installation, hosting & support services - are currently considered upon request (limited availability). If you would like to avail of the subscription and/or associated services, or request other bespoke work on this project, please email to discuss: ssm@aninstance.com.
+The GPL licensed version of this project offered here is *not guaranteed to be regularly maintained*. It is made available here for demo/prototype purposes and *SHOULD NOT* be used in production (i.e. a "live" working environment) unless the administrator regularly patches project dependencies with upstream security updates as and when released by vendors.
 
-## Docker deployment
-
-The `master` branch of this repository is source for the server. Please checkout the `frontend` branch for source for the frontend web client.
-
-An example docker-compose file (which builds the entire stack, including the web client & server) resides in the `master` (server) branch. Server and client images may also be built manually, using the included `Dockerfile` files and tagged `simple-stock-management` & `simple-stock-management-client` accordingly.
-
-To use this source code for non-dockerised builds, please amend the settings.py configuration file accordingly.
+If you would like to avail of the proprietary subscription to the applicaiton-as-a-service, or request other bespoke work on this project, please email to discuss: ssm@aninstance.com.
 
 ## Installation & usage (on Linux systems)
 
-__These are basic instructions to install and run the app on an Linux Ubuntu 18.04 server, and for demonstration purposes only. They do not provide for a secure installation, such as would be required if the app was publicly available.__
-
-__Steps should be taken to harden the environment if using in production, such as applying suitable file & directory permissions and ensuring both backend & frontend are served over a TLS connection.__
-
-__A note on TLS: By default, `docker-compose-example.yml` exposes port to 80 on the server (`nginx`) container and mounts the `settings.docker.insecure.py` Django settings file to the `app` container, which serves the app over an unencrypted connection. To serve over TLS, change the exposed port to 443 and mount `settings.docker.py` rather than `settings.docker.insecure.py`__
+__Below are basic steps to install and run a demonstration of the app on an Linux Ubuntu 20.04 server. They do not provide for a secure installation, such as would be required if the app was publicly available. Steps should be taken to security harden the environment if using in production.__
 
 ### Brief installation instructions
 
-To use the Docker images orchestrated with docker-compose:
+- First, clone the repository to your filesystem.
 
-- Create `ssm` directory, change to it and clone the repository:
+- Ensure you have access to a current version of PostgreSQL (either locally installed, or remote).
 
-  - `mkdir ssm`
-  - `cd ssm`
-  - `git clone https://github.com/Aninstance/simple-stock-management.git .`
+- Ensure gunicorn is installed on your system.
 
-- Create the following directories in the application's root directory. These are for persistent storage (i.e. they persist even after the app server & client containers have been stopped, started, deleted, upgraded):
+- Create a system user under which to run the application (e.g. `django`). Recursively change ownership of the application directory and all its subdirectories to that user, then switch to operate as that user.
 
-  - `mkdir -p static postgres log/gunicorn`
+- Change into the application's root directory.
 
-- Set directory ownership. The default user and group as used in the demo are user: `ssm` (UID `9001`), group `ssm` (GID `9001`). These are the user and group both the server and app run under (they may be changed by editing the `Dockerfile`'s). To do this:
+- Install a python virtual environment on your system and make that your python source.
 
-  - Create group: `sudo groupadd  -g 9001 ssm`
-  - Add user to the host server: `sudo useradd --no-log-init -r -g 9001 -u 9001 ssm`
-  - After ensuring you're still in the `ssm` directory, change ownership of directories and files: `sudo chown -R ssm:ssm static log config/secret_key`
-  - Ensure the postgres database directories are owned by user UID 999: `sudo chown -R 999 postgres`
+- Run `python3 install -r requirements.txt`.
 
-- Edit the following files to your specification:
+- Edit StockManagement/settings.py according to your environment.
 
-  - `docker-compose-example.yml` - save as docker-compose.yml
-  - `config/nginx/spm-example.config` - save as spm.conf
-  - `config/.env.docker` - save as .env.docker (this is the frontend client configuration, where you may configure things like the number of items displayed per page)
+- Create the PostgreSQL database and user, as defined.
 
-  __Note: Don't forget to set the URL in both the `docker-compose.yml` (`app`'s `APP_URL` variable) and the `.env.docker` (`REACT_APP_API_ROUTE` & `REACT_APP_API_DATA_ROUTE` variables) files (as above).__
+- Create a directory named `secret_key` in the application's root directory.
 
-- You may remove the `src` directory, since the source will already be installed in the Docker image.
+- As root (using sudo), create the log directory and file (e.g. `sudo mkdir -p /var/log/django; sudo touch /var/log/django/ssm.log`).
 
-- Run this command to pull the Docker images and start the server (which serves both the server & frontend client components):
+- Create a systemd unit file to run the gunicorn service at `/etc/systemd/system/gunicorn.service`, then enable and start start the systemd service (details of how to do this is outwith the scope of this document, but if you need further advice feel free to get in touch).
 
-  `docker-compose up --build --force-recreate -d`
+- Install a web server (recommended Nginx) to operate as a reverse proxy and create an appropriate configuration file to connect to the unix socket created by gunicorn (as defined above). See the official Nginx and Django documentation for configuration examples.
 
-- If running for the first time (i.e. your persistent database folder is empty), define a superuser & by issuing the following commands:
+- If running for the first time (i.e. your persistent database folder is empty), define a superuser by issuing the following commands from the application's root directory `python manage.py createsuperuser`.
 
-  - Note down the name of the server app (exposing port 8000) that is output in the following command (e.g. `ssm_app_1`): `docker-compose ps`
+- In the application's root directory, run `python manage.py collectstatic`, to add the static files to the approprate directory (ensure the path to the `static` directory has been correctly configured in your reverse proxy configuration).
 
-  - Run the following, substituting `ssm_app_1` with the correct name for the server app, as discussed above.
+- Now visit the app's administration area in your web browser (e.g. `https://your.domain.tld/admin`).
 
-    `docker exec -it ssm_app_1 python manage.py createsuperuser`
+- If running for the first time, create an `administrators` group and add a new user to it, as follows:
 
-- If running for the first time, create an `administrators` group and add the new user to it, as follows:
-
-  - Login at the django admin url - e.g. http://your_domain.tld/admin/
   - Click `add` next to `Groups` in the `Authentication & Authorization` section.
   - Name the new group `administrators`.
   - Under `Available permissions`, scroll to the bottom and select all the `spm_app` permissions, clicking the arrow on the right to add these to the `Chosen permissions` pane (you may hold `shift` to select multiple at once). Once done, click `Save`.
-  - Navigate to `Home > Users > your username` and scroll down to the `Permissions` section. Select `administrators` from the `Available groups` box and double-click it. This moves it to `Chosen groups`. Scroll to the bottom of the page and click `Save`.
+  - Create 2 additional user accounts; one for an application `administrator` (reponsible for managing the `warehouse`), the other a regular user (a manager of a client `shop`). Ensure *both* users are assigned the `staff` status.
+  - Assign the `administrator` user to the `administrators` group, by: navigating to `Home > Users > username`; scrolling down to the `Permissions` section; selecting `administrators` from the `Available groups` box; and double-clicking it. This moves the group to the `Chosen groups` pane. Then, scroll to the bottom of the page and click `Save`.
   - Click `LOG OUT` (top right)
 
-- Navigate to the web client url - e.g. http://your_domain.tld __Note: When starting a newly built or pulled container for the first time, the web client may take several minutes (depending on your server's resources) to create a fresh build. You may get `This connection was reset` or timeout errors whilst the NPM build is occurring. Please be patient and try refreshing the page in a few moments.__
-
-- Login to the web client using the superuser credentials you'd previously supplied. Begin using Simple Stock Management. 
+- Login to the web client (now hosted in a separate repository) using the administrator user you created. Begin using Simple Stock Management.
 
 ### Brief UI instructions
 
@@ -190,7 +177,9 @@ Store account managers:
 - `New shrinkage` & `New recorded sold` update fields are ***disabled** during a stock line edit if the `stock quantity` field is changed. This is to prevent user error by inadvertent duplication of submitted data (i.e. user manually decrementing the `stock quantity` field whilst also recording the same data as `New recorded sold`). Likewise, the `stock quantity` field is disabled if the `New shrinkage` and/or `New recorded sold` fields are edited, for the same reason
 - Eye icon button initiates a stock take
 
-Note: The above guide is not definitive and is intended for users who know their way around Docker. Users would need to arrange database backups and to secure the application appropriately when used in a production environment.
+Note: The above guide is not definitive and is intended for users who know their way around Ubuntu server and Django.
+
+*Users would need to arrange database backups and to secure the application appropriately when used in a production environment.*
 
 ## Development Roadmap
 
