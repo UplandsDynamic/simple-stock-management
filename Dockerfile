@@ -11,7 +11,7 @@ RUN git clone --single-branch --branch frontend https://github.com/Aninstance/si
 COPY public /npm_build
 WORKDIR  /npm_build
 RUN apt install nodejs -y
-RUN npm install
+RUN npm install --legacy-peer-deps
 RUN npx npm-force-resolutions  # have to run this manually as won't work in package.json
 RUN npm audit fix
 RUN npm audit
