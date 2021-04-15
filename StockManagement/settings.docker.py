@@ -1,9 +1,7 @@
 """
 Django settings for StockManagement project.
 """
-import os, string, random, locale
-from urllib.parse import urlsplit
-
+import os, string, random
 """ INITIAL PARAMETERS """
 
 # # # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -26,21 +24,22 @@ except IOError:
 """ MAIN CONFIGURATION """
 
 # # # Network
-APP_URL = os.environ.get('APP_URL')
+APP_URL= os.environ.get('APP_URL', 'localhost')
 ROOT_URLCONF = 'StockManagement.urls'
 WSGI_APPLICATION = 'StockManagement.wsgi.application'
 X_FRAME_OPTIONS = 'DENY'
 # SECURE_HSTS_SECONDS = 3600
+WORKING_PORT = '443'
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_BROWSER_XSS_FILTER = True
-SESSION_COOKIE_SECURE = False
-CSRF_COOKIE_SECURE = False
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
 #  SECURE_SSL_REDIRECT = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-ALLOWED_HOSTS = [urlsplit(APP_URL).netloc.split(':')[0]]
+ALLOWED_HOSTS = [APP_URL]
 # CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
-CORS_ORIGIN_WHITELIST = (APP_URL,)
+CORS_ORIGIN_WHITELIST = (APP_URL, localhost)
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
@@ -53,12 +52,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'stock_control.apps.StockControlConfig',
-    'accounts.apps.AccountsConfig',
-    'email_service.apps.EmailServiceConfig',
     'rest_framework',
     'rest_framework.authtoken',
     'corsheaders',
-    'django_q'
 ]
 
 # # # Rest framework
@@ -110,24 +106,6 @@ TEMPLATES = [
         },
     },
 ]
-
-Q_CLUSTER = {
-    'name': 'SimpleStockManagement',
-    'daemonize_workers': True,
-    'compress': True,
-    'workers': 2,
-    'recycle': 5000,
-    'timeout': None,
-    # 'django_redis': 'default',
-    'retry': 100000,
-    'queue_limit': 4,
-    'bulk': 1,
-    'orm': 'default',
-    'sync': False,  # Set True to debug in sync mode.
-    'guard_cycle': 5,
-    'cpu_affinity': 1,
-    'catch_up': True
-}
 
 # # # Caches
 USE_REDIS_CACHE = False
@@ -237,22 +215,20 @@ STOCK_MANAGEMENT_OPTIONS = {
     }
 
 # # # Internationalization
-locale.setlocale(locale.LC_ALL, 'en_GB.UTF-8')  # set locale
-LANGUAGE_CODE = 'en-gb'  # set language code
-# LOCALE_PATHS = (
-#     os.path.join(BASE_DIR, 'locale'),
-# )
+LOCALE_PATHS = (
+    os.path.join(BASE_DIR, 'locale'),
+)
+LANGUAGE_CODE = 'en-gb'
 # LANGUAGES = (
 #     ('en', 'English')
 # )
-TIME_ZONE = os.environ.get('TIME_ZONE')
+TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_L10N = True
-USE_THOUSAND_SEPARATOR = True 
 USE_TZ = True
 
 # Logging
-LOG_FILE = '/var/log/ssm.log'  # production
+LOG_FILE = '/var/log/django/ssm.prod.log',  # production
 
 LOGGING = {
     'version': 1,

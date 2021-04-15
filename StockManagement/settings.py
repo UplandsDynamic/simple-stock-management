@@ -1,18 +1,19 @@
 """
 Django settings for StockManagement project.
 """
-import os, string, random, locale
+import os
+import string
+import random
+import locale
 from urllib.parse import urlsplit
 
-""" INITIAL PARAMETERS """
+# # # initial setup
 
-# # # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240  # higher than the count of fields
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240  # set higher than the count of fields
 
-# # # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = int(os.environ.get('DEBUG', default=0))
 # # # GENERATE A NEW UNIQUE SECRET KEY (secret_key.txt) IF DOES NOT ALREADY EXIST
+# # # Ensure 'secret_key' dir has been created in base directory
 KEY_PATH = os.path.join(BASE_DIR, 'secret_key', 'secret_key.txt')
 try:
     with open(KEY_PATH, 'r') as f:
@@ -23,28 +24,31 @@ except IOError:
     with open(KEY_PATH, 'w') as f:
         f.write(SECRET_KEY)
 
-""" MAIN CONFIGURATION """
+# # # MAIN CONFIGURATION # # #
 
-# # # Network
-APP_URL= os.environ.get('APP_URL')
+# # # network & paths
+
+TESTING_MODE = True  # WARNING: DO NOT RUN WITH THIS TRUE IN PRODUCTION!
+DEBUG = TESTING_MODE
 ROOT_URLCONF = 'StockManagement.urls'
 WSGI_APPLICATION = 'StockManagement.wsgi.application'
 X_FRAME_OPTIONS = 'DENY'
-# SECURE_HSTS_SECONDS = 3600
+if not TESTING_MODE:  # 30s for testing. Set to more appropriate in production
+    SECURE_HSTS_SECONDS = 30
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_BROWSER_XSS_FILTER = True
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
-#  SECURE_SSL_REDIRECT = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-ALLOWED_HOSTS = [urlsplit(APP_URL).netloc.split(':')[0]]
-# CORS_ORIGIN_ALLOW_ALL = True
+ALLOWED_HOSTS = ['localhost' if TESTING_MODE else '']
+CORS_ORIGIN_ALLOW_ALL = False  # only set True for testing purposes
 CORS_ALLOW_CREDENTIALS = True
-CORS_ORIGIN_WHITELIST = (APP_URL,)
+CORS_ORIGIN_WHITELIST = ['http://localhost' if TESTING_MODE else '']
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-# # # Application definition
+# # # application definition
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -53,15 +57,16 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'stock_control.apps.StockControlConfig',
-    #'accounts.apps.AccountsConfig',
-    #'email_service.apps.EmailServiceConfig',
+    'accounts.apps.AccountsConfig',
+    'email_service.apps.EmailServiceConfig',
     'rest_framework',
     'rest_framework.authtoken',
     'corsheaders',
     'django_q'
 ]
 
-# # # Rest framework
+# # # rest framework
+
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'stock_control.custom_permissions.AccessPermissions',
@@ -73,7 +78,7 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.BasicAuthentication',
     ),
-     # 'DEFAULT_THROTTLE_CLASSES': (
+    # 'DEFAULT_THROTTLE_CLASSES': (
     #     'rest_framework.throttling.AnonRateThrottle',
     #     'rest_framework.throttling.UserRateThrottle'
     # ),
@@ -82,6 +87,8 @@ REST_FRAMEWORK = {
     #     'user': '2/second'
     # }
 }
+
+# # # middleware
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -94,6 +101,8 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.locale.LocaleMiddleware',
 ]
+
+# # # templates
 
 TEMPLATES = [
     {
@@ -111,13 +120,15 @@ TEMPLATES = [
     },
 ]
 
+# # # django_q
+
 Q_CLUSTER = {
     'name': 'SimpleStockManagement',
     'daemonize_workers': True,
     'compress': True,
     'workers': 2,
     'recycle': 5000,
-    'timeout': None,
+    'timeout': 99999,
     # 'django_redis': 'default',
     'retry': 100000,
     'queue_limit': 4,
@@ -144,10 +155,10 @@ if SITE_WIDE_CACHE:
 
 if not USE_REDIS_CACHE:
     CACHES = {'default':
-                  {'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-                   'TIMEOUT': DEFAULT_CACHES_TTL,
-                   'LOCATION': 'stockmanagement-backend-cache'
-                   },
+              {'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+               'TIMEOUT': DEFAULT_CACHES_TTL,
+               'LOCATION': 'stockmanagement-backend-cache'
+               },
               'template_fragments':
                   {'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
                    'TIMEOUT': DEFAULT_CACHES_TTL,
@@ -185,17 +196,26 @@ else:
         },
     }
 
-# # # Database
-DATABASES = {
-    'default': {
-        'ENGINE': os.environ.get('SQL_ENGINE', 'django.db.backends.sqlite3'),
-        'NAME': os.environ.get('SQL_DATABASE', os.path.join(BASE_DIR, 'db.sqlite3')),
-        'USER': os.environ.get('SQL_USER', 'user'),
-        'PASSWORD': os.environ.get('SQL_PASSWORD', 'password'),
-        'HOST': os.environ.get('SQL_HOST', 'localhost'),
-        'PORT': os.environ.get('SQL_PORT', '5432'),
+# # # database
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+if not TESTING_MODE:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': '',
+            'USER': '',
+            'PASSWORD': '',
+            'HOST': '',
+            'PORT': '',
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        }
+    }
 
 STATICFILES_DIRS = []
 STATIC_URL = '/static/'
@@ -220,39 +240,35 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # # # Email services
 EMAIL_BACKEND = "anymail.backends.sparkpost.EmailBackend"
-DEFAULT_FROM_EMAIL = 'productions@staging.aninstance.com'
+DEFAULT_FROM_EMAIL = ''
 ANYMAIL = {
     'IGNORE_UNSUPPORTED_FEATURES': True,
-    'SPARKPOST_API_KEY': 'my_api_key',
-    'SPARKPOST_API_URL': 'https://api.eu.sparkpost.com/api/v1',
+    'SPARKPOST_API_KEY': '',
+    'SPARKPOST_API_URL': '',
 }
 
 # # # StockManagement Application
 STOCK_MANAGEMENT_OPTIONS = {
-        'email': {
-            'notifications_on': True,
-            'notifications_to_transfer_requester': True,
-            'notifications_to_administrators': True,
-        }
+    'email': {
+        'notifications_on': True,
+        'notifications_to_transfer_requester': True,
+        'notifications_to_administrators': True,
     }
+}
 
-# # # Internationalization
+# # # internationalization
 locale.setlocale(locale.LC_ALL, 'en_GB.UTF-8')  # set locale
 LANGUAGE_CODE = 'en-gb'  # set language code
-# LOCALE_PATHS = (
-#     os.path.join(BASE_DIR, 'locale'),
-# )
-# LANGUAGES = (
-#     ('en', 'English')
-# )
-TIME_ZONE = os.environ.get('TIME_ZONE')
+LOCALE_PATHS = (
+    os.path.join(BASE_DIR, 'locale'),
+)
 USE_I18N = True
 USE_L10N = True
-USE_THOUSAND_SEPARATOR = True 
+USE_THOUSAND_SEPARATOR = True
 USE_TZ = True
 
-# Logging
-LOG_FILE = '/var/log/ssm.log'  # production
+# logging - this directory & file needs to be created first!z
+LOG_FILE = '/var/log/django/ssm.log'
 
 LOGGING = {
     'version': 1,

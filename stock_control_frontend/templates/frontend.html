@@ -1,0 +1,23 @@
+{#{% load render_bundle from webpack_loader %}#}
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Simple Stock Management</title>
+    <meta name="description" content="Simple Stock Management">
+    <meta name="author" content="Dan Bright, productions@aninstance.com">
+{#    <link rel="stylesheet" href="{% static 'css/styles.css?v=1.0' %}">#}
+    <!--[if lt IE 9]>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.js"></script>
+  <![endif]-->
+</head>
+<body>
+    <div class="simple-stock-management-react">
+        <!-- REACT STARTS HERE -->
+        <div id="react-app"></div>
+{#        {% render_bundle 'main' %}#}
+        <!-- END REACT -->
+    </div>
+</body>
+</html>
