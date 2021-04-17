@@ -1,5 +1,5 @@
 """
-Django settings for StockManagement project.
+Django settings for StockManagement project
 """
 import os
 import string
