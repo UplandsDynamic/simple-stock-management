@@ -125,9 +125,11 @@ __Below are basic steps to install and run a demonstration of the app on an Linu
 
 - Install a python virtual environment on your system and make that your python source.
 
-- Run `python3 install -r requirements.txt`.
+- Run `pip3 install -r requirements.txt`.
 
 - Edit StockManagement/settings.py according to your environment.
+
+- *Important* - create a file in the current directory called `.gitignore` containing the following content: `settings.py`. This will ensure that when you update the code base from the repository (e.g. `git pull`), you will not overwrite your settings.
 
 - Create the PostgreSQL database and user, as defined.
 
