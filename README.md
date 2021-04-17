@@ -4,21 +4,19 @@
 
 This repository is currently undergoing reorganisation.
 
-Docker deployment is being removed, to simplify the codebase. Earlier versions of the codebase, showing Docker deployment examples will remain in the `legacy` branches, for reference purposes.
-
-The frontend client (built with React) will be moved to a separate repository in due course.
+Docker deployment is being removed, to simplify the code base. Earlier versions of the code base, showing Docker deployment examples will remain in the `legacy` branches, for reference purposes.
 
 ## Demo & Prototype Repository
 
-This a demo/prototype repository for a simple stock management and inventory system. It is built using web technologies, with a client/server architecture.
+This a demo/prototype repository for the server component of the Simple Stock Management stock and inventory system. It is built using web technologies, with a client/server architecture. The repository for the frontend app component is at: https://github.com/Aninstance/simple-stock-management-frontend
 
 The system allows "stores" to request transfers of stock ("order") from a central stock repository ("warehouse"). Stock is adjusted for the "Warehouse Account" and the "Store Account" as stock transfers are "ordered". Email notifications are sent to the "warehouse" administrator(s) and the ordering "store manager".
 
 This project - available to subscribers and clients as a regularly maintained application-as-a-service - offers a web frontend that connects to a RESTful API backend. Data is stored in either a SQLite, mySQL or PostgreSQL (recommended) database.
 
-## Key technologies
+## Key Technologies for Server Component
 
-Key technologies include: Python 3.7; Django; Django-rest-framework; Django_q (for asynchronous processes); Javascript (ReactJS); HTML5; CSS3; BootStrap 4.
+Key technologies include: Python 3.7; Django; Django-rest-framework; Django_q (for asynchronous processes); Javascript; HTML5; CSS3;
 
 ## Live Demo
 
@@ -107,7 +105,7 @@ A regularly updated, proprietary licensed application-as-a-service version, whic
 
 The GPL licensed version of this project offered here is *not guaranteed to be regularly maintained*. It is made available here for demo/prototype purposes and *SHOULD NOT* be used in production (i.e. a "live" working environment) unless the administrator regularly patches project dependencies with upstream security updates as and when released by vendors.
 
-If you would like to avail of the proprietary subscription to the applicaiton-as-a-service, or request other bespoke work on this project, please email to discuss: ssm@aninstance.com.
+If you would like to avail of the proprietary subscription to the application-as-a-service, or request other bespoke work on this project, please email to discuss: ssm@aninstance.com.
 
 ## Installation & usage (on Linux systems)
 
@@ -115,13 +113,13 @@ __Below are basic steps to install and run a demonstration of the app on an Linu
 
 ### Brief installation instructions
 
-- First, clone the repository to your filesystem.
+- First, clone the repository to your file system.
 
 - Ensure you have access to a current version of PostgreSQL (either locally installed, or remote).
 
 - Ensure gunicorn is installed on your system.
 
-- Create a system user under which to run the application (e.g. `django`). Recursively change ownership of the application directory and all its subdirectories to that user, then switch to operate as that user.
+- Create a system user under which to run the application (e.g. `django`). Recursively change ownership of the application directory and all its sub directories to that user, then switch to operate as that user.
 
 - Change into the application's root directory.
 
@@ -143,7 +141,7 @@ __Below are basic steps to install and run a demonstration of the app on an Linu
 
 - If running for the first time (i.e. your persistent database folder is empty), define a superuser by issuing the following commands from the application's root directory `python manage.py createsuperuser`.
 
-- In the application's root directory, run `python manage.py collectstatic`, to add the static files to the approprate directory (ensure the path to the `static` directory has been correctly configured in your reverse proxy configuration).
+- In the application's root directory, run `python manage.py collectstatic`, to add the static files to the appropriate directory (ensure the path to the `static` directory has been correctly configured in your reverse proxy configuration).
 
 - Now visit the app's administration area in your web browser (e.g. `https://your.domain.tld/admin`).
 
@@ -152,7 +150,7 @@ __Below are basic steps to install and run a demonstration of the app on an Linu
   - Click `add` next to `Groups` in the `Authentication & Authorization` section.
   - Name the new group `administrators`.
   - Under `Available permissions`, scroll to the bottom and select all the `spm_app` permissions, clicking the arrow on the right to add these to the `Chosen permissions` pane (you may hold `shift` to select multiple at once). Once done, click `Save`.
-  - Create 2 additional user accounts; one for an application `administrator` (reponsible for managing the `warehouse`), the other a regular user (a manager of a client `shop`). Ensure *both* users are assigned the `staff` status.
+  - Create 2 additional user accounts; one for an application `administrator` (responsible for managing the `warehouse`), the other a regular user (a manager of a client `shop`). Ensure *both* users are assigned the `staff` status.
   - Assign the `administrator` user to the `administrators` group, by: navigating to `Home > Users > username`; scrolling down to the `Permissions` section; selecting `administrators` from the `Available groups` box; and double-clicking it. This moves the group to the `Chosen groups` pane. Then, scroll to the bottom of the page and click `Save`.
   - Click `LOG OUT` (top right)
 
@@ -160,22 +158,7 @@ __Below are basic steps to install and run a demonstration of the app on an Linu
 
 ### Brief UI instructions
 
-Warehouse administrators:
-
-- Plus sign button allows adding new stock lines
-- Circular arrows button refreshes records from the database
-- Pencil icon button in `Action` column allows editing of stock line
-- Dustbin icon button in `Action` column allows deletion of a stock line
-
-Store account managers:
-  
-- Head-&-shoulders icon (right of top header bar) switches between `Warehouse` account (from where transfers are requested) and the user's `Store` account
-- Truck icon (right of top header bar) opens the user's "transfer truck"
-- Circular arrows button refreshes records from the database
-- Plus sign button allows manual addition of new lines to the `Store` account
-- Pencil icon button in `Action` column allows editing of stock line data (e.g. change stock level, record a sale or shrinkage, etc)
-- `New shrinkage` & `New recorded sold` update fields are ***disabled** during a stock line edit if the `stock quantity` field is changed. This is to prevent user error by inadvertent duplication of submitted data (i.e. user manually decrementing the `stock quantity` field whilst also recording the same data as `New recorded sold`). Likewise, the `stock quantity` field is disabled if the `New shrinkage` and/or `New recorded sold` fields are edited, for the same reason
-- Eye icon button initiates a stock take
+Please see the repository for the frontend client, at https://github.com/Aninstance/simple-stock-management-frontend
 
 Note: The above guide is not definitive and is intended for users who know their way around Ubuntu server and Django.
 
@@ -183,7 +166,7 @@ Note: The above guide is not definitive and is intended for users who know their
 
 ## Development Roadmap
 
-- Integration with the "ShopWired" e-commerce platform.
+- No new features planned at present. To request a change or additional functionality, or to file a bug, please open a github issue and/or contact productions@aninstance.com.
 
 ## Authors
 
