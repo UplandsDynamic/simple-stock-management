@@ -129,8 +129,6 @@ __Below are basic steps to install and run a demonstration of the app on an Linu
 
 - Edit StockManagement/settings.py according to your environment.
 
-- *Important* - create a file in the current directory called `.gitignore` containing the following content: `settings.py`. This will ensure that when you update the code base from the repository (e.g. `git pull`), you will not overwrite your settings.
-
 - Create the PostgreSQL database and user, as defined.
 
 - Create a directory named `secret_key` in the application's root directory.
