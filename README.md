@@ -1,4 +1,4 @@
-# Simple Stock Management
+# Simple Stock Management - Server Component
 
 ## UPDATE 15 April 2021
 
@@ -165,6 +165,10 @@ __Below are basic steps to install and run a demonstration of the app on an Linu
   - Click `LOG OUT` (top right)
 
 - Login to the web client (now hosted in a separate repository) using the administrator user you created. Begin using Simple Stock Management.
+
+### Update Instructions
+
+- From the application's root directory, run `git pull`. Then, restart the gunicorn server: `systemctl restart gunicorn`.
 
 ### Brief UI instructions
 
