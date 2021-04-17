@@ -131,13 +131,23 @@ __Below are basic steps to install and run a demonstration of the app on an Linu
 
 - Create the PostgreSQL database and user, as defined.
 
-- Create a directory named `secret_key` in the application's root directory.
+- Create a directory named `secret_key` in the application's root directory and change its ownership to the application user (as created above).
 
 - As root (using sudo), create the log directory and file (e.g. `sudo mkdir -p /var/log/django; sudo touch /var/log/django/ssm.log`).
 
 - Create a systemd unit file to run the gunicorn service at `/etc/systemd/system/gunicorn.service`, then enable and start start the systemd service (details of how to do this is outwith the scope of this document, but if you need further advice feel free to get in touch).
 
 - Install a web server (recommended Nginx) to operate as a reverse proxy and create an appropriate configuration file to connect to the unix socket created by gunicorn (as defined above). See the official Nginx and Django documentation for configuration examples.
+
+- Create the database tables, using the commands:
+
+  - `python manage.py makemigrations;`
+
+  - `python manage.py makemigrations stock_control;`
+
+   - `python manage.py makemigrations accounts;`
+
+  - `python manage.py migrate`.
 
 - If running for the first time (i.e. your persistent database folder is empty), define a superuser by issuing the following commands from the application's root directory `python manage.py createsuperuser`.
 
