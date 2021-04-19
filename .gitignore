@@ -1,4 +1,3 @@
-node_modules/
 .idea
 bundles/
 __pycache__/
@@ -6,7 +5,6 @@ htmlcov/
 .coverage
 secret_key.txt
 venv/
-build/
 db.sqlite3
 migrations/
 requirements.in
@@ -15,4 +13,4 @@ devel/
 static/
 media/
 .eslintrc.js
-.settings.py
+settings.py

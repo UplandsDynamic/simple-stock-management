@@ -127,7 +127,9 @@ __Below are basic steps to install and run a demonstration of the app on an Linu
 
 - Run `pip3 install -r requirements.txt`.
 
-- Edit StockManagement/settings.py according to your environment.
+- Copy `StockManagement/settings.DEFAULT.py` to `StockManagement/settings.py`.
+
+- Edit `StockManagement/settings.py` according to your environment. Be sure to add the URL of your frontend web client to the CORS_ORIGIN_WHITELIST list property.
 
 - Create the PostgreSQL database and user, as defined.
 
