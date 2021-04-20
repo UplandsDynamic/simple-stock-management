@@ -164,9 +164,16 @@ __Below are basic steps to install and run a demonstration of the app on an Linu
   - Under `Available permissions`, scroll to the bottom and select all the `spm_app` permissions, clicking the arrow on the right to add these to the `Chosen permissions` pane (you may hold `shift` to select multiple at once). Once done, click `Save`.
   - Create 2 additional user accounts; one for an application `administrator` (responsible for managing the `warehouse`), the other a regular user (a manager of a client `shop`). Ensure *both* users are assigned the `staff` status.
   - Assign the `administrator` user to the `administrators` group, by: navigating to `Home > Users > username`; scrolling down to the `Permissions` section; selecting `administrators` from the `Available groups` box; and double-clicking it. This moves the group to the `Chosen groups` pane. Then, scroll to the bottom of the page and click `Save`.
-  - Click `LOG OUT` (top right)
 
-- Login to the web client (now hosted in a separate repository) using the administrator user you created. Begin using Simple Stock Management.
+- If running for the first time, it's also necessary to initialise the provided frontend client by creating a single stock line from the admin dashboard (this only needs to be done if there are zero stock lines in the database - all subsequent stock items may be added directly from the provided frontend client by users with the `administrators` privilege). To do this:
+  
+  - Navigate to `Home > Stock_Control > Stock datas` (accessible via the sidebar)
+  - Tap the `Add Stock Data` button (top right of the screen)
+  - Complete and submit the form.
+  
+- Click `LOG OUT` (top right)
+
+- Login to the [web client](https://github.com/Aninstance/simple-stock-management-frontend) using the administrator user you created. Begin using Simple Stock Management.
 
 ### Update Instructions
 
