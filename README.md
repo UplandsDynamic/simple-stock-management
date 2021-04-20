@@ -139,6 +139,8 @@ __Below are basic steps to install and run a demonstration of the app on an Linu
 
 - Create a systemd unit file to run the gunicorn service at `/etc/systemd/system/gunicorn.service`, then enable and start start the systemd service (details of how to do this is outwith the scope of this document, but if you need further advice feel free to get in touch).
 
+- Create a systemd unit file to run the djangoq service (which manages long running operations, such as 'stock taking') at `/etc/systemd/system/djangoq.service`. Enable and start the systemd service (details of how to do this is outwith the scope of this document, but if you need further advice feel free to get in touch).
+
 - Install a web server (recommended Nginx) to operate as a reverse proxy and create an appropriate configuration file to connect to the unix socket created by gunicorn (as defined above). See the official Nginx and Django documentation for configuration examples.
 
 - Create the database tables, using the commands:
