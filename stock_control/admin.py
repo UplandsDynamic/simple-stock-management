@@ -1,4 +1,4 @@
-__Author__ = "Dan Bright, github@aninstance.com"
+__Author__ = "Dan Bright, dan@uplandsdynamic.com"
 __Copyright__ = "(c) Copyright 2021 Dan Bright"
 __License__ = "GPL v3.0"
 __Version__ = "Version 4.1"

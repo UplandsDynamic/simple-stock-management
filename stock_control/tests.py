@@ -146,7 +146,7 @@ class RequestQueryValidatorTestCase(TestCase):
         self.assertRaises(ValidationError, validate_passwords_different, ['mYpa$sW0rD'])
 
     def test_validate_password_correct(self):
-        user = User.objects.create_user('dan', 'test@aninstance.com', 'myPassword1')
+        user = User.objects.create_user('dan', 'test@uplandsdynamic.com', 'myPassword1')
         self.assertEqual(validate_password_correct(user=user, value='myPassword1'), None)
         self.assertRaises(ValidationError, validate_password_correct, user=user, value='InC0rREctPWd!')
 
@@ -162,7 +162,7 @@ class ChangePasswordSerializerTestCase(TestCase):
 
     def setUp(self):
         self.class_instance = ChangePasswordSerializer()  # create instance of class to test
-        self.user_instance = User.objects.create_user('dan', 'test@aninstance.com', 'myPassword1')
+        self.user_instance = User.objects.create_user('dan', 'test@uplandsdynamic.com', 'myPassword1')
         self.invalid_password = '123'
         self.validated_data = {'old_password': 'myPassword1', 'new_password': 'myNewPassword'}
         self.invalid_validated_data = {'old_password': 'myPassword1', 'new_password': 'myPassword1'}
@@ -201,7 +201,7 @@ class StockDataSerializerTestCase(TransactionTestCase):
 
     def setUp(self):
         self.group = Group.objects.create(name='administrators')  # create 'administrators' group
-        self.user = User.objects.create_user('dan', 'test@aninstance.com', 'myPassword1')  # set user
+        self.user = User.objects.create_user('dan', 'test@uplandsdynamic.com', 'myPassword1')  # set user
 
     def test_administrators_check(self):
         """
@@ -314,7 +314,7 @@ class SendEmailTestCase(TestCase):
         self.notification_type = SendEmail.EmailType.STOCK_TRANSFER
         self.group = Group.objects.create(name='administrators')  # create 'administrators' group
         self.user = User.objects.create_user('warehouse admin', settings.DEFAULT_FROM_EMAIL, 'myPwd8*e')
-        self.user2 = User.objects.create_user('shop manager', 's.m.test@aninstance.com', 'eekeJ839)lx*')
+        self.user2 = User.objects.create_user('shop manager', 's.m.test@uplandsdynamic.com', 'eekeJ839)lx*')
         self.stock_data = StockData.objects.create(
             owner=User.objects.get(username='warehouse admin'),
             sku='001-001',
