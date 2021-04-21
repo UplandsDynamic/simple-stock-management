@@ -1,18 +1,22 @@
 # Simple Stock Management - Server Component
 
-## UPDATE 15 April 2021
-
-This repository is currently undergoing reorganisation.
-
-Docker deployment is being removed, to simplify the code base. Earlier versions of the code base, showing Docker deployment examples will remain in the `legacy` branches, for reference purposes.
-
-## Demo & Prototype Repository
+## About
 
 This a demo/prototype repository for the server component of the Simple Stock Management stock and inventory system. It is built using web technologies, with a client/server architecture. The repository for the frontend app component is at: https://github.com/Aninstance/simple-stock-management-frontend
 
 The system allows "stores" to request transfers of stock ("order") from a central stock repository ("warehouse"). Stock is adjusted for the "Warehouse Account" and the "Store Account" as stock transfers are "ordered". Email notifications are sent to the "warehouse" administrator(s) and the ordering "store manager".
 
 This project - available to subscribers and clients as a regularly maintained application-as-a-service - offers a web frontend that connects to a RESTful API backend. Data is stored in either a SQLite, mySQL or PostgreSQL (recommended) database.
+
+## Support & Project Status
+
+A regularly patched, proprietary licensed application-as-a-service version, fully maintained for subscribers and clients, is available upon request (limited availability) and is currently priced at £10.00/month.
+
+A one-off installation service for this GPL open source version is also available.
+
+The GPL licensed version of this project offered here is *not guaranteed* to be regularly maintained. It is made available here for demo/prototype purposes only, and should not be used in production (i.e. a "live" working environment) unless the administrator regularly patches project dependencies (i.e. PYPI & npm packages) with upstream security updates as and when released by vendors.
+
+If you would like to avail of the proprietary subscription to the application-as-a-service, or request other bespoke work on this project, please email to discuss: ssm@uplandsdynamic.com.
 
 ## Key Technologies for Server Component
 
@@ -98,14 +102,6 @@ Password: jduejHje(89K
 
 - Automated removal of obsolete stock line records (lines with zero units of held stock) from the Store accounts following a successful stock take process
 - Historical retention of previous stock take data (not currently exposed on the UI)
-
-## Support & project status
-
-A regularly updated, proprietary licensed application-as-a-service version, which is fully maintained for subscribers and clients, is available upon request (limited availability). A one-off installation service for this GPL open source version is also available.
-
-The GPL licensed version of this project offered here is *not guaranteed to be regularly maintained*. It is made available here for demo/prototype purposes and *SHOULD NOT* be used in production (i.e. a "live" working environment) unless the administrator regularly patches project dependencies with upstream security updates as and when released by vendors.
-
-If you would like to avail of the proprietary subscription to the application-as-a-service, or request other bespoke work on this project, please email to discuss: ssm@uplandsdynamic.com.
 
 ## Installation & usage (on Linux systems)
 
