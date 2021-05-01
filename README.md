@@ -6,13 +6,13 @@ This a demo/prototype repository for the server component of the Simple Stock Ma
 
 The system allows "stores" to request transfers of stock ("order") from a central stock repository ("warehouse"). Stock is adjusted for the "Warehouse Account" and the "Store Account" as stock transfers are "ordered". Email notifications are sent to the "warehouse" administrator(s) and the ordering "store manager".
 
-This project - available to subscribers and clients as a regularly maintained application-as-a-service - offers a web frontend that connects to a RESTful API backend. Data is stored in either a SQLite, mySQL or PostgreSQL (recommended) database.
+This project offers a web frontend that connects to a RESTful API backend. Data is stored in either a SQLite, mySQL or PostgreSQL (recommended) database.
 
 ## Support & Project Status
 
 A regularly patched, proprietary licensed application-as-a-service version, fully maintained for subscribers and clients, is available upon request (limited availability) and is currently priced at £10.00/month.
 
-A one-off installation service for this GPL open source version is also available.
+A one-off installation service for this GPL licensed version is also available.
 
 The GPL licensed version of this project offered here is *not guaranteed* to be regularly maintained. It is made available here for demo/prototype purposes only, and should not be used in production (i.e. a "live" working environment) unless the administrator regularly patches project dependencies (i.e. PYPI & npm packages) with upstream security updates as and when released by vendors.
 
@@ -131,27 +131,33 @@ __Below are basic steps to install and run a demonstration of the app on an Linu
 
 - Create a directory named `secret_key` in the application's root directory and change its ownership to the application user (as created above).
 
-- As root (using sudo), create the log directory and file (e.g. `sudo mkdir -p /var/log/django; sudo touch /var/log/django/ssm.log`).
+- As root (using sudo), create the log directory and file, e.g.:
+
+  - `sudo mkdir -p /var/log/django;`
+  - `sudo touch /var/log/django/ssm.log`
+
+- Change ownership of the log directory and its log file to the user running the app, e.g.:
+
+  - `sudo chown -R django /var/log/django/`
 
 - Create a systemd unit file to run the gunicorn service at `/etc/systemd/system/gunicorn.service`, then enable and start start the systemd service (details of how to do this is outwith the scope of this document, but if you need further advice feel free to get in touch).
 
-- Create a systemd unit file to run the djangoq service (which manages long running operations, such as 'stock taking') at `/etc/systemd/system/djangoq.service`. Enable and start the systemd service (details of how to do this is outwith the scope of this document, but if you need further advice feel free to get in touch).
+- Create a systemd unit file to run the django_q service (which manages long running operations, such as 'stock taking') at `/etc/systemd/system/djangoq.service`. Enable and start the systemd service (details of how to do this is outwith the scope of this document, but if you need further advice feel free to get in touch).
 
 - Install a web server (recommended Nginx) to operate as a reverse proxy and create an appropriate configuration file to connect to the unix socket created by gunicorn (as defined above). See the official Nginx and Django documentation for configuration examples.
 
 - Create the database tables, using the commands:
 
   - `python manage.py makemigrations;`
-
   - `python manage.py makemigrations stock_control;`
-
-   - `python manage.py makemigrations accounts;`
-
+  - `python manage.py makemigrations accounts;`
   - `python manage.py migrate`.
 
 - If running for the first time (i.e. your persistent database folder is empty), define a superuser by issuing the following commands from the application's root directory `python manage.py createsuperuser`.
 
-- In the application's root directory, run `python manage.py collectstatic`, to add the static files to the appropriate directory (ensure the path to the `static` directory has been correctly configured in your reverse proxy configuration).
+- In the application's root directory, run `python manage.py collectstatic`, to add the static files to the appropriate directory (ensure the path to the `static` directory has been correctly configured in your web server configuration).
+
+
 
 - Now visit the app's administration area in your web browser (e.g. `https://your.domain.tld/admin`).
 
@@ -177,7 +183,7 @@ __Below are basic steps to install and run a demonstration of the app on an Linu
 
 - From the application's root directory, run `git pull`. 
 - Then, run `pip3 install -r requirements.txt`.
-- Then, restart the gunicorn server: `systemctl restart gunicorn`.
+- Then, restart the gunicorn server: `systemctl restart gunicorn.service`.
 
 ### Brief UI instructions
 
