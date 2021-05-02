@@ -185,7 +185,7 @@ __Below are basic steps to install and run a demonstration of the app on an Linu
 - Then, run `pip3 install -r requirements.txt`.
 - Then, restart the gunicorn server: `systemctl restart gunicorn.service`.
 
-### Brief UI instructions
+## Brief UI instructions
 
 Please see the repository for the frontend client, at https://github.com/Aninstance/simple-stock-management-frontend
 
