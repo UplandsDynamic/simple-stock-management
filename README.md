@@ -131,6 +131,8 @@ __Below are basic steps to install and run a demonstration of the app on an Linu
 
 - Create a directory named `secret_key` in the application's root directory and change its ownership to the application user (as created above).
 
+- Change permissions on the `secret_key` directory so only the user running the application can read it, e.g.: `chmod 0700 secret_key`.
+
 - As root (using sudo), create the log directory and file, e.g.:
 
   - `sudo mkdir -p /var/log/django;`
