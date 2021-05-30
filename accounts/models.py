@@ -40,19 +40,19 @@ class AccountStockData(models.Model):
         blank=False, null=False, default=0)
     shrinkage = models.PositiveIntegerField(blank=False, null=False, default=0)
     xfer_price = models.DecimalField(
-        blank=False, null=False, decimal_places=2, max_digits=9, default=0.00)
+        blank=False, null=False, decimal_places=2, max_digits=50, default=0.00)
     selling_price = models.DecimalField(
-        blank=False, null=False, decimal_places=2, max_digits=9, default=0.00)
+        blank=False, null=False, decimal_places=2, max_digits=50, default=0.00)
     opening_stock = models.PositiveIntegerField(
         blank=False, null=False, default=0)
     running_total_xfer_value = models.DecimalField(
-        blank=False, null=False, decimal_places=2, max_digits=9, default=0.00)
+        blank=False, null=False, decimal_places=2, max_digits=50, default=0.00)
     running_total_sold_value = models.DecimalField(
-        blank=False, null=False, decimal_places=2, max_digits=9, default=0.00)
+        blank=False, null=False, decimal_places=2, max_digits=50, default=0.00)
     running_total_shrinkage_value = models.DecimalField(
-        blank=False, null=False, decimal_places=2, max_digits=9, default=0.00)
+        blank=False, null=False, decimal_places=2, max_digits=50, default=0.00)
     all_time_total_xfer_value = models.DecimalField(
-        blank=False, null=False, decimal_places=2, max_digits=9, default=0.00)
+        blank=False, null=False, decimal_places=2, max_digits=50, default=0.00)
 
     # fields that store_managers are allowed to update
     STAFF_ALLOWED_TO_UPDATE = ['units_total',
@@ -98,7 +98,7 @@ class AccountData(models.Model):
     owner = models.ForeignKey(
         'auth.User', related_name='account_meta_data', on_delete=models.SET_NULL, null=True)
     all_time_total_xfer_value = models.DecimalField(
-        blank=False, null=False, decimal_places=2, max_digits=9, default=0.00)
+        blank=False, null=False, decimal_places=2, max_digits=50, default=0.00)
 
     class Meta:
         ordering = ('owner',)
@@ -144,21 +144,21 @@ class AccountStockTake(models.Model):
     grand_units_unrecorded_hist_diff_since_st = models.IntegerField(
         blank=False, null=False, default=0)
     grand_total_value_recorded_sold_since_st = models.DecimalField(
-        blank=False, null=False, decimal_places=2, max_digits=9, default=0.00)
+        blank=False, null=False, decimal_places=2, max_digits=50, default=0.00)
     grand_total_value_recorded_shrunk_since_st = models.DecimalField(
-        blank=False, null=False, decimal_places=2, max_digits=9, default=0.00)
+        blank=False, null=False, decimal_places=2, max_digits=50, default=0.00)
     grand_total_value_unrecorded_current_xfer_price_since_st = models.DecimalField(
-        blank=False, null=False, decimal_places=2, max_digits=9, default=0.00)
+        blank=False, null=False, decimal_places=2, max_digits=50, default=0.00)
     grand_total_value_unrecorded_current_retail_price_since_st = models.DecimalField(
-        blank=False, null=False, decimal_places=2, max_digits=9, default=0.00)
+        blank=False, null=False, decimal_places=2, max_digits=50, default=0.00)
     grand_total_xferred_value_since_last_stock_take = models.DecimalField(
-        blank=False, null=False, decimal_places=2, max_digits=9, default=0.00)
+        blank=False, null=False, decimal_places=2, max_digits=50, default=0.00)
     grand_held_stock_value_at_current_xfer_price = models.DecimalField(
-        blank=False, null=False, decimal_places=2, max_digits=9, default=0.00)
+        blank=False, null=False, decimal_places=2, max_digits=50, default=0.00)
     grand_held_stock_value_at_present_retail_price = models.DecimalField(
-        blank=False, null=False, decimal_places=2, max_digits=9, default=0.00)
+        blank=False, null=False, decimal_places=2, max_digits=50, default=0.00)
     grand_all_time_total_at_actual_xfer_price = models.DecimalField(
-        blank=False, null=False, decimal_places=2, max_digits=9, default=0.00)
+        blank=False, null=False, decimal_places=2, max_digits=50, default=0.00)
 
     class Meta:
         ordering = ('owner',)
@@ -194,9 +194,9 @@ class AccountStockTakeLines(models.Model):
     stock_desc = models.CharField(max_length=100, blank=False, null=False, unique=False,
                                   validators=[custom_validators.validate_alphanumplus])
     xfer_price = models.DecimalField(
-        blank=False, null=False, decimal_places=2, max_digits=9, default=0.00)
+        blank=False, null=False, decimal_places=2, max_digits=50, default=0.00)
     retail_price = models.DecimalField(
-        blank=False, null=False, decimal_places=2, max_digits=9, default=0.00)
+        blank=False, null=False, decimal_places=2, max_digits=50, default=0.00)
     opening_stock = models.PositiveIntegerField(
         blank=False, null=False, default=0)
     total_units = models.PositiveIntegerField(
@@ -210,19 +210,19 @@ class AccountStockTakeLines(models.Model):
         blank=False, null=False, default=0)
     unrecorded = models.IntegerField(blank=False, null=False, default=0)
     sold_value = models.DecimalField(
-        blank=False, null=False, decimal_places=2, max_digits=9, default=0.00)
+        blank=False, null=False, decimal_places=2, max_digits=50, default=0.00)
     shrinkage_value = models.DecimalField(
-        blank=False, null=False, decimal_places=2, max_digits=9, default=0.00)
+        blank=False, null=False, decimal_places=2, max_digits=50, default=0.00)
     xferred_value = models.DecimalField(
-        blank=False, null=False, decimal_places=2, max_digits=9, default=0.00)
+        blank=False, null=False, decimal_places=2, max_digits=50, default=0.00)
     unrecorded_xfer_price = models.DecimalField(
-        blank=False, null=False, decimal_places=2, max_digits=9, default=0.00)
+        blank=False, null=False, decimal_places=2, max_digits=50, default=0.00)
     unrecorded_retail_price = models.DecimalField(
-        blank=False, null=False, decimal_places=2, max_digits=9, default=0.00)
+        blank=False, null=False, decimal_places=2, max_digits=50, default=0.00)
     held_stock_current_xfer_price = models.DecimalField(
-        blank=False, null=False, decimal_places=2, max_digits=9, default=0.00)
+        blank=False, null=False, decimal_places=2, max_digits=50, default=0.00)
     held_stock_retail_price = models.DecimalField(
-        blank=False, null=False, decimal_places=2, max_digits=9, default=0.00)
+        blank=False, null=False, decimal_places=2, max_digits=50, default=0.00)
 
     class Meta:
         ordering = ('stock_take',)
