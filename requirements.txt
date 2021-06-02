@@ -92,7 +92,7 @@ toml==0.10.2
     # via autopep8
 uritemplate==3.0.1
     # via coreapi
-urllib3==1.26.4
+urllib3==1.26.5
     # via requests
 wcwidth==0.2.5
     # via blessed
