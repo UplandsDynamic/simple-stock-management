@@ -185,7 +185,7 @@ __Below are basic steps to install and run a demonstration of the app on an Linu
 
 - From the application's root directory, run `git pull`. 
 - Then, run `pip3 install -r requirements.txt`.
-- Then, restart the gunicorn server: `systemctl restart gunicorn.service`.
+- Then, restart the gunicorn server: `systemctl restart gunicorn.service djangoq.service`.
 
 ## Brief UI instructions
 

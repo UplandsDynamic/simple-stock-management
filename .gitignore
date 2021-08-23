@@ -14,3 +14,4 @@ static/
 media/
 .eslintrc.js
 settings.py
+venv/
