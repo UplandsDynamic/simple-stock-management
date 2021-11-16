@@ -1,0 +1,27 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+coreapi = "*"
+python-dateutil = "*"
+djangorestframework = "*"
+django-webpack-loader = "*"
+django-cors-headers = "*"
+django-anymail = {extras = ["sparkpost"], version = "*"}
+gunicorn = "*"
+gevent = "*"
+psycopg2-binary = "*"
+postgres = "*"
+django-q = "*"
+Django = "*"
+PyYAML = "*"
+Markdown = "*"
+
+[dev-packages]
+autopep8 = "*"
+pip-licenses = "*"
+
+[requires]
+python_version = "3.9"
