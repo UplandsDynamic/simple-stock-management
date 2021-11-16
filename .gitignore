@@ -15,3 +15,4 @@ media/
 .eslintrc.js
 settings.py
 venv/
+create_requirements_txt.sh
