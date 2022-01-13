@@ -3,7 +3,8 @@ __Copyright__ = "(c) Copyright 2021 Dan Bright"
 __License__ = "GPL v3.0"
 __Version__ = "Version 4.1"
 
-from django.conf.urls import url, include
+from django.conf.urls import include
+from django.urls import re_path
 from rest_framework import routers, permissions
 from rest_framework.urlpatterns import format_suffix_patterns
 from . import views
@@ -28,11 +29,11 @@ Note: Mapping for actions (used in as_view), are:
     }
 """
 functional_view_urlpatterns = [
-    url('^stock/$', views.AccountStockDataViewSet.as_view(
+    re_path('^stock/$', views.AccountStockDataViewSet.as_view(
         {'get': 'list',  'post': 'create'})),
-    url('^stock/(?P<pk>\d+)/$', views.AccountStockDataViewSet.as_view(
+    re_path('^stock/(?P<pk>\d+)/$', views.AccountStockDataViewSet.as_view(
         {'get': 'retrieve', 'patch': 'perform_single_update', 'delete': 'destroy'})),
-    url('^take-stock/$', views.AccountStockDataViewSet.as_view(
+    re_path('^take-stock/$', views.AccountStockDataViewSet.as_view(
         {'get': 'take_stock'})),
 ]
 

@@ -22,6 +22,7 @@ Markdown = "*"
 [dev-packages]
 autopep8 = "*"
 pip-licenses = "*"
+pylint = "*"
 
 [requires]
 python_version = "3.9"
