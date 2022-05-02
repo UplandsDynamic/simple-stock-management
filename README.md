@@ -1,5 +1,9 @@
 # Simple Stock Management - Server Component
 
+## Development Funding
+
+If anyone is using this app in production & wants to toss me some Ethereum, my address is: 0x2b712c714BDE6d34CB13031b3a5AbA94FDaA93ac
+
 ## About
 
 This a demo/prototype repository for the server component of the Simple Stock Management stock and inventory system. It is built using web technologies, with a client/server architecture. The repository for the frontend app component is at: https://github.com/Aninstance/simple-stock-management-frontend
