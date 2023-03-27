@@ -1,5 +1,11 @@
 # Simple Stock Management - Server Component
 
+## SECURITY ALERT
+
+This project was archived on 28 March 2023 due to *dependency security issues* that cannot be immediately resolved.
+
+The app's dependencies *DO HAVE UNRESOLVED SECURITY VULNERABILITIES* Use at your own risk.
+
 ## About
 
 This a demo/prototype repository for the server component of the Simple Stock Management stock and inventory system. It is built using web technologies, with a client/server architecture. The repository for the frontend app component is at: https://github.com/Aninstance/simple-stock-management-frontend
