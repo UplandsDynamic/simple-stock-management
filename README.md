@@ -2,9 +2,13 @@
 
 ## SECURITY ALERT
 
-This project was archived on 28 March 2023 due to *dependency security issues* that cannot be immediately resolved.
+This project was archived on 28 March 2023 due to a *dependency security issue* that cannot be immediately resolved. 
 
-The app's dependencies *DO HAVE UNRESOLVED SECURITY VULNERABILITIES* Use at your own risk.
+Ergo, this app should be considered unfit for human consumption and is henceforth banished to the archive.
+
+The app would require a considerable rewrite to replace the vulnerable dependency, which occurs in a package that has seemingly been abandoned by its developer. Given limited resources and relatively little public interest in this app, such an undertaking is not considered worthwhile.
+
+Again, at least one of the app's dependencies *DOES HAVE AN UNRESOLVED SECURITY VULNERABILITY*. Deploying this app in its current form is *NOT ADVISED*.
 
 ## About
 
