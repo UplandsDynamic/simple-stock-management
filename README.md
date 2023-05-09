@@ -1,14 +1,8 @@
 # Simple Stock Management - Server Component
 
-## SECURITY ALERT
+## Security Advisory
 
-This project was archived on 28 March 2023 due to a *dependency security issue* that cannot be immediately resolved. 
-
-Ergo, this app should be considered unfit for human consumption and is henceforth banished to the archive.
-
-The app would require a considerable rewrite to replace the vulnerable dependency, which occurs in a package that has seemingly been abandoned by its developer. Given limited resources and relatively little public interest in this app, such an undertaking is not considered worthwhile.
-
-Again, at least one of the app's dependencies *DOES HAVE AN UNRESOLVED SECURITY VULNERABILITY*. Deploying this app in its current form is *NOT ADVISED*.
+Please note, this application has not been audited for security and may contain vulnerabilities that could expose data contained on the host system to unauthorized manipulation or disclosure. Deploy at your own risk.
 
 ## About
 

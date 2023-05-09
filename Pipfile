@@ -14,10 +14,10 @@ gunicorn = "*"
 gevent = "*"
 psycopg2-binary = "*"
 postgres = "*"
-django-q = "*"
 Django = "*"
 PyYAML = "*"
 Markdown = "*"
+django-q2 = "*"
 
 [dev-packages]
 autopep8 = "*"
