@@ -12,12 +12,12 @@ django-cors-headers = "*"
 django-anymail = {extras = ["sparkpost"], version = "*"}
 gunicorn = "*"
 gevent = "*"
-psycopg2-binary = "*"
 postgres = "*"
 Django = "*"
 PyYAML = "*"
 Markdown = "*"
 django-q2 = "*"
+psycopg2-binary = "*"
 
 [dev-packages]
 autopep8 = "*"
