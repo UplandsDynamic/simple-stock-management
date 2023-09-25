@@ -10,7 +10,7 @@ django-picklefield==3.1
 django-q2==1.5.4
 django-webpack-loader==2.0.1
 djangorestframework==3.14.0
-gevent==23.7.0
+gevent==23.9.1
 greenlet==2.0.2
 gunicorn==21.2.0
 idna==3.4
