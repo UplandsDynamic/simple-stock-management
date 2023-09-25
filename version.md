@@ -1,2 +1,2 @@
 # SERVER VERSION
-4.2.5
+4.2.6
