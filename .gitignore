@@ -16,3 +16,4 @@ media/
 settings.py
 venv/
 create_requirements_txt.sh
+Pipfile
