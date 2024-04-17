@@ -12,7 +12,7 @@ django-webpack-loader==3.1.0
 djangorestframework==3.15.1
 gevent==24.2.1
 greenlet==3.0.3
-gunicorn==21.2.0
+gunicorn==22.0.0
 idna==3.7
 importlib-metadata==7.1.0
 itypes==1.2.0
