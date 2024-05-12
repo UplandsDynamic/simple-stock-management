@@ -3,7 +3,7 @@ certifi==2024.2.2
 charset-normalizer==3.3.2
 coreapi==2.3.3
 coreschema==0.0.4
-django==4.2.11
+django==4.2.13
 django-anymail==10.3
 django-cors-headers==4.3.1
 django-picklefield==3.2
@@ -16,7 +16,7 @@ gunicorn==22.0.0
 idna==3.7
 importlib-metadata==7.1.0
 itypes==1.2.0
-jinja2==3.1.3
+jinja2==3.1.4
 markdown==3.6
 markupsafe==2.1.5
 packaging==24.0
@@ -46,6 +46,6 @@ prettytable==3.10.0
 pycodestyle==2.11.1
 pylint==3.1.0
 tomli==2.0.1
-tomlkit==0.12.4
+tomlkit==0.12.5
 typing-extensions==4.11.0
 wcwidth==0.2.13
