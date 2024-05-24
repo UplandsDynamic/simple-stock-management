@@ -1,7 +1,6 @@
 __Author__ = "Dan Bright, dan@uplandsdynamic.com"
-__Copyright__ = "(c) Copyright 2021 Dan Bright"
 __License__ = "GPL v3.0"
-__Version__ = "Version 4.1"
+__Version__ = "Version 4.3.4"
 
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
@@ -48,6 +47,10 @@ def validate_password_correct(user, value):
     if not user.check_password(value):
         raise ValidationError(
             _(f'Your old credentials were incorrect. Please try again.')
+        )
+    if user.username == 'test_admin' or user.username == 'test_manager':
+        raise ValidationError(
+            _(f'The credentials of demo users cannot be changed through the UI.')
         )
 
 
