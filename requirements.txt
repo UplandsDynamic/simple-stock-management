@@ -3,7 +3,7 @@ certifi==2024.7.4
 charset-normalizer==3.3.2
 coreapi==2.3.3
 coreschema==0.0.4
-django==4.2.13
+django==4.2.14
 django-anymail==11.0
 django-cors-headers==4.4.0
 django-picklefield==3.2
