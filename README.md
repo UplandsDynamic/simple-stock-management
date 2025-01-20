@@ -2,7 +2,9 @@
 
 ## Security Advisory
 
-Please note, this application has not been audited for security and may contain vulnerabilities that could expose data contained on the host system to unauthorized manipulation or disclosure. Deploy at your own risk.
+Please note, this application has not been audited for security and may contain vulnerabilities that could expose data contained on the host system to unauthorized manipulation or disclosure. Deploy at your own risk and on a server that has *no* access to your primary systems, or indeed any system where compromise could reveal personally identifiable information or other sensitive data. For example, a standalone VPS machine. 
+
+In addition, regular updates of Python dependencies to the latest versions is necessary, to ensure patching of any discovered vulnerabilities (this may be achieved through your python package manager, such as pip or pipenv).
 
 ## About
 
